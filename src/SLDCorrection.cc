@@ -1,2 +1,1 @@
-#ifndef SLDCorrection_h
-#define SLDCorrection_h 1
+#include "SLDCorrection.h"
