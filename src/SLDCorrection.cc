@@ -209,6 +209,12 @@ SLDCorrection::SLDCorrection() :
 					bool(true)
 				);
 
+	registerProcessorParameter(	"vertexingScenario",
+					"Scenario for finding flight direction of mother hadron: 1 = default , 2 = assign jet axis , 3 = assign flight direction of leading particle in the jet",
+					m_vertexingScenario,
+					int(1)
+				);
+
 	registerProcessorParameter(	"useJetAxisAsFlightDirection",
 					"use jet axis as flight direction of mother hadron",
 					m_useJetAxisAsFlightDirection,
@@ -286,128 +292,136 @@ void SLDCorrection::init()
 	{
 		m_pTFile = new TFile(m_rootFile.c_str(), "recreate");
 		m_pTTree = new TTree("SLDCorrection", "SLDCorrection");
-		m_pTTree->SetDirectory(m_pTFile);
-		m_pTTree->Branch("event", &m_nEvt, "event/I");
-		m_pTTree->Branch("nTauSLDecay",&m_nTauSLDecay,"nTauSLDecay/I");
-		m_pTTree->Branch("nTauNeutrino",&m_nTauNeutrino,"nTauNeutrino/I");
-		m_pTTree->Branch("nNeutrino",&m_nNeutrino,"nNeutrino/I");
-		m_pTTree->Branch("jetFlavourPDG",&m_jetFlavourPDG);
-		m_pTTree->Branch("nSLD_chargedMCPwoTrack",&m_nSLD_chargedMCPwoTrack);
-		m_pTTree->Branch("GenStatParentHadron",&m_GenStatParentHadron);
-		m_pTTree->Branch("ChargeParentHadron",&m_ChargeParentHadron);
-		m_pTTree->Branch("foundRecoLepton",&m_foundRecoLepton);
-		m_pTTree->Branch("foundBuildUpVertex",&m_foundBuildUpVertex);
-		m_pTTree->Branch("foundRecoLeptonInBuildUpVertex",&m_foundRecoLeptonInBuildUpVertex);
-		m_pTTree->Branch("foundRecoLeptonInPrimaryVertex",&m_foundRecoLeptonInPrimaryVertex);
-		m_pTTree->Branch("lostChargedMCP_CosTheta",&m_lostChargedMCP_CosTheta);
-		m_pTTree->Branch("lostChargedMCP_Energy",&m_lostChargedMCP_Energy);
-		m_pTTree->Branch("lostChargedMCP_Pt",&m_lostChargedMCP_Pt);
-		m_pTTree->Branch("SLDecayXi", &m_SLDecayXi);
-		m_pTTree->Branch("SLDecayYi", &m_SLDecayYi);
-		m_pTTree->Branch("SLDecayZi", &m_SLDecayZi);
-		m_pTTree->Branch("SLDecayRi", &m_SLDecayRi);
-		m_pTTree->Branch("SLDecayXf", &m_SLDecayXf);
-		m_pTTree->Branch("SLDecayYf", &m_SLDecayYf);
-		m_pTTree->Branch("SLDecayZf", &m_SLDecayZf);
-		m_pTTree->Branch("SLDecayRf", &m_SLDecayRf);
-		m_pTTree->Branch("trueNuPx", &m_trueNuPx);
-		m_pTTree->Branch("trueNuPy", &m_trueNuPy);
-		m_pTTree->Branch("trueNuPz", &m_trueNuPz);
-		m_pTTree->Branch("trueNuE", &m_trueNuE);
-		m_pTTree->Branch("recoNuCloseInitialPx", &m_recoNuCloseInitialPx);
-		m_pTTree->Branch("recoNuCloseInitialPy", &m_recoNuCloseInitialPy);
-		m_pTTree->Branch("recoNuCloseInitialPz", &m_recoNuCloseInitialPz);
-		m_pTTree->Branch("recoNuCloseInitialE", &m_recoNuCloseInitialE);
-		m_pTTree->Branch("recoNuClosePx", &m_recoNuClosePx);
-		m_pTTree->Branch("recoNuClosePy", &m_recoNuClosePy);
-		m_pTTree->Branch("recoNuClosePz", &m_recoNuClosePz);
-		m_pTTree->Branch("recoNuCloseE", &m_recoNuCloseE);
-		m_pTTree->Branch("recoNuPosPx", &m_recoNuPosPx);
-		m_pTTree->Branch("recoNuPosPy", &m_recoNuPosPy);
-		m_pTTree->Branch("recoNuPosPz", &m_recoNuPosPz);
-		m_pTTree->Branch("recoNuPosE", &m_recoNuPosE);
-		m_pTTree->Branch("recoNuNegPx", &m_recoNuNegPx);
-		m_pTTree->Branch("recoNuNegPy", &m_recoNuNegPy);
-		m_pTTree->Branch("recoNuNegPz", &m_recoNuNegPz);
-		m_pTTree->Branch("recoNuNegE", &m_recoNuNegE);
-		m_pTTree->Branch("NuPxResidual", &m_NuPxResidual);
-		m_pTTree->Branch("NuPyResidual", &m_NuPyResidual);
-		m_pTTree->Branch("NuPzResidual", &m_NuPzResidual);
-		m_pTTree->Branch("NuEResidual", &m_NuEResidual);
-		m_pTTree->Branch("NuPxNormalizedResidual", &m_NuPxNormalizedResidual);
-		m_pTTree->Branch("NuPyNormalizedResidual", &m_NuPyNormalizedResidual);
-		m_pTTree->Branch("NuPzNormalizedResidual", &m_NuPzNormalizedResidual);
-		m_pTTree->Branch("NuENormalizedResidual", &m_NuENormalizedResidual);
-		m_pTTree->Branch("flightDirectionError", &m_FlightDirectionError);
-		m_pTTree->Branch("distRecoLeptonToDownStreamVertex", &m_distRecoLeptonToDownStreamVertex);
-		h_NuPxResidual = new TH1F( "PxResidual" , "; _{}p_{x,#nu}^{REC} - p_{x,#nu}^{MC} [GeV]; Normalized Entries / 0.1" , 2000 , -10.0 , 10.0 ); n_NuPxResidual = 0;
-		h_NuPyResidual = new TH1F( "PyResidual" , "; _{}p_{y,#nu}^{REC} - p_{y,#nu}^{MC} [GeV]; Normalized Entries / 0.1" , 2000 , -10.0 , 10.0 ); n_NuPyResidual = 0;
-		h_NuPzResidual = new TH1F( "PzResidual" , "; _{}p_{z,#nu}^{REC} - p_{z,#nu}^{MC}  [GeV]; Normalized Entries / 0.1" , 2000 , -10.0 , 10.0 ); n_NuPzResidual = 0;
-		h_NuEResidual = new TH1F( "EResidual" , "; _{}E_{#nu}^{REC} - E_{#nu}^{MC} [GeV]; Normalized Entries / 0.1" , 2000 , -10.0 , 10.0 ); n_NuEResidual = 0;
-		h_NuPxNormalizedResidual = new TH1F( "PxNormalizedResidual" , "; ( _{}p_{x,#nu}^{REC} - p_{x,#nu}^{MC} ) / #sigma_{p_{x,#nu}}; Normalized Entries / 0.1" , 200 , -10.0 , 10.0 ); n_NuPxNormalizedResidual = 0;
-		h_NuPyNormalizedResidual = new TH1F( "PyNormalizedResidual" , "; ( _{}p_{y,#nu}^{REC} - p_{y,#nu}^{MC} ) / #sigma_{p_{y,#nu}}; Normalized Entries / 0.1" , 200 , -10.0 , 10.0 ); n_NuPyNormalizedResidual = 0;
-		h_NuPzNormalizedResidual = new TH1F( "PzNormalizedResidual" , "; ( _{}p_{z,#nu}^{REC} - p_{z,#nu}^{MC} ) / #sigma_{p_{z,#nu}}; Normalized Entries / 0.1" , 200 , -10.0 , 10.0 ); n_NuPzNormalizedResidual = 0;
-		h_NuENormalizedResidual = new TH1F( "ENormalizedResidual" , "; ( _{}E_{#nu}^{REC} - E_{#nu}^{MC} ) / #sigma_{E_{#nu}}; Normalized Entries / 0.1" , 200 , -10.0 , 10.0 ); n_NuENormalizedResidual = 0;
-		h_recoNuPx_mcNuPx = new TH2F( "p_{x}^{#nu}" , "; _{}p_{x,#nu}^{MC} [GeV] ;  _{}p_{x,#nu}^{REC} [GeV]" , 120 , -60.0 , 60.0 , 120 , -60.0 , 60.0 );
-		h_recoNuPy_mcNuPy = new TH2F( "p_{y}^{#nu}" , "; _{}p_{y,#nu}^{MC} [GeV] ;  _{}p_{y,#nu}^{REC} [GeV]" , 120 , -60.0 , 60.0 , 120 , -60.0 , 60.0 );
-		h_recoNuPz_mcNuPz = new TH2F( "p_{z}^{#nu}" , "; _{}p_{z,#nu}^{MC} [GeV] ;  _{}p_{z,#nu}^{REC} [GeV]" , 120 , -60.0 , 60.0 , 120 , -60.0 , 60.0 );
-		h_recoNuE_mcNuE = new TH2F( "E^{#nu}" , "; _{}E_{#nu}^{MC} [GeV] ;  _{}E_{#nu}^{REC} [GeV]" , 100 , 0.0 , 100.0 , 100 , 0.0 , 100.0 );
-		h_parentPx_daughtersPx = new TH2F( "p_{x} conservation" , "; _{}Px_{parentHadron}^{MC} [GeV] ;  _{}Px_{daughters}^{MC} [GeV]" , 200 , -100.0 , 100.0 , 200 , -100.0 , 100.0 );
-		h_parentPy_daughtersPy = new TH2F( "p_{y} conservation" , "; _{}Py_{parentHadron}^{MC} [GeV] ;  _{}Py_{daughters}^{MC} [GeV]" , 200 , -100.0 , 100.0 , 200 , -100.0 , 100.0 );
-		h_parentPz_daughtersPz = new TH2F( "p_{z} conservation" , "; _{}Pz_{parentHadron}^{MC} [GeV] ;  _{}Pz_{daughters}^{MC} [GeV]" , 200 , -100.0 , 100.0 , 200 , -100.0 , 100.0 );
-		h_parentE_daughtersE = new TH2F( "E conservation" , "; _{}E_{parentHadron}^{MC} [GeV] ;  _{}E_{daughters}^{MC} [GeV]" , 100 , 0.0 , 100.0 , 100 , 0.0 , 100.0 );
-		h_recoPFOLinkedToElectron_Type = new TH1I( "PFOTypeofTrueElectron" , "; PFO Type" , 8 , 0 , 8 );
-		h_recoPFOLinkedToElectron_Type->GetXaxis()->SetBinLabel(1,"e^{#pm}");
-		h_recoPFOLinkedToElectron_Type->GetXaxis()->SetBinLabel(2,"#mu^{#pm}");
-		h_recoPFOLinkedToElectron_Type->GetXaxis()->SetBinLabel(3,"#pi^{#pm}");
-		h_recoPFOLinkedToElectron_Type->GetXaxis()->SetBinLabel(4,"#gamma");
-		h_recoPFOLinkedToElectron_Type->GetXaxis()->SetBinLabel(5,"K^{0}_{S}");
-		h_recoPFOLinkedToElectron_Type->GetXaxis()->SetBinLabel(6,"#Lambda");
-		h_recoPFOLinkedToElectron_Type->GetXaxis()->SetBinLabel(7,"Other");
-		h_recoPFOLinkedToElectron_Type->GetXaxis()->SetBinLabel(8,"Not Found");
-		h_recoPFOLinkedToMuon_Type = new TH1I( "PFOTypeofTrueMuon" , "; PFO Type" , 8 , 0 , 8 );
-		h_recoPFOLinkedToMuon_Type->GetXaxis()->SetBinLabel(1,"e^{#pm}");
-		h_recoPFOLinkedToMuon_Type->GetXaxis()->SetBinLabel(2,"#mu^{#pm}");
-		h_recoPFOLinkedToMuon_Type->GetXaxis()->SetBinLabel(3,"#pi^{#pm}");
-		h_recoPFOLinkedToMuon_Type->GetXaxis()->SetBinLabel(4,"#gamma");
-		h_recoPFOLinkedToMuon_Type->GetXaxis()->SetBinLabel(5,"K^{0}_{S}");
-		h_recoPFOLinkedToMuon_Type->GetXaxis()->SetBinLabel(6,"#Lambda");
-		h_recoPFOLinkedToMuon_Type->GetXaxis()->SetBinLabel(7,"Other");
-		h_recoPFOLinkedToMuon_Type->GetXaxis()->SetBinLabel(8,"Not Found");
-		h_SLDecayOrder = new TH1I( "SLDecayOrder" , "; SLDecay Type" , 3 , 0 , 3 );
-		h_SLDecayOrder->GetXaxis()->SetBinLabel(1,"upStream");
-		h_SLDecayOrder->GetXaxis()->SetBinLabel(2,"primary");
-		h_SLDecayOrder->GetXaxis()->SetBinLabel(3,"downStream");
-		h_foundVertex = new TH2I( "Viertices" , "; primary vertex ; secondary vertex" , 2 , 0 , 2 , 2 , 0 , 2 );
-		h_foundVertex->GetXaxis()->SetBinLabel(1,"vertex not found");
-		h_foundVertex->GetXaxis()->SetBinLabel(2,"vertex found");
-		h_foundVertex->GetYaxis()->SetBinLabel(1,"vertex not found");
-		h_foundVertex->GetYaxis()->SetBinLabel(2,"vertex found");
-		h_secondaryVertex = new TH1I( "secondary vertices" , ";" , 6 , 0 , 6 );
-		h_secondaryVertex->GetXaxis()->SetBinLabel(1,"lep in BUp vtx");
-		h_secondaryVertex->GetXaxis()->SetBinLabel(2,"lep in Prim vtx");
-		h_secondaryVertex->GetXaxis()->SetBinLabel(3,"SLD with downStream vtx");
-		h_secondaryVertex->GetXaxis()->SetBinLabel(4,"Sec. vtx not found");
-		h_secondaryVertex->GetXaxis()->SetBinLabel(5,"reco lep not found");
-		h_secondaryVertex->GetXaxis()->SetBinLabel(6,"other(?)");
-		h_parentHadronCharge = new TH1I( "parentHadronCharge" , "; Parent Hadron Charge" , 5 , 0 , 5 );
-		h_parentHadronCharge->GetXaxis()->SetBinLabel(1,"-2");
-		h_parentHadronCharge->GetXaxis()->SetBinLabel(2,"-1");
-		h_parentHadronCharge->GetXaxis()->SetBinLabel(3,"0");
-		h_parentHadronCharge->GetXaxis()->SetBinLabel(4,"1");
-		h_parentHadronCharge->GetXaxis()->SetBinLabel(5,"2");
-		h_MCPTracks = new TH1I( "chargedMCPTracks" , ";" , 2 , 0 , 2 );
-		h_MCPTracks->GetXaxis()->SetBinLabel(1,"track found");
-		h_MCPTracks->GetXaxis()->SetBinLabel(2,"track lost");
-		h_MCPTracks_Eweighted = new TH1I( "chargedMCPTracks" , "Energy weighted;" , 2 , 0 , 2 );
-		h_MCPTracks_Eweighted->GetXaxis()->SetBinLabel(1,"track found");
-		h_MCPTracks_Eweighted->GetXaxis()->SetBinLabel(2,"track lost");
-		h_MCPTracks_Ptweighted = new TH1I( "chargedMCPTracks" , "p_{T} weighted;" , 2 , 0 , 2 );
-		h_MCPTracks_Ptweighted->GetXaxis()->SetBinLabel(1,"track found");
-		h_MCPTracks_Ptweighted->GetXaxis()->SetBinLabel(2,"track lost");
-		h_FlightDirectionError = new TH1F ( "Flight Direction Error" , "; cos #alpha" , 200 , -1.0 , 1.0 );
-		h_distRecoLeptonToDownStreamVertex = new TH1F( "distance of RecoLepton to DownStreamVertex" , ";r^{3D} [mm]", 100 , 0.0 , 10.0 );
 	}
+	m_pTTree->SetDirectory(m_pTFile);
+	m_pTTree->Branch("event", &m_nEvt, "event/I");
+	m_pTTree->Branch("nTauSLDecay",&m_nTauSLDecay,"nTauSLDecay/I");
+	m_pTTree->Branch("nTauNeutrino",&m_nTauNeutrino,"nTauNeutrino/I");
+	m_pTTree->Branch("nNeutrino",&m_nNeutrino,"nNeutrino/I");
+	m_pTTree->Branch("jetFlavourPDG",&m_jetFlavourPDG);
+	m_pTTree->Branch("nSLD_chargedMCPwoTrack",&m_nSLD_chargedMCPwoTrack);
+	m_pTTree->Branch("GenStatParentHadron",&m_GenStatParentHadron);
+	m_pTTree->Branch("ChargeParentHadron",&m_ChargeParentHadron);
+	m_pTTree->Branch("foundRecoLepton",&m_foundRecoLepton);
+	m_pTTree->Branch("foundBuildUpVertex",&m_foundBuildUpVertex);
+	m_pTTree->Branch("foundRecoLeptonInBuildUpVertex",&m_foundRecoLeptonInBuildUpVertex);
+	m_pTTree->Branch("foundRecoLeptonInPrimaryVertex",&m_foundRecoLeptonInPrimaryVertex);
+	m_pTTree->Branch("lostChargedMCP_CosTheta",&m_lostChargedMCP_CosTheta);
+	m_pTTree->Branch("lostChargedMCP_Energy",&m_lostChargedMCP_Energy);
+	m_pTTree->Branch("lostChargedMCP_Pt",&m_lostChargedMCP_Pt);
+	m_pTTree->Branch("SLDecayXi", &m_SLDecayXi);
+	m_pTTree->Branch("SLDecayYi", &m_SLDecayYi);
+	m_pTTree->Branch("SLDecayZi", &m_SLDecayZi);
+	m_pTTree->Branch("SLDecayRi", &m_SLDecayRi);
+	m_pTTree->Branch("SLDecayXf", &m_SLDecayXf);
+	m_pTTree->Branch("SLDecayYf", &m_SLDecayYf);
+	m_pTTree->Branch("SLDecayZf", &m_SLDecayZf);
+	m_pTTree->Branch("SLDecayRf", &m_SLDecayRf);
+	m_pTTree->Branch("trueNuPx", &m_trueNuPx);
+	m_pTTree->Branch("trueNuPy", &m_trueNuPy);
+	m_pTTree->Branch("trueNuPz", &m_trueNuPz);
+	m_pTTree->Branch("trueNuE", &m_trueNuE);
+	m_pTTree->Branch("recoNuCloseInitialPx", &m_recoNuCloseInitialPx);
+	m_pTTree->Branch("recoNuCloseInitialPy", &m_recoNuCloseInitialPy);
+	m_pTTree->Branch("recoNuCloseInitialPz", &m_recoNuCloseInitialPz);
+	m_pTTree->Branch("recoNuCloseInitialE", &m_recoNuCloseInitialE);
+	m_pTTree->Branch("recoNuClosePx", &m_recoNuClosePx);
+	m_pTTree->Branch("recoNuClosePy", &m_recoNuClosePy);
+	m_pTTree->Branch("recoNuClosePz", &m_recoNuClosePz);
+	m_pTTree->Branch("recoNuCloseE", &m_recoNuCloseE);
+	m_pTTree->Branch("recoNuPosPx", &m_recoNuPosPx);
+	m_pTTree->Branch("recoNuPosPy", &m_recoNuPosPy);
+	m_pTTree->Branch("recoNuPosPz", &m_recoNuPosPz);
+	m_pTTree->Branch("recoNuPosE", &m_recoNuPosE);
+	m_pTTree->Branch("recoNuNegPx", &m_recoNuNegPx);
+	m_pTTree->Branch("recoNuNegPy", &m_recoNuNegPy);
+	m_pTTree->Branch("recoNuNegPz", &m_recoNuNegPz);
+	m_pTTree->Branch("recoNuNegE", &m_recoNuNegE);
+	m_pTTree->Branch("NuPxResidual", &m_NuPxResidual);
+	m_pTTree->Branch("NuPyResidual", &m_NuPyResidual);
+	m_pTTree->Branch("NuPzResidual", &m_NuPzResidual);
+	m_pTTree->Branch("NuEResidual", &m_NuEResidual);
+	m_pTTree->Branch("NuPxNormalizedResidual", &m_NuPxNormalizedResidual);
+	m_pTTree->Branch("NuPyNormalizedResidual", &m_NuPyNormalizedResidual);
+	m_pTTree->Branch("NuPzNormalizedResidual", &m_NuPzNormalizedResidual);
+	m_pTTree->Branch("NuENormalizedResidual", &m_NuENormalizedResidual);
+	m_pTTree->Branch("solutionSign", &m_solutionSign);
+	m_pTTree->Branch("E_vis", &m_E_vis);
+	m_pTTree->Branch("E_vis_prime", &m_E_vis_prime);
+	m_pTTree->Branch("P_vis_par", &m_P_vis_par);
+	m_pTTree->Branch("P_vis_par_prime", &m_P_vis_par_prime);
+	m_pTTree->Branch("P_vis_nor", &m_P_vis_nor);
+	m_pTTree->Branch("P_vis_nor_prime", &m_P_vis_nor_prime);
+	m_pTTree->Branch("flightDirectionErrorCosAlpha", &m_FlightDirectionErrorCosAlpha);
+	m_pTTree->Branch("flightDirectionErrorSinAlpha", &m_FlightDirectionErrorSinAlpha);
+	m_pTTree->Branch("distRecoLeptonToDownStreamVertex", &m_distRecoLeptonToDownStreamVertex);
+	h_NuPxResidual = new TH1F( "PxResidual" , "; _{}p_{x,#nu}^{REC} - p_{x,#nu}^{MC} [GeV]; Normalized Entries / 0.1" , 2000 , -10.0 , 10.0 ); n_NuPxResidual = 0;
+	h_NuPyResidual = new TH1F( "PyResidual" , "; _{}p_{y,#nu}^{REC} - p_{y,#nu}^{MC} [GeV]; Normalized Entries / 0.1" , 2000 , -10.0 , 10.0 ); n_NuPyResidual = 0;
+	h_NuPzResidual = new TH1F( "PzResidual" , "; _{}p_{z,#nu}^{REC} - p_{z,#nu}^{MC}  [GeV]; Normalized Entries / 0.1" , 2000 , -10.0 , 10.0 ); n_NuPzResidual = 0;
+	h_NuEResidual = new TH1F( "EResidual" , "; _{}E_{#nu}^{REC} - E_{#nu}^{MC} [GeV]; Normalized Entries / 0.1" , 2000 , -10.0 , 10.0 ); n_NuEResidual = 0;
+	h_NuPxNormalizedResidual = new TH1F( "PxNormalizedResidual" , "; ( _{}p_{x,#nu}^{REC} - p_{x,#nu}^{MC} ) / #sigma_{p_{x,#nu}}; Normalized Entries / 0.1" , 200 , -10.0 , 10.0 ); n_NuPxNormalizedResidual = 0;
+	h_NuPyNormalizedResidual = new TH1F( "PyNormalizedResidual" , "; ( _{}p_{y,#nu}^{REC} - p_{y,#nu}^{MC} ) / #sigma_{p_{y,#nu}}; Normalized Entries / 0.1" , 200 , -10.0 , 10.0 ); n_NuPyNormalizedResidual = 0;
+	h_NuPzNormalizedResidual = new TH1F( "PzNormalizedResidual" , "; ( _{}p_{z,#nu}^{REC} - p_{z,#nu}^{MC} ) / #sigma_{p_{z,#nu}}; Normalized Entries / 0.1" , 200 , -10.0 , 10.0 ); n_NuPzNormalizedResidual = 0;
+	h_NuENormalizedResidual = new TH1F( "ENormalizedResidual" , "; ( _{}E_{#nu}^{REC} - E_{#nu}^{MC} ) / #sigma_{E_{#nu}}; Normalized Entries / 0.1" , 200 , -10.0 , 10.0 ); n_NuENormalizedResidual = 0;
+	h_recoNuPx_mcNuPx = new TH2F( "p_{x}^{#nu}" , "; _{}p_{x,#nu}^{MC} [GeV] ;  _{}p_{x,#nu}^{REC} [GeV]" , 120 , -60.0 , 60.0 , 120 , -60.0 , 60.0 );
+	h_recoNuPy_mcNuPy = new TH2F( "p_{y}^{#nu}" , "; _{}p_{y,#nu}^{MC} [GeV] ;  _{}p_{y,#nu}^{REC} [GeV]" , 120 , -60.0 , 60.0 , 120 , -60.0 , 60.0 );
+	h_recoNuPz_mcNuPz = new TH2F( "p_{z}^{#nu}" , "; _{}p_{z,#nu}^{MC} [GeV] ;  _{}p_{z,#nu}^{REC} [GeV]" , 120 , -60.0 , 60.0 , 120 , -60.0 , 60.0 );
+	h_recoNuE_mcNuE = new TH2F( "E^{#nu}" , "; _{}E_{#nu}^{MC} [GeV] ;  _{}E_{#nu}^{REC} [GeV]" , 100 , 0.0 , 100.0 , 100 , 0.0 , 100.0 );
+	h_parentPx_daughtersPx = new TH2F( "p_{x} conservation" , "; _{}Px_{parentHadron}^{MC} [GeV] ;  _{}Px_{daughters}^{MC} [GeV]" , 200 , -100.0 , 100.0 , 200 , -100.0 , 100.0 );
+	h_parentPy_daughtersPy = new TH2F( "p_{y} conservation" , "; _{}Py_{parentHadron}^{MC} [GeV] ;  _{}Py_{daughters}^{MC} [GeV]" , 200 , -100.0 , 100.0 , 200 , -100.0 , 100.0 );
+	h_parentPz_daughtersPz = new TH2F( "p_{z} conservation" , "; _{}Pz_{parentHadron}^{MC} [GeV] ;  _{}Pz_{daughters}^{MC} [GeV]" , 200 , -100.0 , 100.0 , 200 , -100.0 , 100.0 );
+	h_parentE_daughtersE = new TH2F( "E conservation" , "; _{}E_{parentHadron}^{MC} [GeV] ;  _{}E_{daughters}^{MC} [GeV]" , 100 , 0.0 , 100.0 , 100 , 0.0 , 100.0 );
+	h_recoPFOLinkedToElectron_Type = new TH1I( "PFOTypeofTrueElectron" , "; PFO Type" , 8 , 0 , 8 );
+	h_recoPFOLinkedToElectron_Type->GetXaxis()->SetBinLabel(1,"e^{#pm}");
+	h_recoPFOLinkedToElectron_Type->GetXaxis()->SetBinLabel(2,"#mu^{#pm}");
+	h_recoPFOLinkedToElectron_Type->GetXaxis()->SetBinLabel(3,"#pi^{#pm}");
+	h_recoPFOLinkedToElectron_Type->GetXaxis()->SetBinLabel(4,"#gamma");
+	h_recoPFOLinkedToElectron_Type->GetXaxis()->SetBinLabel(5,"K^{0}_{S}");
+	h_recoPFOLinkedToElectron_Type->GetXaxis()->SetBinLabel(6,"#Lambda");
+	h_recoPFOLinkedToElectron_Type->GetXaxis()->SetBinLabel(7,"Other");
+	h_recoPFOLinkedToElectron_Type->GetXaxis()->SetBinLabel(8,"Not Found");
+	h_recoPFOLinkedToMuon_Type = new TH1I( "PFOTypeofTrueMuon" , "; PFO Type" , 8 , 0 , 8 );
+	h_recoPFOLinkedToMuon_Type->GetXaxis()->SetBinLabel(1,"e^{#pm}");
+	h_recoPFOLinkedToMuon_Type->GetXaxis()->SetBinLabel(2,"#mu^{#pm}");
+	h_recoPFOLinkedToMuon_Type->GetXaxis()->SetBinLabel(3,"#pi^{#pm}");
+	h_recoPFOLinkedToMuon_Type->GetXaxis()->SetBinLabel(4,"#gamma");
+	h_recoPFOLinkedToMuon_Type->GetXaxis()->SetBinLabel(5,"K^{0}_{S}");
+	h_recoPFOLinkedToMuon_Type->GetXaxis()->SetBinLabel(6,"#Lambda");
+	h_recoPFOLinkedToMuon_Type->GetXaxis()->SetBinLabel(7,"Other");
+	h_recoPFOLinkedToMuon_Type->GetXaxis()->SetBinLabel(8,"Not Found");
+	h_SLDecayOrder = new TH1I( "SLDecayOrder" , "; SLDecay Type" , 3 , 0 , 3 );
+	h_SLDecayOrder->GetXaxis()->SetBinLabel(1,"upStream");
+	h_SLDecayOrder->GetXaxis()->SetBinLabel(2,"primary");
+	h_SLDecayOrder->GetXaxis()->SetBinLabel(3,"downStream");
+	h_foundVertex = new TH2I( "Viertices" , "; primary vertex ; secondary vertex" , 2 , 0 , 2 , 2 , 0 , 2 );
+	h_foundVertex->GetXaxis()->SetBinLabel(1,"vertex not found");
+	h_foundVertex->GetXaxis()->SetBinLabel(2,"vertex found");
+	h_foundVertex->GetYaxis()->SetBinLabel(1,"vertex not found");
+	h_foundVertex->GetYaxis()->SetBinLabel(2,"vertex found");
+	h_secondaryVertex = new TH1I( "secondary vertices" , ";" , 6 , 0 , 6 );
+	h_secondaryVertex->GetXaxis()->SetBinLabel(1,"lep in BUp vtx");
+	h_secondaryVertex->GetXaxis()->SetBinLabel(2,"lep in Prim vtx");
+	h_secondaryVertex->GetXaxis()->SetBinLabel(3,"SLD with downStream vtx");
+	h_secondaryVertex->GetXaxis()->SetBinLabel(4,"Sec. vtx not found");
+	h_secondaryVertex->GetXaxis()->SetBinLabel(5,"reco lep not found");
+	h_secondaryVertex->GetXaxis()->SetBinLabel(6,"other(?)");
+	h_parentHadronCharge = new TH1I( "parentHadronCharge" , "; Parent Hadron Charge" , 5 , 0 , 5 );
+	h_parentHadronCharge->GetXaxis()->SetBinLabel(1,"-2");
+	h_parentHadronCharge->GetXaxis()->SetBinLabel(2,"-1");
+	h_parentHadronCharge->GetXaxis()->SetBinLabel(3,"0");
+	h_parentHadronCharge->GetXaxis()->SetBinLabel(4,"1");
+	h_parentHadronCharge->GetXaxis()->SetBinLabel(5,"2");
+	h_MCPTracks = new TH1I( "chargedMCPTracks" , ";" , 2 , 0 , 2 );
+	h_MCPTracks->GetXaxis()->SetBinLabel(1,"track found");
+	h_MCPTracks->GetXaxis()->SetBinLabel(2,"track lost");
+	h_MCPTracks_Eweighted = new TH1I( "chargedMCPTracks" , "Energy weighted;" , 2 , 0 , 2 );
+	h_MCPTracks_Eweighted->GetXaxis()->SetBinLabel(1,"track found");
+	h_MCPTracks_Eweighted->GetXaxis()->SetBinLabel(2,"track lost");
+	h_MCPTracks_Ptweighted = new TH1I( "chargedMCPTracks" , "p_{T} weighted;" , 2 , 0 , 2 );
+	h_MCPTracks_Ptweighted->GetXaxis()->SetBinLabel(1,"track found");
+	h_MCPTracks_Ptweighted->GetXaxis()->SetBinLabel(2,"track lost");
+	h_FlightDirectionError = new TH1F ( "Flight Direction Error" , "; cos #alpha" , 200 , -1.0 , 1.0 );
+	h_distRecoLeptonToDownStreamVertex = new TH1F( "distance of RecoLepton to DownStreamVertex" , ";r^{3D} [mm]", 100 , 0.0 , 10.0 );
 
 }
 
@@ -464,7 +478,15 @@ void SLDCorrection::Clear()
 	m_NuPyNormalizedResidual.clear();
 	m_NuPzNormalizedResidual.clear();
 	m_NuENormalizedResidual.clear();
-	m_FlightDirectionError.clear();
+	m_solutionSign.clear();
+	m_E_vis.clear();
+	m_E_vis_prime.clear();
+	m_P_vis_par.clear();
+	m_P_vis_par_prime.clear();
+	m_P_vis_nor.clear();
+	m_P_vis_nor_prime.clear();
+	m_FlightDirectionErrorCosAlpha.clear();
+	m_FlightDirectionErrorSinAlpha.clear();
 	m_distRecoLeptonToDownStreamVertex.clear();
 
 }
@@ -671,16 +693,29 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 	TLorentzVector recoNeutrinoFourMomentumPos( 0.0 , 0.0 , 0.0 , 0.0 );
 	TLorentzVector recoNeutrinoFourMomentumNeg( 0.0 , 0.0 , 0.0 , 0.0 );
 	TLorentzVector recoNeutrinoFourMomentumClose( 0.0 , 0.0 , 0.0 , 0.0 );
+	TLorentzVector trueNeutrinoFourMomentum = getTrueNeutrinoFourMomentum( SLDLepton );
+	std::vector< float > NeutrinoCovMat( 10 , 0.0 );
 	TLorentzVector trueLeptonFourMomentum( 0.0 , 0.0 , 0.0 , 0.0 );
 	TLorentzVector trueChargedFourMomentum( 0.0 , 0.0 , 0.0 , 0.0 );
 	TLorentzVector trueNeutralFourMomentum( 0.0 , 0.0 , 0.0 , 0.0 );
 	TLorentzVector leptonFourMomentum( 0.0 , 0.0 , 0.0 , 0.0 );
 	TLorentzVector chargedFourMomentum( 0.0 , 0.0 , 0.0 , 0.0 );
 	TLorentzVector neutralFourMomentum( 0.0 , 0.0 , 0.0 , 0.0 );
+	TVector3 trueFlightDirection( 0.0 , 0.0 , 0.0 );
+	TVector3 recoFlightDirection( 0.0 , 0.0 , 0.0 );
 	TVector3 flightDirection( 0.0 , 0.0 , 0.0 );
 	float restCharge = 0.0;
 	double parentHadronMass = 0.0;
+
+	MCParticle *parentHadron = SLDLepton->getParents()[ 0 ];
+	parentHadronMass = ( SLDLepton->getParents()[ 0 ] )->getMass();
 	streamlog_out(DEBUG2) << "			     (  PDG	, Mass		, Px		, Py		, Pz		, E		, Charge	)" << std::endl;
+	streamlog_out(DEBUG2) << "		Neutrino" << std::endl;
+	streamlog_out(DEBUG2) << "			True:(	" << "***" << "	, " << trueNeutrinoFourMomentum.M() << "	, " << trueNeutrinoFourMomentum.Px() << "	, " << trueNeutrinoFourMomentum.Py() << "	, " << trueNeutrinoFourMomentum.Pz() << "	, " << trueNeutrinoFourMomentum.E() << "	, " << "0" << "	)" << std::endl;
+	streamlog_out(DEBUG2) << "" << std::endl;
+	streamlog_out(DEBUG2) << "		Hadron" << std::endl;
+	streamlog_out(DEBUG2) << "			True:(	" << parentHadron->getPDG() << "	, " << parentHadron->getMass() << "	, " << parentHadron->getMomentum()[ 0 ] << "	, " << parentHadron->getMomentum()[ 1 ] << "	, " << parentHadron->getMomentum()[ 2 ] << "	, " << parentHadron->getEnergy() << "	, " << parentHadron->getCharge() << "	)" << std::endl;
+	streamlog_out(DEBUG2) << "" << std::endl;
 	getLeptonFourMomentum( pLCEvent , SLDLepton  , m_cheatLepton4momentum , leptonFourMomentum , trueLeptonFourMomentum , m_RecoMCTruthLinkCollection , m_MCTruthRecoLinkCollection );
 	streamlog_out(DEBUG2) << "			Used:(	" << SLDLepton->getPDG() << "	, " << leptonFourMomentum.M() << "	, " << leptonFourMomentum.Px() << "	, " << leptonFourMomentum.Py() << "	, " << leptonFourMomentum.Pz() << "	, " << leptonFourMomentum.E() << "	, " << (int)SLDLepton->getCharge() << "		)" << std::endl;
 	streamlog_out(DEBUG2) << "" << std::endl;
@@ -690,19 +725,57 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 	getNeutralFourMomentum( pLCEvent , SLDLepton  , m_cheatNeutral4momentum , neutralFourMomentum , trueNeutralFourMomentum , m_RecoMCTruthLinkCollection , m_MCTruthRecoLinkCollection );
 	streamlog_out(DEBUG2) << "			Used:(	" << "nnn" << "	, " << chargedFourMomentum.M() << "	, " << chargedFourMomentum.Px() << "	, " << chargedFourMomentum.Py() << "	, " << chargedFourMomentum.Pz() << "	, " << chargedFourMomentum.E() << "	, " << "0" << "		)" << std::endl;
 	streamlog_out(DEBUG2) << "" << std::endl;
-//	getParentHadronFlightDirection( pLCEvent , SLDLepton , m_inputPrimaryVertex , m_inputBuildUpVertex , m_inputJetCollection );
-
-//	recoNeutrinoFourMomentumPos = getNeutrinoFourMomentum( flightDirection , leptonFourMomentum , chargedFourMomentum , neutralFourMomentum , parentHadronMass , +1 );
-//	recoNeutrinoFourMomentumNeg = getNeutrinoFourMomentum( flightDirection , leptonFourMomentum , chargedFourMomentum , neutralFourMomentum , parentHadronMass , -1 );
-
-//	TLorentzVector fourMomentumLepton = getLeptonFourMomentum( pLCEvent , SLDLepton );
-//	TLorentzVector visibleFourMomentumCharged = getVisibleFourMomentum( pLCEvent , SLDLepton , SLDLepton->getParents()[ 0 ] , true , false );
-//	TLorentzVector visibleFourMomentumNeutral = getVisibleFourMomentum( pLCEvent , SLDLepton , SLDLepton->getParents()[ 0 ] , false , true );
+	streamlog_out(DEBUG2) << "			     (  X		, Y		, Z	)" << std::endl;
+	int flightDirectionStatus = getParentHadronFlightDirection( pLCEvent , SLDLepton , trueFlightDirection , recoFlightDirection , m_inputPrimaryVertex , m_inputBuildUpVertex , m_inputJetCollection , m_vertexingScenario , m_RecoMCTruthLinkCollection , m_MCTruthRecoLinkCollection );
+	if ( m_cheatFlightDirection )
+	{
+		flightDirection = trueFlightDirection;
+	}
+	else
+	{
+		flightDirection = recoFlightDirection;
+	}
+	if ( flightDirectionStatus == 2 )
+	{
+		m_FlightDirectionErrorCosAlpha.push_back( trueFlightDirection.Dot( recoFlightDirection ) );
+		m_FlightDirectionErrorSinAlpha.push_back( sqrt( 1 - pow( trueFlightDirection.Dot( recoFlightDirection ) , 2 ) ) );
+		if ( trueFlightDirection.Dot( recoFlightDirection ) >= 0.99 )
+		{
+			recoNeutrinoFourMomentumPos = getNeutrinoFourMomentum( flightDirection , leptonFourMomentum , chargedFourMomentum , neutralFourMomentum , parentHadronMass , +1 );
+			recoNeutrinoFourMomentumNeg = getNeutrinoFourMomentum( flightDirection , leptonFourMomentum , chargedFourMomentum , neutralFourMomentum , parentHadronMass , -1 );
+			recoNeutrinoFourMomentumClose = ( fabs( recoNeutrinoFourMomentumPos.E() - trueNeutrinoFourMomentum.E() ) < fabs( recoNeutrinoFourMomentumNeg.E() - trueNeutrinoFourMomentum.E() ) ? recoNeutrinoFourMomentumPos : recoNeutrinoFourMomentumNeg );
+			streamlog_out(DEBUG4) << "" << std::endl;
+			streamlog_out(DEBUG4) << "	Closest Neutrino 4-Momentum:			( " << recoNeutrinoFourMomentumClose.Px() << "	, " << recoNeutrinoFourMomentumClose.Py() << "	, " << recoNeutrinoFourMomentumClose.Pz() << "	, " << recoNeutrinoFourMomentumClose.E() << " )" << std::endl;
+			streamlog_out(DEBUG4) << "	True Neutrino 4-Momentum:			( " << trueNeutrinoFourMomentum.Px() << "	, " << trueNeutrinoFourMomentum.Py() << "	, " << trueNeutrinoFourMomentum.Pz() << "	, " << trueNeutrinoFourMomentum.E() << " )" << std::endl;
+			if ( fabs( recoNeutrinoFourMomentumClose.E() - trueNeutrinoFourMomentum.E() ) > 10.0 )
+			{
+				streamlog_out(DEBUG4) << "	!!! Big Difference between true and reco neutrino Energy : " << recoNeutrinoFourMomentumClose.E() - trueNeutrinoFourMomentum.E() << "  GeV" << std::endl;
+			}
+			plotHistograms( trueNeutrinoFourMomentum , recoNeutrinoFourMomentumClose , NeutrinoCovMat );
+			m_trueNuPx.push_back( trueNeutrinoFourMomentum.Px() );
+			m_trueNuPy.push_back( trueNeutrinoFourMomentum.Py() );
+			m_trueNuPz.push_back( trueNeutrinoFourMomentum.Pz() );
+			m_trueNuE.push_back( trueNeutrinoFourMomentum.E() );
+			m_recoNuClosePx.push_back( recoNeutrinoFourMomentumClose.Px() );
+			m_recoNuClosePy.push_back( recoNeutrinoFourMomentumClose.Py() );
+			m_recoNuClosePz.push_back( recoNeutrinoFourMomentumClose.Pz() );
+			m_recoNuCloseE.push_back( recoNeutrinoFourMomentumClose.E() );
+			m_recoNuPosPx.push_back( recoNeutrinoFourMomentumPos.Px() );
+			m_recoNuPosPy.push_back( recoNeutrinoFourMomentumPos.Py() );
+			m_recoNuPosPz.push_back( recoNeutrinoFourMomentumPos.Pz() );
+			m_recoNuPosE.push_back( recoNeutrinoFourMomentumPos.E() );
+			m_recoNuNegPx.push_back( recoNeutrinoFourMomentumNeg.Px() );
+			m_recoNuNegPy.push_back( recoNeutrinoFourMomentumNeg.Py() );
+			m_recoNuNegPz.push_back( recoNeutrinoFourMomentumNeg.Pz() );
+			m_recoNuNegE.push_back( recoNeutrinoFourMomentumNeg.E() );
+		}
+	}
 }
 
 TLorentzVector SLDCorrection::getNeutrinoFourMomentum( TVector3 flightDirection , TLorentzVector FourMomentumLepton , TLorentzVector VisibleFourMomentumCharged , TLorentzVector VisibleFourMomentumNeutral , double ParentHadronMass , int solutionSign )
 {
 	int sign = ( solutionSign != 0 ? solutionSign / abs( solutionSign ) : 1 );
+	m_solutionSign.push_back( sign );
 	const char *solSign = ( sign >= 0 ? "+" : "-" );
 	streamlog_out(DEBUG1) << "" << std::endl;
 	streamlog_out(DEBUG1) << "		--------------------------------------------" << std::endl;
@@ -716,13 +789,14 @@ TLorentzVector SLDCorrection::getNeutrinoFourMomentum( TVector3 flightDirection 
 	TLorentzVector visible_tlv	= VisibleFourMomentumCharged + VisibleFourMomentumNeutral + FourMomentumLepton;
 	streamlog_out(DEBUG1) << "		Visible 4-Momentum:			( " << visible_tlv.Px() << "	, " << visible_tlv.Py() << "	, " << visible_tlv.Pz() << "	, " << visible_tlv.E() << " )" << std::endl;
 	streamlog_out(DEBUG1) << "				Lepton			( " << FourMomentumLepton.Px() << "	, " << FourMomentumLepton.Py() << "	, " << FourMomentumLepton.Pz() << "	, " << FourMomentumLepton.E() << " )" << std::endl;
-	streamlog_out(DEBUG1) << "				Charged		( " << VisibleFourMomentumCharged.Px() << "	, " << VisibleFourMomentumCharged.Py() << "	, " << VisibleFourMomentumCharged.Pz() << "	, " << VisibleFourMomentumCharged.E() << " )" << std::endl;
-	streamlog_out(DEBUG1) << "				Neutral		( " << VisibleFourMomentumNeutral.Px() << "	, " << VisibleFourMomentumNeutral.Py() << "	, " << VisibleFourMomentumNeutral.Pz() << "	, " << VisibleFourMomentumNeutral.E() << " )" << std::endl;
+	streamlog_out(DEBUG1) << "				Charged			( " << VisibleFourMomentumCharged.Px() << "	, " << VisibleFourMomentumCharged.Py() << "	, " << VisibleFourMomentumCharged.Pz() << "	, " << VisibleFourMomentumCharged.E() << " )" << std::endl;
+	streamlog_out(DEBUG1) << "				Neutral			( " << VisibleFourMomentumNeutral.Px() << "	, " << VisibleFourMomentumNeutral.Py() << "	, " << VisibleFourMomentumNeutral.Pz() << "	, " << VisibleFourMomentumNeutral.E() << " )" << std::endl;
 
 	double visible_mass		= visible_tlv.M();
 	streamlog_out(DEBUG1) << "		Visible Inv Mass:	" << visible_mass << std::endl;
 
 	double visible_E		= visible_tlv.E();
+	m_E_vis.push_back( visible_E );
 	streamlog_out(DEBUG1) << "		Visible Energy:									" << visible_E << std::endl;
 
 	TVector3 visible_p		= TVector3( visible_tlv.Px() , visible_tlv.Py() , visible_tlv.Pz() );
@@ -730,24 +804,30 @@ TLorentzVector SLDCorrection::getNeutrinoFourMomentum( TVector3 flightDirection 
 	streamlog_out(DEBUG1) << "		(Visible Momentum).(FlightDirection):							" << visible_p.Dot( flightDirection ) << std::endl;
 
 	TVector3 visible_p_par		= visible_p.Dot( flightDirection ) * flightDirection;
-	streamlog_out(DEBUG1) << "		Visible Momentum (par):		( " << visible_p_par.Px() << "	, " << visible_p_par.Py() << "	, " << visible_p_par.Pz() << "	)" << std::endl;
+	m_P_vis_par.push_back( visible_p_par.Mag() );
+	streamlog_out(DEBUG1) << "		Visible Momentum (par):			( " << visible_p_par.Px() << "	, " << visible_p_par.Py() << "	, " << visible_p_par.Pz() << "	)" << std::endl;
 
 	TVector3 visible_p_nor		= visible_p - visible_p_par;
-	streamlog_out(DEBUG1) << "		Visible Momentum (nor):		( " << visible_p_nor.Px() << "	, " << visible_p_nor.Py() << "	, " << visible_p_nor.Pz() << "	)" << std::endl;
+	m_P_vis_nor.push_back( visible_p_nor.Mag() );
+	m_P_vis_nor_prime.push_back( visible_p_nor.Mag() );
+	streamlog_out(DEBUG1) << "		Visible Momentum (nor):			( " << visible_p_nor.Px() << "	, " << visible_p_nor.Py() << "	, " << visible_p_nor.Pz() << "	)" << std::endl;
 
 	double visible_E_prime		= ( pow( ParentHadronMass , 2 ) + pow( visible_mass , 2 ) ) / ( 2 * ParentHadronMass );
+	m_E_vis_prime.push_back( visible_E_prime );
 	streamlog_out(DEBUG1) << "		Visible Energy (prime):								" << visible_E_prime << std::endl;
 
 	TVector3 visible_p_par_prime	= sign * sqrt( pow( ( pow( ParentHadronMass , 2 ) - pow( visible_mass , 2 ) ) / ( 2 * ParentHadronMass ) , 2 ) - visible_p_nor.Mag2() ) * flightDirection;
+	m_P_vis_par_prime.push_back( visible_p_par_prime.Mag() );
 	if ( pow( ( pow( ParentHadronMass , 2 ) - pow( visible_mass , 2 ) ) / ( 2 * ParentHadronMass ) , 2 ) < visible_p_nor.Mag2() )
 	{
 		visible_p_par_prime	= std::numeric_limits<double>::min() * flightDirection;
 	}
 	streamlog_out(DEBUG1) << "		Visible Momentum (par-prime):		( " << visible_p_par_prime.Px() << "	, " << visible_p_par_prime.Py() << "	, " << visible_p_par_prime.Pz() << "	)" << std::endl;
 
-	double parent_hadron_E		= ( ( visible_tlv.E() * ( pow( ParentHadronMass , 2 ) + pow( visible_mass , 2 ) ) / ( 2 * ParentHadronMass ) ) - visible_p.Dot( flightDirection ) * sign * sqrt( pow( ( pow( ParentHadronMass , 2 ) - pow( visible_mass , 2 ) ) / ( 2 * ParentHadronMass ) , 2 ) - visible_p_nor.Mag2() ) ) * ParentHadronMass / ( pow( visible_mass , 2 ) + visible_p_nor.Mag2() );
+	double parent_hadron_E		= ( ( visible_tlv.E() * ( pow( ParentHadronMass , 2 ) + pow( visible_mass , 2 ) ) / ( 2 * ParentHadronMass ) ) - visible_p.Dot( flightDirection ) * visible_p_par_prime.Mag() ) * ParentHadronMass / ( pow( visible_mass , 2 ) + visible_p_nor.Mag2() );
+	streamlog_out(DEBUG1) << "		Parent Hadron Energy =									" << parent_hadron_E << std::endl;
 	TVector3 parent_hadron_p	= sqrt( pow( parent_hadron_E , 2 ) - pow( ParentHadronMass , 2 ) ) * flightDirection;
-	streamlog_out(DEBUG1) << "		Parent Hadron Momentum:		( " << parent_hadron_p.Px() << "	, " << parent_hadron_p.Py() << "	, " << parent_hadron_p.Pz() << "	, " << parent_hadron_E << " )" << std::endl;
+	streamlog_out(DEBUG1) << "		Parent Hadron Momentum:			( " << parent_hadron_p.Px() << "	, " << parent_hadron_p.Py() << "	, " << parent_hadron_p.Pz() << "	, " << parent_hadron_E << " )" << std::endl;
 
 	double Neutrino_E		= parent_hadron_E - visible_E;
 	streamlog_out(DEBUG1) << "		Neutrino Energy:									" << Neutrino_E << std::endl;
@@ -756,7 +836,7 @@ TLorentzVector SLDCorrection::getNeutrinoFourMomentum( TVector3 flightDirection 
 	streamlog_out(DEBUG1) << "		Neutrino Momentum (nor):		( " << Neutrino_p_nor.Px() << "	, " << Neutrino_p_nor.Py() << "	, " << Neutrino_p_nor.Pz() << "	)" << std::endl;
 
 	TVector3 Neutrino_p_par		= sqrt( pow( Neutrino_E , 2 ) - Neutrino_p_nor.Mag2() ) * flightDirection;
-	streamlog_out(DEBUG1) << "		Neutrino Momentum (par):		( " << Neutrino_p_nor.Px() << "	, " << Neutrino_p_nor.Py() << "	, " << Neutrino_p_nor.Pz() << "	)" << std::endl;
+	streamlog_out(DEBUG1) << "		Neutrino Momentum (par):		( " << Neutrino_p_par.Px() << "	, " << Neutrino_p_par.Py() << "	, " << Neutrino_p_par.Pz() << "	)" << std::endl;
 
 	TVector3 Neutrino_p		= Neutrino_p_nor + Neutrino_p_par;
 	streamlog_out(DEBUG1) << "		Neutrino Momentum:			( " << Neutrino_p_par.Px() << "	, " << Neutrino_p_par.Py() << "	, " << Neutrino_p_par.Pz() << "	)" << std::endl;
@@ -766,6 +846,97 @@ TLorentzVector SLDCorrection::getNeutrinoFourMomentum( TVector3 flightDirection 
 	streamlog_out(DEBUG2) << "	Reconstructed Neutrino Mass:	" << Neutrino_tlv.Mag() << std::endl;
 	streamlog_out(DEBUG2) << "	Reconstructed Neutrino 4-Momentum:		( " << Neutrino_tlv.Px() << "	, " << Neutrino_tlv.Py() << "	, " << Neutrino_tlv.Pz() << "	, " << Neutrino_tlv.E() << " )" << std::endl;
 	return Neutrino_tlv;
+}
+
+TLorentzVector SLDCorrection::getTrueNeutrinoFourMomentum( MCParticle *SLDLepton )
+{
+	TLorentzVector InisibleFourMomentum( 0.0 , 0.0 , 0.0 , 0.0 );
+	try
+	{
+		const EVENT::MCParticle *MotherHadron = SLDLepton->getParents()[ 0 ];
+		int nNeutrinos = 0;
+		for ( long unsigned int i_daughter = 0 ; i_daughter < ( MotherHadron->getDaughters() ).size() ; ++i_daughter )
+		{
+			const EVENT::MCParticle *daughter = MotherHadron->getDaughters()[ i_daughter ];
+			if ( daughter->getGeneratorStatus() == 1 && ( abs( daughter->getPDG() ) == abs( SLDLepton->getPDG() ) + 1 ) )
+			{
+				streamlog_out(DEBUG0) << "		Neutrino:" << std::endl;
+				streamlog_out(DEBUG0) << "			True:(	" << daughter->getPDG() << "	, " << daughter->getMass() << "	, " << daughter->getMomentum()[ 0 ] << "	, " << daughter->getMomentum()[ 1 ] << "	, " << daughter->getMomentum()[ 2 ] << "	, " << daughter->getEnergy() << "	, " << daughter->getCharge() << "	)" << std::endl;
+				InisibleFourMomentum = TLorentzVector( daughter->getMomentum()[ 0 ] , daughter->getMomentum()[ 1 ] , daughter->getMomentum()[ 2 ] , daughter->getEnergy() );
+			}
+		}
+		++nNeutrinos;
+	}
+	catch(DataNotAvailableException &e)
+        {
+        	streamlog_out(MESSAGE) << "	True Neutrino for semi-leptonic decay not found in MCParticles" << std::endl;
+        }
+	return InisibleFourMomentum;
+}
+
+void SLDCorrection::plotHistograms( TLorentzVector trueFourMomentumNeutrino , TLorentzVector FourMomentumNuClose , std::vector<float> NeutrinoCovMat )
+{
+	double NuPxResidual = FourMomentumNuClose.Px() - trueFourMomentumNeutrino.Px(); m_NuPxResidual.push_back( NuPxResidual );
+	double NuPyResidual = FourMomentumNuClose.Py() - trueFourMomentumNeutrino.Py(); m_NuPyResidual.push_back( NuPyResidual );
+	double NuPzResidual = FourMomentumNuClose.Pz() - trueFourMomentumNeutrino.Pz(); m_NuPzResidual.push_back( NuPzResidual );
+	double NuEResidual = FourMomentumNuClose.E() - trueFourMomentumNeutrino.E(); m_NuEResidual.push_back( NuEResidual );
+//	double NuPxNormalizedResidual = NuPxResidual / sqrt( NeutrinoCovMat[ 0 ] ); m_NuPxNormalizedResidual.push_back( NuPxNormalizedResidual );
+//	double NuPyNormalizedResidual = NuPyResidual / sqrt( NeutrinoCovMat[ 2 ] ); m_NuPyNormalizedResidual.push_back( NuPyNormalizedResidual );
+//	double NuPzNormalizedResidual = NuPzResidual / sqrt( NeutrinoCovMat[ 5 ] ); m_NuPzNormalizedResidual.push_back( NuPzNormalizedResidual );
+//	double NuENormalizedResidual = NuEResidual / sqrt( NeutrinoCovMat[ 9 ] ); m_NuENormalizedResidual.push_back( NuENormalizedResidual );
+	h_NuPxResidual->Fill( NuPxResidual ); ++n_NuPxResidual;
+	h_NuPyResidual->Fill( NuPyResidual ); ++n_NuPyResidual;
+	h_NuPzResidual->Fill( NuPzResidual ); ++n_NuPzResidual;
+	h_NuEResidual->Fill( NuEResidual ); ++n_NuEResidual;
+//	h_NuPxNormalizedResidual->Fill( NuPxNormalizedResidual ); ++n_NuPxNormalizedResidual;
+//	h_NuPyNormalizedResidual->Fill( NuPyNormalizedResidual ); ++n_NuPyNormalizedResidual;
+//	h_NuPzNormalizedResidual->Fill( NuPzNormalizedResidual ); ++n_NuPzNormalizedResidual;
+//	h_NuENormalizedResidual->Fill( NuENormalizedResidual ); ++n_NuENormalizedResidual;
+	h_recoNuPx_mcNuPx->Fill( trueFourMomentumNeutrino.Px() , FourMomentumNuClose.Px() );
+	h_recoNuPy_mcNuPy->Fill( trueFourMomentumNeutrino.Py() , FourMomentumNuClose.Py() );
+	h_recoNuPz_mcNuPz->Fill( trueFourMomentumNeutrino.Pz() , FourMomentumNuClose.Pz() );
+	h_recoNuE_mcNuE->Fill( trueFourMomentumNeutrino.E() , FourMomentumNuClose.E() );
+}
+
+void SLDCorrection::InitializeHistogram( TH1F *histogram , int scale , int color , int lineWidth , int markerSize , int markerStyle )
+{
+	histogram->Scale( 1.0 / scale );
+	histogram->SetLineColor( color );
+	histogram->SetLineWidth( lineWidth );
+	histogram->SetMarkerSize( markerSize );
+	histogram->SetMarkerStyle( markerStyle );
+	histogram->SetMarkerColor( color );
+	float fit_range = 4.0;
+	float fit_min = -2.0;
+	float fit_max = 2.0;
+	doProperGaussianFit( histogram , fit_min , fit_max , fit_range );
+	histogram->GetFunction("gaus")->SetLineColor( color );
+	float y_max = 1.2 * histogram->GetMaximum();
+	histogram->GetYaxis()->SetRangeUser(0.0, y_max);
+	histogram->Write();
+}
+
+void SLDCorrection::doProperGaussianFit( TH1F *histogram , float fitMin , float fitMax , float fitRange )
+{
+	float Chi2 = 0.0;
+	float NDF = 0.0;
+	for ( int i_fit = 0 ; i_fit < 3 ; ++i_fit )
+	{
+		histogram->Fit( "gaus" , "" , "" , fitMin , fitMax );
+		TF1 *fitFunction = (TF1 *)histogram->GetFunction("gaus");
+		double fitMean = fitFunction->GetParameter( 1 );
+		double fitSigma = fitFunction->GetParameter( 2 );
+		fitMin = fitMean - fitRange * fitSigma;
+		fitMax = fitMean + fitRange * fitSigma;
+		Chi2 = fitFunction->GetChisquare();
+		NDF = fitFunction->GetNDF();
+	}
+	streamlog_out(DEBUG2) << "	FIT : CHI2(" << Chi2 << ") / NDF(" << NDF << ") = " << Chi2 / NDF << " 	, fitrange = " << fitRange << std::endl;
+	streamlog_out(DEBUG2) << "" << std::endl;
+	if ( Chi2 != 0.0 && NDF != 0.0 && Chi2 / NDF > 2.0 && fitRange >= 0.5 )
+	{
+		doProperGaussianFit( histogram , fitMin , fitMax , fitRange - 0.1 );
+	}
 }
 
 void SLDCorrection::check( EVENT::LCEvent *pLCEvent )
@@ -786,12 +957,16 @@ void SLDCorrection::check( EVENT::LCEvent *pLCEvent )
 
 void SLDCorrection::end()
 {
+//	m_pTFile->cd();
 	if ( m_fillRootTree )
 	{
 		m_pTFile->cd();
 		m_pTTree->Write();
+		InitializeHistogram( h_NuPxResidual , n_NuPxResidual , 4 , 1 , 1.0 , 1 );
+		InitializeHistogram( h_NuPyResidual , n_NuPyResidual , 4 , 1 , 1.0 , 1 );
+		InitializeHistogram( h_NuPzResidual , n_NuPzResidual , 4 , 1 , 1.0 , 1 );
+		InitializeHistogram( h_NuEResidual , n_NuEResidual , 4 , 1 , 1.0 , 1 );
 		h_SLDecayOrder->Write();
-
 		m_pTFile->Close();
 		delete m_pTFile;
 	}

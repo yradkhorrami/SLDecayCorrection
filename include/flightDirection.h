@@ -6,9 +6,15 @@
 #include <EVENT/MCParticle.h>
 #include <EVENT/ReconstructedParticle.h>
 #include "UTIL/LCRelationNavigator.h"
+#include "TVector3.h"
+#include <marlinutil/HelixClass.h>
 
 
-int getParentHadronFlightDirection( EVENT::LCEvent *pLCEvent , EVENT::MCParticle *SLDLepton , std::string inputPrimaryVertex , std::string inputBuildUpVertex , std::string inputJetCollection , int vertexinScenario , std::string recoMCTruthLinkCollection , std::string mcTruthRecoLinkCollection );
+int getParentHadronFlightDirection( EVENT::LCEvent *pLCEvent , EVENT::MCParticle *SLDLepton , TVector3 &trueFlightDirection , TVector3 &recoFlightDirection , std::string inputPrimaryVertex , std::string inputBuildUpVertex , std::string inputJetCollection , int vertexingScenario , std::string recoMCTruthLinkCollection , std::string mcTruthRecoLinkCollection );
 int getPrimaryVertex( EVENT::LCEvent *pLCEvent , EVENT::MCParticle *SLDLepton , std::string inputPrimaryVertex , bool cheatVertices , std::vector<double> &primaryVertex );
-int getSecondaryVertex( EVENT::LCEvent *pLCEvent , EVENT::MCParticle *SLDLepton , std::string inputPrimaryVertex , std::string inputBuildUpVertex , bool cheatVertices , std::vector<double> &secondayVertex , std::string recoMCTruthLinkCollection , std::string mcTruthRecoLinkCollection );
+int getSecondaryVertex( EVENT::LCEvent *pLCEvent , EVENT::MCParticle *SLDLepton , std::string inputPrimaryVertex , std::string inputBuildUpVertex , bool cheatVertices , std::vector<double> &secondayVertex , std::string inputJetCollection , std::string recoMCTruthLinkCollection , std::string mcTruthRecoLinkCollection );
+int getJetAxis( EVENT::LCEvent *pLCEvent , EVENT::MCParticle *SLDLepton , TVector3 &jetAxis , std::string inputJetCollection , std::string recoMCTruthLinkCollection , std::string mcTruthRecoLinkCollection );
+int getLeadingParticleFlightDirection( EVENT::LCEvent *pLCEvent , EVENT::MCParticle *SLDLepton , TVector3 &leadingParticleFlightDirection , std::string inputJetCollection , std::string recoMCTruthLinkCollection , std::string mcTruthRecoLinkCollection );
+int intersectLeptonDSVertex( EVENT::ReconstructedParticle *linkedRecoLepton , EVENT::Vertex *downStreamVertex , std::vector<double> &secondayVertex );
+
 #endif

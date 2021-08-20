@@ -53,6 +53,10 @@ public:
 	bool checkTauLeptonSLDecay( MCParticle *SLDLepton );
 	virtual void doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDLepton );
 	TLorentzVector getNeutrinoFourMomentum( TVector3 flightDirection , TLorentzVector fourMomentumLepton , TLorentzVector visibleFourMomentumCharged , TLorentzVector visibleFourMomentumNeutral , double parentHadronMass , int solutionSign );
+	TLorentzVector getTrueNeutrinoFourMomentum( MCParticle *SLDLepton );
+	virtual void plotHistograms( TLorentzVector trueFourMomentumNeutrino , TLorentzVector FourMomentumNuClose , std::vector<float> NeutrinoCovMat );
+	virtual void InitializeHistogram( TH1F *histogram , int scale , int color , int lineWidth , int markerSize , int markerStyle );
+	virtual void doProperGaussianFit( TH1F *histogram , float fitMin , float fitMax , float fitRange );
 
 	virtual void check( EVENT::LCEvent *pLCEvent );
 	virtual void end();
@@ -87,6 +91,7 @@ private:
 	bool					m_includeTSLD = true;
 	bool					m_cheatSLDLeptons = true;
 	bool					m_cheatFlightDirection = true;
+	int					m_vertexingScenario = 1;
 	bool					m_useJetAxisAsFlightDirection = true;
 	bool					m_considerParentCharge = true;
 	bool					m_cheatVertices = true;
@@ -166,7 +171,15 @@ private:
 	DoubleVector				m_NuPyNormalizedResidual{};
 	DoubleVector				m_NuPzNormalizedResidual{};
 	DoubleVector				m_NuENormalizedResidual{};
-	DoubleVector				m_FlightDirectionError{};
+	IntVector				m_solutionSign{};
+	DoubleVector				m_E_vis{};
+	DoubleVector				m_E_vis_prime{};
+	DoubleVector				m_P_vis_par{};
+	DoubleVector				m_P_vis_par_prime{};
+	DoubleVector				m_P_vis_nor{};
+	DoubleVector				m_P_vis_nor_prime{};
+	DoubleVector				m_FlightDirectionErrorSinAlpha{};
+	DoubleVector				m_FlightDirectionErrorCosAlpha{};
 	DoubleVector				m_distRecoLeptonToDownStreamVertex{};
 	TH1F					*h_NuPxResidual{};
 	TH1F					*h_NuPyResidual{};
