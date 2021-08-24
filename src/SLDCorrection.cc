@@ -352,6 +352,7 @@ void SLDCorrection::init()
 	m_pTTree->Branch("P_vis_par_prime", &m_P_vis_par_prime);
 	m_pTTree->Branch("P_vis_nor", &m_P_vis_nor);
 	m_pTTree->Branch("P_vis_nor_prime", &m_P_vis_nor_prime);
+	m_pTTree->Branch("flightDirectionStatus", &m_flightDirectionStatus);
 	m_pTTree->Branch("flightDirectionErrorCosAlpha", &m_FlightDirectionErrorCosAlpha);
 	m_pTTree->Branch("flightDirectionErrorSinAlpha", &m_FlightDirectionErrorSinAlpha);
 	m_pTTree->Branch("distRecoLeptonToDownStreamVertex", &m_distRecoLeptonToDownStreamVertex);
@@ -399,12 +400,13 @@ void SLDCorrection::init()
 	h_foundVertex->GetYaxis()->SetBinLabel(1,"vertex not found");
 	h_foundVertex->GetYaxis()->SetBinLabel(2,"vertex found");
 	h_secondaryVertex = new TH1I( "secondary vertices" , ";" , 6 , 0 , 6 );
-	h_secondaryVertex->GetXaxis()->SetBinLabel(1,"lep in BUp vtx");
-	h_secondaryVertex->GetXaxis()->SetBinLabel(2,"lep in Prim vtx");
-	h_secondaryVertex->GetXaxis()->SetBinLabel(3,"SLD with downStream vtx");
-	h_secondaryVertex->GetXaxis()->SetBinLabel(4,"Sec. vtx not found");
-	h_secondaryVertex->GetXaxis()->SetBinLabel(5,"reco lep not found");
-	h_secondaryVertex->GetXaxis()->SetBinLabel(6,"other(?)");
+	h_secondaryVertex->GetXaxis()->SetBinLabel(1,"cheated Secondary Vtx");
+	h_secondaryVertex->GetXaxis()->SetBinLabel(2,"reco lep not found");
+	h_secondaryVertex->GetXaxis()->SetBinLabel(3,"lep in BuildUp vtx");
+	h_secondaryVertex->GetXaxis()->SetBinLabel(4,"downStream vtx w/o intersec. to lep");
+	h_secondaryVertex->GetXaxis()->SetBinLabel(5,"downStream vtx w intersec. to lep");
+	h_secondaryVertex->GetXaxis()->SetBinLabel(6,"no BuildUp Vtx in jet");
+//	h_secondaryVertex->GetXaxis()->SetBinLabel(6,"other(?)");
 	h_parentHadronCharge = new TH1I( "parentHadronCharge" , "; Parent Hadron Charge" , 5 , 0 , 5 );
 	h_parentHadronCharge->GetXaxis()->SetBinLabel(1,"-2");
 	h_parentHadronCharge->GetXaxis()->SetBinLabel(2,"-1");
@@ -485,6 +487,7 @@ void SLDCorrection::Clear()
 	m_P_vis_par_prime.clear();
 	m_P_vis_nor.clear();
 	m_P_vis_nor_prime.clear();
+	m_flightDirectionStatus.clear();
 	m_FlightDirectionErrorCosAlpha.clear();
 	m_FlightDirectionErrorSinAlpha.clear();
 	m_distRecoLeptonToDownStreamVertex.clear();
@@ -706,6 +709,7 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 	TVector3 flightDirection( 0.0 , 0.0 , 0.0 );
 	float restCharge = 0.0;
 	double parentHadronMass = 0.0;
+	float helicesDistance = 0.0;
 
 	MCParticle *parentHadron = SLDLepton->getParents()[ 0 ];
 	parentHadronMass = ( SLDLepton->getParents()[ 0 ] )->getMass();
@@ -726,7 +730,12 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 	streamlog_out(DEBUG2) << "			Used:(	" << "nnn" << "	, " << chargedFourMomentum.M() << "	, " << chargedFourMomentum.Px() << "	, " << chargedFourMomentum.Py() << "	, " << chargedFourMomentum.Pz() << "	, " << chargedFourMomentum.E() << "	, " << "0" << "		)" << std::endl;
 	streamlog_out(DEBUG2) << "" << std::endl;
 	streamlog_out(DEBUG2) << "			     (  X		, Y		, Z	)" << std::endl;
-	int flightDirectionStatus = getParentHadronFlightDirection( pLCEvent , SLDLepton , trueFlightDirection , recoFlightDirection , m_inputPrimaryVertex , m_inputBuildUpVertex , m_inputJetCollection , m_vertexingScenario , m_RecoMCTruthLinkCollection , m_MCTruthRecoLinkCollection );
+	int flightDirectionStatus = getParentHadronFlightDirection( pLCEvent , SLDLepton , trueFlightDirection , recoFlightDirection , m_inputPrimaryVertex , m_inputBuildUpVertex , m_inputJetCollection , m_vertexingScenario , m_RecoMCTruthLinkCollection , m_MCTruthRecoLinkCollection , helicesDistance );
+	h_secondaryVertex->Fill( flightDirectionStatus + 0.5 );
+	m_flightDirectionStatus.push_back( flightDirectionStatus );
+	m_distRecoLeptonToDownStreamVertex.push_back( helicesDistance );
+	m_FlightDirectionErrorCosAlpha.push_back( trueFlightDirection.Dot( recoFlightDirection ) );
+	m_FlightDirectionErrorSinAlpha.push_back( sqrt( 1 - pow( trueFlightDirection.Dot( recoFlightDirection ) , 2 ) ) );
 	if ( m_cheatFlightDirection )
 	{
 		flightDirection = trueFlightDirection;
@@ -735,10 +744,10 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 	{
 		flightDirection = recoFlightDirection;
 	}
-	if ( flightDirectionStatus == 2 )
-	{
-		m_FlightDirectionErrorCosAlpha.push_back( trueFlightDirection.Dot( recoFlightDirection ) );
-		m_FlightDirectionErrorSinAlpha.push_back( sqrt( 1 - pow( trueFlightDirection.Dot( recoFlightDirection ) , 2 ) ) );
+//	if ( flightDirectionStatus == 2 )
+//	{
+		streamlog_out(DEBUG4) << "" << std::endl;
+		streamlog_out(DEBUG4) << "		Flight Direction Error:		CosAlpha = " << trueFlightDirection.Dot( recoFlightDirection ) << "	, Alpha = " << acos( trueFlightDirection.Dot( recoFlightDirection ) ) * 180.0 / 3.14159265 << " deg" << std::endl;
 		if ( trueFlightDirection.Dot( recoFlightDirection ) >= 0.99 )
 		{
 			recoNeutrinoFourMomentumPos = getNeutrinoFourMomentum( flightDirection , leptonFourMomentum , chargedFourMomentum , neutralFourMomentum , parentHadronMass , +1 );
@@ -769,7 +778,7 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 			m_recoNuNegPz.push_back( recoNeutrinoFourMomentumNeg.Pz() );
 			m_recoNuNegE.push_back( recoNeutrinoFourMomentumNeg.E() );
 		}
-	}
+//	}
 }
 
 TLorentzVector SLDCorrection::getNeutrinoFourMomentum( TVector3 flightDirection , TLorentzVector FourMomentumLepton , TLorentzVector VisibleFourMomentumCharged , TLorentzVector VisibleFourMomentumNeutral , double ParentHadronMass , int solutionSign )
@@ -957,17 +966,16 @@ void SLDCorrection::check( EVENT::LCEvent *pLCEvent )
 
 void SLDCorrection::end()
 {
-//	m_pTFile->cd();
-	if ( m_fillRootTree )
-	{
-		m_pTFile->cd();
-		m_pTTree->Write();
-		InitializeHistogram( h_NuPxResidual , n_NuPxResidual , 4 , 1 , 1.0 , 1 );
-		InitializeHistogram( h_NuPyResidual , n_NuPyResidual , 4 , 1 , 1.0 , 1 );
-		InitializeHistogram( h_NuPzResidual , n_NuPzResidual , 4 , 1 , 1.0 , 1 );
-		InitializeHistogram( h_NuEResidual , n_NuEResidual , 4 , 1 , 1.0 , 1 );
-		h_SLDecayOrder->Write();
-		m_pTFile->Close();
-		delete m_pTFile;
-	}
+	m_pTFile->cd();
+	m_pTTree->Write();
+	InitializeHistogram( h_NuPxResidual , n_NuPxResidual , 4 , 1 , 1.0 , 1 );
+	InitializeHistogram( h_NuPyResidual , n_NuPyResidual , 4 , 1 , 1.0 , 1 );
+	InitializeHistogram( h_NuPzResidual , n_NuPzResidual , 4 , 1 , 1.0 , 1 );
+	InitializeHistogram( h_NuEResidual , n_NuEResidual , 4 , 1 , 1.0 , 1 );
+	h_SLDecayOrder->Write();
+	h_secondaryVertex->Write();
+	m_pTFile->Close();
+//	delete m_pTFile;
+
+
 }

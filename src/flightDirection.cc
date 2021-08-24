@@ -11,7 +11,8 @@ int getParentHadronFlightDirection( 	EVENT::LCEvent *pLCEvent , EVENT::MCParticl
 					TVector3 &trueFlightDirection , TVector3 &recoFlightDirection ,
 					std::string inputPrimaryVertex , std::string inputBuildUpVertex ,
 					std::string inputJetCollection , int vertexingScenario ,
-					std::string recoMCTruthLinkCollection , std::string mcTruthRecoLinkCollection )
+					std::string recoMCTruthLinkCollection , std::string mcTruthRecoLinkCollection ,
+					float &helicesDistance )
 {
 	int flightDirectionStatus = 0;
 	std::vector<double> primaryVertex;
@@ -23,13 +24,16 @@ int getParentHadronFlightDirection( 	EVENT::LCEvent *pLCEvent , EVENT::MCParticl
 	trueFlightDirection.SetMag(1.0);
 
 	int primaryVertexStatus = getPrimaryVertex( pLCEvent , SLDLepton , inputPrimaryVertex , false , primaryVertex );
-	int secondayVertexStatus = getSecondaryVertex( pLCEvent , SLDLepton , inputPrimaryVertex , inputBuildUpVertex , false , secondayVertex , inputJetCollection , recoMCTruthLinkCollection , mcTruthRecoLinkCollection );
+	int secondayVertexStatus = getSecondaryVertex( pLCEvent , SLDLepton , inputPrimaryVertex , inputBuildUpVertex , false , secondayVertex , inputJetCollection , recoMCTruthLinkCollection , mcTruthRecoLinkCollection , helicesDistance );
+	flightDirectionStatus = secondayVertexStatus;
 	streamlog_out(DEBUG1) << "	Primary Vertex status: " << primaryVertexStatus << std::endl;
 	streamlog_out(DEBUG1) << "	Secondary Vertex status: " << secondayVertexStatus << std::endl;
+	streamlog_out(DEBUG1) << "		Secondary Vertex" << std::endl;
+	streamlog_out(DEBUG1) << "			True:(	" << SLDLepton->getVertex()[ 0 ] << "	, " << SLDLepton->getVertex()[ 1 ] << "	, " << SLDLepton->getVertex()[ 2 ] << " 		)" << std::endl;
+	if ( secondayVertexStatus == 2 || secondayVertexStatus == 4 ) streamlog_out(DEBUG1) << "			Reco:(	" << secondayVertex[ 0 ] << "	, " << secondayVertex[ 1 ] << "	, " << secondayVertex[ 2 ] << " 		)" << std::endl;
 
-	if ( primaryVertexStatus == 2 && secondayVertexStatus == 2 )
+	if ( ( secondayVertexStatus == 2 || secondayVertexStatus == 4 ) && primaryVertexStatus == 2 )
 	{
-		flightDirectionStatus = 2;
 		if ( vertexingScenario == 1 )
 		{
 			recoFlightDirection = TVector3( secondayVertex[ 0 ] - primaryVertex[ 0 ] , secondayVertex[ 1 ] - primaryVertex[ 1 ] , secondayVertex[ 2 ] - primaryVertex[ 2 ] );
@@ -98,7 +102,8 @@ int getPrimaryVertex( 	EVENT::LCEvent *pLCEvent , EVENT::MCParticle *SLDLepton ,
 int getSecondaryVertex( EVENT::LCEvent *pLCEvent , EVENT::MCParticle *SLDLepton ,
 			std::string inputPrimaryVertex , std::string inputBuildUpVertex ,
 			bool cheatVertices , std::vector<double> &secondayVertex , std::string inputJetCollection ,
-			std::string recoMCTruthLinkCollection , std::string mcTruthRecoLinkCollection )
+			std::string recoMCTruthLinkCollection , std::string mcTruthRecoLinkCollection ,
+			float &helicesDistance )
 {
 	int secondayVertexStatus = -999;
 	bool foundSecondaryVertex = false;
@@ -225,7 +230,15 @@ int getSecondaryVertex( EVENT::LCEvent *pLCEvent , EVENT::MCParticle *SLDLepton 
 							foundDownStreamVertex = true;
 						}
 					}
-					if ( foundDownStreamVertex ) intersectLeptonDSVertexstatus = intersectLeptonDSVertex( linkedRecoLepton , closetDownStreamVertex , secondayVertex );
+					if ( foundDownStreamVertex )
+					{
+						intersectLeptonDSVertexstatus = intersectLeptonDSVertex( linkedRecoLepton , closetDownStreamVertex , secondayVertex , helicesDistance );
+						secondayVertexStatus = 4;
+					}
+					else
+					{
+						secondayVertexStatus = 3;
+					}
 				}
 			}
 		}
@@ -299,37 +312,55 @@ int getLeadingParticleFlightDirection( EVENT::LCEvent *pLCEvent , EVENT::MCParti
 
 int intersectLeptonDSVertex( 	EVENT::ReconstructedParticle *linkedRecoLepton ,
 				EVENT::Vertex *downStreamVertex ,
-				std::vector<double> &secondayVertex )
+				std::vector<double> &secondayVertex ,
+			 	float &helicesDistance )
 {
 	float m_Bfield = 3.5;
-	float scaleDSMomentum = 100;
+	float scaleDSMomentum = -1000.0;
+	float reverseScale = -1.0;
 	float recoLeptonMomentum = std::sqrt( pow( linkedRecoLepton->getMomentum()[ 0 ] , 2 ) + pow( linkedRecoLepton->getMomentum()[ 1 ] , 2 ) + pow( linkedRecoLepton->getMomentum()[ 2 ] , 2 ) );
 	Track *leptonTrack = linkedRecoLepton->getTracks()[ 0 ];
 	HelixClass leptonHelix;
 	leptonHelix.Initialize_Canonical( leptonTrack->getPhi() , leptonTrack->getD0() , leptonTrack->getZ0() , leptonTrack->getOmega() , leptonTrack->getTanLambda() , m_Bfield );
-	float downStreamPosition[ 3 ]; downStreamPosition[ 0 ] = downStreamVertex->getPosition()[ 0 ]; downStreamPosition[ 1 ] = downStreamVertex->getPosition()[ 1 ]; downStreamPosition[ 2 ] = downStreamVertex->getPosition()[ 2 ];
-	float downStreamMomentum[ 3 ]; downStreamMomentum[ 0 ] = scaleDSMomentum * downStreamVertex->getAssociatedParticle()->getMomentum()[ 0 ]; downStreamMomentum[ 1 ] = scaleDSMomentum * downStreamVertex->getAssociatedParticle()->getMomentum()[ 1 ]; downStreamMomentum[ 2 ] = scaleDSMomentum * downStreamVertex->getAssociatedParticle()->getMomentum()[ 2 ];
+	float downStreamMomentum[ 3 ];
+	downStreamMomentum[ 0 ] = scaleDSMomentum * downStreamVertex->getAssociatedParticle()->getMomentum()[ 0 ];
+	downStreamMomentum[ 1 ] = scaleDSMomentum * downStreamVertex->getAssociatedParticle()->getMomentum()[ 1 ];
+	downStreamMomentum[ 2 ] = scaleDSMomentum * downStreamVertex->getAssociatedParticle()->getMomentum()[ 2 ];
+	float downStreamReverseMomentum[ 3 ];
+	downStreamReverseMomentum[ 0 ] = reverseScale * downStreamVertex->getAssociatedParticle()->getMomentum()[ 0 ];
+	downStreamReverseMomentum[ 1 ] = reverseScale * downStreamVertex->getAssociatedParticle()->getMomentum()[ 1 ];
+	downStreamReverseMomentum[ 2 ] = reverseScale * downStreamVertex->getAssociatedParticle()->getMomentum()[ 2 ];
+	float downStreamPosition[ 3 ];
+	downStreamPosition[ 0 ] = downStreamVertex->getPosition()[ 0 ];
+	downStreamPosition[ 1 ] = downStreamVertex->getPosition()[ 1 ];
+	downStreamPosition[ 2 ] = downStreamVertex->getPosition()[ 2 ];
+//	TVector3 dsMomentum = TVector3( downStreamMomentum[ 0 ] , downStreamMomentum[ 1 ] , downStreamMomentum[ 2 ] );
+//	float dsPhi = dsMomentum.Phi();
+//	float dsD0 = ( downStreamPosition[ 1 ] - downStreamMomentum[ 1 ] * downStreamPosition[ 0 ] / downStreamMomentum[ 1 ] ) * cos( dsPhi );
+//	float dsOmega = 0.0;
 	float downStreamCharge = -1.0 * linkedRecoLepton->getCharge(); //downStreamParameters[ 7 ];
 	HelixClass downStreamHelix;
 	downStreamHelix.Initialize_VP( downStreamPosition , downStreamMomentum , downStreamCharge , m_Bfield );
 	float dsMomentum = std::sqrt( pow( downStreamMomentum[ 0 ] , 2 ) + pow( downStreamMomentum[ 1 ] , 2 ) + pow( downStreamMomentum[ 2 ] , 2 ) );
 	float secVertexMomentum[ 3 ];
 	float secVertexPosition[ 3 ];
-	float distRecoLeptonToDownStreamVertex;
+//	float helicesDistance;
 	if ( recoLeptonMomentum > dsMomentum )
 	{
-		distRecoLeptonToDownStreamVertex = leptonHelix.getDistanceToHelix( &downStreamHelix , secVertexPosition , secVertexMomentum );
+		helicesDistance = leptonHelix.getDistanceToHelix( &downStreamHelix , secVertexPosition , secVertexMomentum );
 	}
 	else
 	{
-		distRecoLeptonToDownStreamVertex = downStreamHelix.getDistanceToHelix( &leptonHelix , secVertexPosition , secVertexMomentum );
+		helicesDistance = downStreamHelix.getDistanceToHelix( &leptonHelix , secVertexPosition , secVertexMomentum );
 	}
-//	m_distRecoLeptonToDownStreamVertex.push_back( distRecoLeptonToDownStreamVertex );
-//	h_distRecoLeptonToDownStreamVertex->Fill( distRecoLeptonToDownStreamVertex );
+//	m_helicesDistance.push_back( helicesDistance );
+//	h_helicesDistance->Fill( helicesDistance );
 	secondayVertex.push_back( secVertexPosition[ 0 ] );
 	secondayVertex.push_back( secVertexPosition[ 1 ] );
 	secondayVertex.push_back( secVertexPosition[ 2 ] );
-	streamlog_out(DEBUG1) << "	Distance of Down Stream helix to SLDLepton helix = " << distRecoLeptonToDownStreamVertex << " mm" << std::endl;
+	streamlog_out(DEBUG1) << "	Down Stream Vertex at (	" << downStreamPosition[ 0 ] << "	,	" << downStreamPosition[ 1 ] << "	,	" << downStreamPosition[ 2 ] << "	)" << std::endl;
+	streamlog_out(DEBUG1) << "	Down Stream Momentum: (	" << downStreamMomentum[ 0 ] << "	,	" << downStreamMomentum[ 1 ] << "	,	" << downStreamMomentum[ 2 ] << "	)" << std::endl;
+	streamlog_out(DEBUG1) << "	Distance of Down Stream helix to SLDLepton helix = " << helicesDistance << " mm" << std::endl;
 //	streamlog_out(DEBUG1) << "	TrueVertex (x,y,z) : ( " << SLDLepton->getVertex()[ 0 ] << " , " << SLDLepton->getVertex()[ 1 ] << " , " << SLDLepton->getVertex()[ 2 ] << " )" << std::endl;
 //	streamlog_out(DEBUG1) << "	RecoVertex (x,y,z) : ( " << secVertexPosition[ 0 ] << " , " << secVertexPosition[ 1 ] << " , " << secVertexPosition[ 2 ] << " )" << std::endl;
 

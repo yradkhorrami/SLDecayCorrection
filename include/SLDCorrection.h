@@ -178,6 +178,7 @@ private:
 	DoubleVector				m_P_vis_par_prime{};
 	DoubleVector				m_P_vis_nor{};
 	DoubleVector				m_P_vis_nor_prime{};
+	IntVector				m_flightDirectionStatus{};
 	DoubleVector				m_FlightDirectionErrorSinAlpha{};
 	DoubleVector				m_FlightDirectionErrorCosAlpha{};
 	DoubleVector				m_distRecoLeptonToDownStreamVertex{};
