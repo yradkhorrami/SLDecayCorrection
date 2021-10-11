@@ -17,6 +17,7 @@
 #include "TLorentzVector.h"
 #include "TVector3.h"
 #include "TMatrixD.h"
+#include "DD4hep/Detector.h"
 class TFile;
 class TDirectory;
 class TH1F;
@@ -60,6 +61,7 @@ public:
 
 	virtual void check( EVENT::LCEvent *pLCEvent );
 	virtual void end();
+	dd4hep::Detector& _theDetector = dd4hep::Detector::getInstance();
 
 private:
 
@@ -100,6 +102,7 @@ private:
 	bool					m_cheatNeutral4momentum = true;
 	int					m_nIterFlightDirCorrection = 0;
 	int					m_recoFourMomentumOfVisibles = 0;
+	bool					m_displayEvent = true;
 	bool					m_fillRootTree = true;
 
 	int					m_nRun;
@@ -135,6 +138,7 @@ private:
 	int					n_NuPyNormalizedResidual;
 	int					n_NuPzNormalizedResidual;
 	int					n_NuENormalizedResidual;
+	int					n_secondaryVertex;
 	DoubleVector				m_SLDecayXi{};
 	DoubleVector				m_SLDecayYi{};
 	DoubleVector				m_SLDecayZi{};
@@ -181,7 +185,14 @@ private:
 	IntVector				m_flightDirectionStatus{};
 	DoubleVector				m_FlightDirectionErrorSinAlpha{};
 	DoubleVector				m_FlightDirectionErrorCosAlpha{};
+	DoubleVector				m_FlightDirectionErrorAlpha{};
 	DoubleVector				m_distRecoLeptonToDownStreamVertex{};
+	DoubleVector				m_dsVertexResidualX{};
+	DoubleVector				m_dsVertexResidualY{};
+	DoubleVector				m_dsVertexResidualZ{};
+	DoubleVector				m_SecVertexResidualX{};
+	DoubleVector				m_SecVertexResidualY{};
+	DoubleVector				m_SecVertexResidualZ{};
 	TH1F					*h_NuPxResidual{};
 	TH1F					*h_NuPyResidual{};
 	TH1F					*h_NuPzResidual{};
@@ -202,7 +213,7 @@ private:
 	TH1I					*h_recoPFOLinkedToMuon_Type{};
 	TH1I					*h_SLDecayOrder{};
 	TH2I					*h_foundVertex{};
-	TH1I					*h_secondaryVertex{};
+	TH1F					*h_secondaryVertex{};
 	TH1I					*h_parentHadronCharge{};
 	TH1I					*h_MCPTracks{};
 	TH1I					*h_MCPTracks_Eweighted{};
