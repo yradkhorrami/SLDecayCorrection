@@ -415,14 +415,16 @@ void SLDCorrection::init()
 		h_foundVertex->GetXaxis()->SetBinLabel(2,"vertex found");
 		h_foundVertex->GetYaxis()->SetBinLabel(1,"vertex not found");
 		h_foundVertex->GetYaxis()->SetBinLabel(2,"vertex found");
-		h_secondaryVertex = new TH1F( "secondary_vertices" , ";" , 7 , 0 , 7 ); n_secondaryVertex = 0;
-		h_secondaryVertex->GetXaxis()->SetBinLabel(1,"cheated Secondary Vtx");
-		h_secondaryVertex->GetXaxis()->SetBinLabel(2,"reco lep not found");
+		h_secondaryVertex = new TH1F( "secondary_vertices" , ";" , 9 , 0 , 9 ); n_secondaryVertex = 0;
+		h_secondaryVertex->GetXaxis()->SetBinLabel(1,"reco lep not found");
+		h_secondaryVertex->GetXaxis()->SetBinLabel(2,"reco lep not in jet");
 		h_secondaryVertex->GetXaxis()->SetBinLabel(3,"lep in Sec. Vtx");
-		h_secondaryVertex->GetXaxis()->SetBinLabel(4,"3^{rd}Vtx w/o intersec. to lep");
-		h_secondaryVertex->GetXaxis()->SetBinLabel(5,"Ch. 3^{rd} Vtx + lep");
-		h_secondaryVertex->GetXaxis()->SetBinLabel(6,"N. 3^{rd} Vtx + lep");
-		h_secondaryVertex->GetXaxis()->SetBinLabel(7,"no B.Up Vtx in jet");
+		h_secondaryVertex->GetXaxis()->SetBinLabel(4,"Ch. 3^{rd} Vtx + lep");
+		h_secondaryVertex->GetXaxis()->SetBinLabel(5,"N. 3^{rd} Vtx + lep");
+		h_secondaryVertex->GetXaxis()->SetBinLabel(6,"jet axis");
+		h_secondaryVertex->GetXaxis()->SetBinLabel(7,"lead. par. in jet (Ch.)");
+		h_secondaryVertex->GetXaxis()->SetBinLabel(8,"lead. par. in jet (N.)");
+		h_secondaryVertex->GetXaxis()->SetBinLabel(9,"lead. par. in jet (#gamma)");
 	//	h_secondaryVertex->GetXaxis()->SetBinLabel(6,"other(?)");
 		h_parentHadronCharge = new TH1I( "parentHadronCharge" , "; Parent Hadron Charge" , 5 , 0 , 5 );
 		h_parentHadronCharge->GetXaxis()->SetBinLabel(1,"-2");
@@ -760,9 +762,10 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 	streamlog_out(DEBUG2) << "" << std::endl;
 	streamlog_out(DEBUG2) << "			     (  X		, Y		, Z	)" << std::endl;
 	int flightDirectionStatus = getParentHadronFlightDirection( pLCEvent , SLDLepton , trueFlightDirection , recoFlightDirection , m_inputPrimaryVertex , m_inputBuildUpVertex , m_inputJetCollection , m_vertexingScenario , m_RecoMCTruthLinkCollection , m_MCTruthRecoLinkCollection , helicesDistance , SecondaryVertexPar , m_displayEvent , this );
+//	if ( helicesDistance > 400.0 ) getParentHadronFlightDirection( pLCEvent , SLDLepton , trueFlightDirection , recoFlightDirection , m_inputPrimaryVertex , m_inputBuildUpVertex , m_inputJetCollection , m_vertexingScenario , m_RecoMCTruthLinkCollection , m_MCTruthRecoLinkCollection , helicesDistance , SecondaryVertexPar , true , this );
 	if ( m_fillRootTree )
 	{
-		h_secondaryVertex->Fill( flightDirectionStatus + 0.5 );
+		h_secondaryVertex->Fill( flightDirectionStatus - 0.5 );
 		++n_secondaryVertex;
 	}
 	m_flightDirectionStatus.push_back( flightDirectionStatus );

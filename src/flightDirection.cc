@@ -75,45 +75,22 @@ int getParentHadronFlightDirection( 	EVENT::LCEvent *pLCEvent , EVENT::MCParticl
 	SecondaryVertexPar.push_back( MotherHadron->getEndpoint()[ 0 ] );
 	SecondaryVertexPar.push_back( MotherHadron->getEndpoint()[ 1 ] );
 	SecondaryVertexPar.push_back( MotherHadron->getEndpoint()[ 2 ] );
-	flightDirectionStatus = secondayVertexStatus;
 	streamlog_out(DEBUG1) << "	Parent Hadron Charge: " << MotherHadron->getCharge() << std::endl;
 	streamlog_out(DEBUG1) << "	Primary Vertex status: " << primaryVertexStatus << std::endl;
 	streamlog_out(DEBUG1) << "	Secondary Vertex status: " << secondayVertexStatus << std::endl;
 	streamlog_out(DEBUG1) << "		Secondary Vertex" << std::endl;
 	streamlog_out(DEBUG1) << "			True:(	" << SLDLepton->getVertex()[ 0 ] << "	, " << SLDLepton->getVertex()[ 1 ] << "	, " << SLDLepton->getVertex()[ 2 ] << " 		)" << std::endl;
 
-	if ( ( secondayVertexStatus == 2 || secondayVertexStatus == 4 || secondayVertexStatus == 5 ) && primaryVertexStatus == 2 )
+	if ( ( secondayVertexStatus == 3 || secondayVertexStatus == 4 || secondayVertexStatus == 5 ) && primaryVertexStatus == 2 )
 	{
+		flightDirectionStatus = secondayVertexStatus;
 		streamlog_out(DEBUG1) << "			Reco:(	" << secondayVertex[ 0 ] << "	, " << secondayVertex[ 1 ] << "	, " << secondayVertex[ 2 ] << " 		)" << std::endl;
 		recoFlightDirection = TVector3( secondayVertex[ 0 ] - primaryVertex[ 0 ] , secondayVertex[ 1 ] - primaryVertex[ 1 ] , secondayVertex[ 2 ] - primaryVertex[ 2 ] );
 		streamlog_out(DEBUG1) << "		Test 3, |flightDirection| = " << recoFlightDirection.Mag() << std::endl;
 		recoFlightDirection.SetMag( 1.0 );
 		streamlog_out(DEBUG1) << "			Flight Direction Scenario: finding primary/secondary vertices and reconstruct flight direction" << std::endl;
-/*
-		if ( vertexingScenario == 1 )
-		{
-			recoFlightDirection = TVector3( secondayVertex[ 0 ] - primaryVertex[ 0 ] , secondayVertex[ 1 ] - primaryVertex[ 1 ] , secondayVertex[ 2 ] - primaryVertex[ 2 ] );
-			recoFlightDirection.SetMag( 1.0 );
-			streamlog_out(DEBUG1) << "			Flight Direction Scenario: finding primary/secondary vertices and reconstruct flight direction" << std::endl;
-		}
-		else if ( vertexingScenario == 2 )
-		{
-			streamlog_out(DEBUG1) << "			Flight Direction Scenario: Assigning jet axis to the flight direction of parent hadron" << std::endl;
-			int jetAssigningStatus = getJetAxis( pLCEvent , SLDLepton , recoFlightDirection , inputJetCollection , recoMCTruthLinkCollection , mcTruthRecoLinkCollection );
-			recoFlightDirection.SetMag( 1.0 );
-			if ( jetAssigningStatus == 1 ) streamlog_out(DEBUG1) << "			Successfully assigned jet axis to the flight direction of parent hadron" << std::endl;
-		}
-		else if ( vertexingScenario == 3 )
-		{
-			streamlog_out(DEBUG1) << "			Flight Direction Scenario: Assigning flight direction of leading particle in the jet to the flight direction of parent hadron" << std::endl;
-			int leadingParticleStatus = getLeadingParticleFlightDirection( pLCEvent , SLDLepton , recoFlightDirection , inputJetCollection , recoMCTruthLinkCollection , mcTruthRecoLinkCollection );
-			recoFlightDirection.SetMag( 1.0 );
-			if ( leadingParticleStatus == 1 ) streamlog_out(DEBUG1) << "			Successfully assigned flight direction of (Charged) leading particle in the jet to the flight direction of parent hadron" << std::endl;
-			if ( leadingParticleStatus == -1 ) streamlog_out(DEBUG1) << "			Successfully assigned flight direction of (Neutral) leading particle in the jet to the flight direction of parent hadron" << std::endl;
-		}
-*/
 	}
-	else if ( secondayVertexStatus == 6 )
+	else if ( secondayVertexStatus == 2 )
 	{
 		if ( vertexingScenario == 1 )
 		{
@@ -129,22 +106,34 @@ int getParentHadronFlightDirection( 	EVENT::LCEvent *pLCEvent , EVENT::MCParticl
 			int jetAssigningStatus = getJetAxis( pLCEvent , SLDLepton , recoFlightDirection , inputJetCollection , recoMCTruthLinkCollection , mcTruthRecoLinkCollection );
 			streamlog_out(DEBUG1) << "		Test 5, |flightDirection| = " << recoFlightDirection.Mag() << std::endl;
 			recoFlightDirection.SetMag( 1.0 );
-			if ( jetAssigningStatus == 1 ) streamlog_out(DEBUG1) << "			Successfully assigned jet axis to the flight direction of parent hadron" << std::endl;
+			if ( jetAssigningStatus == 1 )
+			{
+				streamlog_out(DEBUG1) << "			Successfully assigned jet axis to the flight direction of parent hadron" << std::endl;
+				flightDirectionStatus = 6;
+			}
+			else
+			{
+				streamlog_out(DEBUG1) << "			!!! recoLepton does not belong to any jet !!!" << std::endl;
+				flightDirectionStatus = 2;
+			}
 		}
 		else if ( vertexingScenario == 3 )
 		{
 			streamlog_out(DEBUG1) << "			Flight Direction Scenario: Assigning flight direction of leading particle in the jet to the flight direction of parent hadron" << std::endl;
 			int leadingParticleStatus = getLeadingParticleFlightDirection( pLCEvent , SLDLepton , recoFlightDirection , inputJetCollection , recoMCTruthLinkCollection , mcTruthRecoLinkCollection );
+			flightDirectionStatus = leadingParticleStatus;
 			streamlog_out(DEBUG1) << "		Test 6, |flightDirection| = " << recoFlightDirection.Mag() << std::endl;
 			recoFlightDirection.SetMag( 1.0 );
-			if ( leadingParticleStatus == 0 ) streamlog_out(DEBUG1) << "			Successfully assigned flight direction of photon leading particle in the jet to the flight direction of parent hadron" << std::endl;
-			if ( leadingParticleStatus == 1 ) streamlog_out(DEBUG1) << "			Successfully assigned flight direction of (Charged) leading particle in the jet to the flight direction of parent hadron" << std::endl;
-			if ( leadingParticleStatus == -1 ) streamlog_out(DEBUG1) << "			Successfully assigned flight direction of (Neutral) leading particle in the jet to the flight direction of parent hadron" << std::endl;
+			if ( leadingParticleStatus == 7 ) streamlog_out(DEBUG1) << "			Leading particle in the jet is a charged particle " << std::endl;
+			if ( leadingParticleStatus == 8 ) streamlog_out(DEBUG1) << "			Leading particle in the jet is a neutral hadron " << std::endl;
+			if ( leadingParticleStatus == 9 ) streamlog_out(DEBUG1) << "			Leading particle in the jet is a photon " << std::endl;
+			if ( leadingParticleStatus == 2 ) streamlog_out(DEBUG1) << "			!!! recoLepton does not belong to any jet !!!" << std::endl;
 		}
 
 	}
-	if ( secondayVertexStatus == 1 || secondayVertexStatus == 6 )
+	else if ( secondayVertexStatus == 1 )
 	{
+		flightDirectionStatus = 1;
 		SecondaryVertexPar.push_back( 0.0 );
 		SecondaryVertexPar.push_back( 0.0 );
 		SecondaryVertexPar.push_back( 0.0 );
@@ -160,6 +149,10 @@ int getParentHadronFlightDirection( 	EVENT::LCEvent *pLCEvent , EVENT::MCParticl
 	streamlog_out(DEBUG1) << "			Reco:(	" << recoFlightDirection.X() << "	, " << recoFlightDirection.Y() << "	, " << recoFlightDirection.Z() << " 		)" << std::endl;
 	streamlog_out(DEBUG1) << "		Test 7, |flightDirection| = " << recoFlightDirection.Mag() << std::endl;
 	recoFlightDirection.SetMag( 1.0 );
+	streamlog_out(DEBUG1) << "			Flight Direction Status = " << flightDirectionStatus << std::endl;
+	streamlog_out(DEBUG1) << "			Flight Direction Error: " << std::endl;
+	streamlog_out(DEBUG1) << "					Alpha = " << acos( trueFlightDirection.Dot( recoFlightDirection ) ) * 180.0 / 3.14159265 << " deg" << std::endl;
+	streamlog_out(DEBUG1) << "				   Cos(Alpha) = " << trueFlightDirection.Dot( recoFlightDirection ) << std::endl;
 	if ( m_displayEvent )
 	{
 		DDMarlinCED::draw( thisProcessor , 1); // draw everything
@@ -205,7 +198,9 @@ int getPrimaryVertex( 	EVENT::LCEvent *pLCEvent , EVENT::MCParticle *SLDLepton ,
 	}
 	if ( m_displayEvent )
 	{
-		ced_hit( primaryVertex[ 0 ] , primaryVertex[ 1 ] , primaryVertex[ 2 ] , 0 , 2 , 0xff7300 );
+		const EVENT::MCParticle *MotherHadron = SLDLepton->getParents()[ 0 ];
+		ced_hit( MotherHadron->getVertex()[ 0 ] , MotherHadron->getVertex()[ 1 ] , MotherHadron->getVertex()[ 2 ] , 2 , 2 , 0x000000 );
+		ced_hit( primaryVertex[ 0 ] , primaryVertex[ 1 ] , primaryVertex[ 2 ] , 2 , 2 , 0xff7300 );
 	}
 	return primaryVertexStatus;
 }
@@ -270,7 +265,7 @@ int getSecondaryVertex( EVENT::LCEvent *pLCEvent , EVENT::MCParticle *SLDLepton 
 						secondayVertex.push_back( secondaryVtx->getPosition()[ 0 ] );
 						secondayVertex.push_back( secondaryVtx->getPosition()[ 1 ] );
 						secondayVertex.push_back( secondaryVtx->getPosition()[ 2 ] );
-						secondayVertexStatus = 2;
+						secondayVertexStatus = 3;
 						foundSecondaryVertex = true;
 						streamlog_out(DEBUG1) << "	Found Reco Lepton in BuildUp Vertex" << std::endl;
 						if ( m_displayEvent )
@@ -347,7 +342,7 @@ int getSecondaryVertex( EVENT::LCEvent *pLCEvent , EVENT::MCParticle *SLDLepton 
 				streamlog_out(DEBUG1) << "	Found " << DownStreamVertices.size() << " DownStream Vertices in the same jet of semi-leptonic decay" << std::endl;
 				if ( DownStreamVertices.size() == 0 )
 				{
-					secondayVertexStatus = 6;
+					secondayVertexStatus = 2;
 					SecondaryVertexPar.push_back( 0.0 );
 					SecondaryVertexPar.push_back( 0.0 );
 					SecondaryVertexPar.push_back( 0.0 );
@@ -362,6 +357,7 @@ int getSecondaryVertex( EVENT::LCEvent *pLCEvent , EVENT::MCParticle *SLDLepton 
 					bool foundDownStreamVertex = false;
 					TVector3 trueDSVertex;
 					TVector3 trueDSVertexMomentum;
+					Track *leptonTrack	= linkedRecoLepton->getTracks()[ 0 ];
 					int trueDSVertexStatus = getTrueDownStreamVertex( SLDLepton , trueDSVertex , trueDSVertexMomentum );
 					streamlog_out(DEBUG1) << "	Found " << trueDSVertexStatus << " particles at True Down Stream vertex" << std::endl;
 					streamlog_out(DEBUG1) << "	True Down Stream vertex at (x,y,z) = 	( " << trueDSVertex.X() << "	,	" << trueDSVertex.Y() << "	,	" << trueDSVertex.Z() << "	)" << std::endl;
@@ -369,14 +365,89 @@ int getSecondaryVertex( EVENT::LCEvent *pLCEvent , EVENT::MCParticle *SLDLepton 
 					for ( unsigned int i_dsVTX = 0 ; i_dsVTX < DownStreamVertices.size() ; ++i_dsVTX )
 					{
 						Vertex* downStreamVertex = DownStreamVertices[ i_dsVTX ];
+						std::vector<double> PCAatLeptonTrack;
+						std::vector<double> PCAatDownStreamLine;
 						streamlog_out(DEBUG1) << "	Checking Down Stream vertex at (x,y,z) = 	( " << downStreamVertex->getPosition()[ 0 ] << "	,	" << downStreamVertex->getPosition()[ 1 ] << "	,	" << downStreamVertex->getPosition()[ 2 ] << "	)" << std::endl;
-						double dsVertex[ 3 ]{ downStreamVertex->getPosition()[ 0 ] , downStreamVertex->getPosition()[ 1 ] , downStreamVertex->getPosition()[ 2 ] };
-						float dsDistance = std::sqrt( pow( dsVertex[ 0 ] - primaryVertex[ 0 ] , 2 ) + pow( dsVertex[ 1 ] - primaryVertex[ 1 ] , 2 ) + pow( dsVertex[ 2 ] - primaryVertex[ 2 ] , 2 ) );
+						std::vector<double> dsVertex;
+						dsVertex.push_back( downStreamVertex->getPosition()[ 0 ] );
+						dsVertex.push_back( downStreamVertex->getPosition()[ 1 ] );
+						dsVertex.push_back( downStreamVertex->getPosition()[ 2 ] );
+						TVector3 dsMomentum = TVector3( downStreamVertex->getAssociatedParticle()->getMomentum()[ 0 ] , downStreamVertex->getAssociatedParticle()->getMomentum()[ 1 ] , downStreamVertex->getAssociatedParticle()->getMomentum()[ 2 ] );
+//						float dsDistance = std::sqrt( pow( dsVertex[ 0 ] - primaryVertex[ 0 ] , 2 ) + pow( dsVertex[ 1 ] - primaryVertex[ 1 ] , 2 ) + pow( dsVertex[ 2 ] - primaryVertex[ 2 ] , 2 ) );
+						float dsDistance = intersectHelixLine( pLCEvent , leptonTrack , dsMomentum , dsVertex , PCAatLeptonTrack , PCAatDownStreamLine , inputPrimaryVertex );
 						if ( dsDistance < minFlightDistance )
 						{
 							closetDownStreamVertex = downStreamVertex;
 							minFlightDistance = dsDistance;
 							foundDownStreamVertex = true;
+						}
+						if ( m_displayEvent )
+						{
+							double bField = 3.5;//marlinutil::getBzAtOrigin();
+							double lepcharge = ( leptonTrack->getOmega() > 0.0 ?  1.0 : -1.0 );
+							double leppT = bField * 3.0e-4 / std::fabs( leptonTrack->getOmega() );
+							double lepPx = leppT * std::cos( leptonTrack->getPhi() ) ;
+							double lepPy = leppT * std::sin( leptonTrack->getPhi() ) ;
+							double lepPz = leppT * leptonTrack->getTanLambda() ;
+							double lepXs = leptonTrack->getReferencePoint()[ 0 ] - leptonTrack->getD0() * std::sin( leptonTrack->getPhi() );
+							double lepYs = leptonTrack->getReferencePoint()[ 1 ] + leptonTrack->getD0() * std::cos( leptonTrack->getPhi() );
+							double lepZs = leptonTrack->getReferencePoint()[ 2 ] + leptonTrack->getZ0();
+							DDMarlinCED::drawHelix( bField , lepcharge , lepXs , lepYs , lepZs , lepPx , lepPy , lepPz , 1 , 2 , 0xff0000 , 0.0 , 2100.0 , 3000.0 , 0 );
+
+							ced_hit( PCAatLeptonTrack[ 0 ] , PCAatLeptonTrack[ 1 ] , PCAatLeptonTrack[ 2 ] , 2 , 1 , 0xff0000 );
+							ced_hit( PCAatLeptonTrack[ 0 ] , PCAatLeptonTrack[ 1 ] , PCAatLeptonTrack[ 2 ] , 0 , 1 , 0xff0000 );
+							DDMarlinCED::drawHelix( bField , lepcharge , PCAatLeptonTrack[ 0 ] , PCAatLeptonTrack[ 1 ] , PCAatLeptonTrack[ 2 ] , lepPx , lepPy , lepPz , 1 , 2 , 0xff0000 , 0.0 , 2100.0 , 3000.0 , 0 );
+
+
+							double dsCharge = -1.0 * lepcharge;
+							double scale = ( secondayVertexStatus == 4 ? -1.0 : -100.0 );
+							double dsPx = scale * dsMomentum[ 0 ];
+							double dsPy = scale * dsMomentum[ 1 ];
+							double dsPz = scale * dsMomentum[ 2 ];
+							double dsXs = dsVertex[ 0 ];
+							double dsYs = dsVertex[ 1 ];
+							double dsZs = dsVertex[ 2 ];
+
+							ced_hit( PCAatDownStreamLine[ 0 ] , PCAatDownStreamLine[ 1 ] , PCAatDownStreamLine[ 2 ] , 0 , 1 , 0x0000a8 );
+							ced_hit( dsVertex[ 0 ] , dsVertex[ 1 ] , dsVertex[ 2 ] , 0 , 1 , 0x0000a8 );
+							double vMin = -1.0 * ( dsMomentum.Px() * ( dsVertex[ 0 ] - PCAatDownStreamLine[ 0 ] ) + dsMomentum.Py() * ( dsVertex[ 1 ] - PCAatDownStreamLine[ 1 ] ) + dsMomentum.Pz() * ( dsVertex[ 2 ] - PCAatDownStreamLine[ 2 ] ) ) / dsMomentum.Mag2();
+							double vMax = 0.0;
+							double dsTestX	= dsVertex[ 0 ] + dsMomentum.Px() * vMin;
+							double dsTestY	= dsVertex[ 1 ] + dsMomentum.Py() * vMin;
+							double dsTestZ	= dsVertex[ 2 ] + dsMomentum.Pz() * vMin;
+							ced_hit( dsTestX , dsTestY , dsTestZ , 0 , 1 , 0x0000a8 );
+							dsTestX	= dsVertex[ 0 ] + dsMomentum.Px() * vMax;
+							dsTestY	= dsVertex[ 1 ] + dsMomentum.Py() * vMax;
+							dsTestZ	= dsVertex[ 2 ] + dsMomentum.Pz() * vMax;
+							ced_hit( dsTestX , dsTestY , dsTestZ , 0 , 1 , 0x0000a8 );
+							for ( double v = vMin ; v <= vMax ; v += ( vMax - vMin ) / 1000.0 )
+							{
+								dsTestX	= dsVertex[ 0 ] + dsMomentum.Px() * v;
+								dsTestY	= dsVertex[ 1 ] + dsMomentum.Py() * v;
+								dsTestZ	= dsVertex[ 2 ] + dsMomentum.Pz() * v;
+								ced_hit( dsTestX , dsTestY , dsTestZ , 0 , 1 , 0x0000a8 );
+							}
+
+							ced_hit( PCAatDownStreamLine[ 0 ] , PCAatDownStreamLine[ 1 ] , PCAatDownStreamLine[ 2 ] , 2 , 1 , 0x0000ff );
+//							ced_hit( downStreamPosition[ 0 ] , downStreamPosition[ 1 ] , downStreamPosition[ 2 ] , 2 , 1 , 0x0000ff );
+							DDMarlinCED::drawHelix( bField , dsCharge , dsXs , dsYs , dsZs , dsPx , dsPy , dsPz , 1 , 2 , 0x0000ff , 0.0 , 2100.0 , 3000.0 , 0 );
+							for ( unsigned int i_trk = 0 ; i_trk < ( downStreamVertex->getAssociatedParticle() )->getParticles().size() ; ++i_trk )
+							{
+								ReconstructedParticle* vtxRP = ( downStreamVertex->getAssociatedParticle() )->getParticles()[ i_trk ];
+								Track *vtxTrack = vtxRP->getTracks()[ 0 ];
+								double charge = ( vtxTrack->getOmega() > 0.0 ?  1.0 : -1.0 );
+								double pT = bField * 3.0e-4 / std::fabs( vtxTrack->getOmega() );
+								double Px = pT * std::cos( vtxTrack->getPhi() ) ;
+								double Py = pT * std::sin( vtxTrack->getPhi() ) ;
+								double Pz = pT * vtxTrack->getTanLambda() ;
+								double Xs = dsVertex[ 0 ];
+								double Ys = dsVertex[ 1 ];
+								double Zs = dsVertex[ 2 ];
+//								double Xs = vtxTrack->getReferencePoint()[ 0 ] - vtxTrack->getD0() * std::sin( vtxTrack->getPhi() );
+//								double Ys = vtxTrack->getReferencePoint()[ 1 ] + vtxTrack->getD0() * std::cos( vtxTrack->getPhi() );
+//								double Zs = vtxTrack->getReferencePoint()[ 2 ] + vtxTrack->getZ0();
+								DDMarlinCED::drawHelix( bField , charge , Xs , Ys , Zs , Px , Py , Pz , 1 , 2 , 0xb000e6 , 0.0 , 2100.0 , 3000.0 , 0 );
+							}
 						}
 					}
 					if ( foundDownStreamVertex )
@@ -384,7 +455,6 @@ int getSecondaryVertex( EVENT::LCEvent *pLCEvent , EVENT::MCParticle *SLDLepton 
 						streamlog_out(DEBUG1) << "	There are " << ( closetDownStreamVertex->getAssociatedParticle() )->getParticles().size() << " particle in DownStream Vertex" << std::endl;
 						std::vector<double> PCAatLeptonTrack;
 						std::vector<double> PCAatDownStreamLine;
-						Track *leptonTrack	= linkedRecoLepton->getTracks()[ 0 ];
 						TVector3 dsMomentum = TVector3( closetDownStreamVertex->getAssociatedParticle()->getMomentum()[ 0 ] , closetDownStreamVertex->getAssociatedParticle()->getMomentum()[ 1 ] , closetDownStreamVertex->getAssociatedParticle()->getMomentum()[ 2 ] );
 						std::vector<double> downStreamPosition;
 						downStreamPosition.push_back( closetDownStreamVertex->getPosition()[ 0 ] );
@@ -408,7 +478,19 @@ int getSecondaryVertex( EVENT::LCEvent *pLCEvent , EVENT::MCParticle *SLDLepton 
 						streamlog_out(DEBUG1) << "	Secondary Vertex on Lepton Track:(" << PCAatLeptonTrack[ 0 ] << "	,	" << PCAatLeptonTrack[ 1 ] << "	,	" << PCAatLeptonTrack[ 2 ] << "	)" << std::endl;
 						streamlog_out(DEBUG1) << "	Secondary Vertex on DownStream Line:(" << PCAatDownStreamLine[ 0 ] << "	,	" << PCAatDownStreamLine[ 1 ] << "	,	" << PCAatDownStreamLine[ 2 ] << "	)" << std::endl;
 						streamlog_out(DEBUG1) << "	Distance of Down Stream helix to SLDLepton helix = " << helicesDistance << " mm" << std::endl;
-						secondayVertex = PCAatLeptonTrack;
+						double lepXs = leptonTrack->getReferencePoint()[ 0 ] - leptonTrack->getD0() * std::sin( leptonTrack->getPhi() );
+						double lepYs = leptonTrack->getReferencePoint()[ 1 ] + leptonTrack->getD0() * std::cos( leptonTrack->getPhi() );
+						double lepZs = leptonTrack->getReferencePoint()[ 2 ] + leptonTrack->getZ0();
+						double lepRs = std::sqrt( std::pow( lepXs - primaryVertex[ 0 ] , 2 ) + std::pow( lepYs - primaryVertex[ 1 ] , 2 ) + std::pow( lepZs - primaryVertex[ 2 ] , 2 ) );
+						double dsRs  = std::sqrt( std::pow( downStreamPosition[ 0 ] - primaryVertex[ 0 ] , 2 ) + std::pow( downStreamPosition[ 1 ] - primaryVertex[ 1 ] , 2 ) + std::pow( downStreamPosition[ 2 ] - primaryVertex[ 2 ] , 2 ) );
+						if ( lepRs <= dsRs )
+						{
+							secondayVertex = PCAatLeptonTrack;
+						}
+						else
+						{
+							secondayVertex = PCAatDownStreamLine;
+						}
 						if ( m_displayEvent )
 						{
 							double bField = 3.5;//marlinutil::getBzAtOrigin();
@@ -417,9 +499,9 @@ int getSecondaryVertex( EVENT::LCEvent *pLCEvent , EVENT::MCParticle *SLDLepton 
 							double lepPx = leppT * std::cos( leptonTrack->getPhi() ) ;
 							double lepPy = leppT * std::sin( leptonTrack->getPhi() ) ;
 							double lepPz = leppT * leptonTrack->getTanLambda() ;
-							double lepXs = leptonTrack->getReferencePoint()[ 0 ] - leptonTrack->getD0() * std::sin( leptonTrack->getPhi() );
-							double lepYs = leptonTrack->getReferencePoint()[ 1 ] + leptonTrack->getD0() * std::cos( leptonTrack->getPhi() );
-							double lepZs = leptonTrack->getReferencePoint()[ 2 ] + leptonTrack->getZ0();
+//							double lepXs = leptonTrack->getReferencePoint()[ 0 ] - leptonTrack->getD0() * std::sin( leptonTrack->getPhi() );
+//							double lepYs = leptonTrack->getReferencePoint()[ 1 ] + leptonTrack->getD0() * std::cos( leptonTrack->getPhi() );
+//							double lepZs = leptonTrack->getReferencePoint()[ 2 ] + leptonTrack->getZ0();
 							DDMarlinCED::drawHelix( bField , lepcharge , lepXs , lepYs , lepZs , lepPx , lepPy , lepPz , 1 , 2 , 0xff0000 , 0.0 , 2100.0 , 3000.0 , 0 );
 
 							ced_hit( PCAatLeptonTrack[ 0 ] , PCAatLeptonTrack[ 1 ] , PCAatLeptonTrack[ 2 ] , 2 , 1 , 0xff0000 );
@@ -482,7 +564,7 @@ int getSecondaryVertex( EVENT::LCEvent *pLCEvent , EVENT::MCParticle *SLDLepton 
 					}
 					else
 					{
-						secondayVertexStatus = 3;
+						secondayVertexStatus = 2;
 					}
 					SecondaryVertexPar.push_back( trueDSVertex.X() );
 					SecondaryVertexPar.push_back( trueDSVertex.Y() );
@@ -533,50 +615,64 @@ int getLeadingParticleFlightDirection( EVENT::LCEvent *pLCEvent , EVENT::MCParti
 		std::string recoMCTruthLinkCollection , std::string mcTruthRecoLinkCollection )
 {
 	int leadingParticleStatus = -999;
+	bool jetAssigned = false;
+	ReconstructedParticle* leadingParticle = NULL;
+	ReconstructedParticle* linkedJet = NULL;
 	ReconstructedParticle* linkedRecoLepton = getLinkedPFO( pLCEvent , SLDLepton , recoMCTruthLinkCollection , mcTruthRecoLinkCollection , true , false );
 	LCCollection *jetCollection = pLCEvent->getCollection( inputJetCollection );
 	int n_Jet = jetCollection->getNumberOfElements();
 	for ( int i_Jet = 0 ; i_Jet < n_Jet ; ++i_Jet )
 	{
-		bool jetAssigned = false;
 		ReconstructedParticle* jet = dynamic_cast<ReconstructedParticle*>( jetCollection->getElementAt( i_Jet ) );
 		int nParticles = ( jet->getParticles() ).size();
-		float leadingEnergy = 0.0;
-		ReconstructedParticle* leadingParticle = NULL;
 		for ( int i_particle = 0 ; i_particle < nParticles ; ++i_particle )
 		{
 			ReconstructedParticle* particle = jet->getParticles()[ i_particle ];
-			if ( particle->getEnergy() > leadingEnergy )
-			{
-				leadingParticle = particle;
-				leadingEnergy = particle->getEnergy();
-			}
 			if ( particle == linkedRecoLepton )
 			{
 				jetAssigned = true;
+				linkedJet = jet;
 			}
 		}
-		if ( jetAssigned )
+	}
+	if ( jetAssigned )
+	{
+		int nParticles = ( linkedJet->getParticles() ).size();
+		float leadingEnergy = 0.0;
+		for ( int i_par = 0 ; i_par < nParticles ; ++i_par )
 		{
-			leadingParticleFlightDirection = TVector3( leadingParticle->getMomentum()[ 0 ] , leadingParticle->getMomentum()[ 1 ] , leadingParticle->getMomentum()[ 2 ] );
-			streamlog_out(DEBUG1) << "		Test 9, |flightDirection| = " << leadingParticleFlightDirection.Mag() << std::endl;
-			leadingParticleFlightDirection.SetMag( 1.0 );
-			if ( leadingParticle->getTracks().size() == 0 )
+			ReconstructedParticle* par = linkedJet->getParticles()[ i_par ];
+			if ( par->getEnergy() > leadingEnergy )
 			{
-				if ( leadingParticle->getType() == 22 )
-				{
-					leadingParticleStatus = 0;
-				}
-				else
-				{
-					leadingParticleStatus = -1;
-				}
+				leadingParticle = par;
+				leadingEnergy = par->getEnergy();
+			}
+		}
+		leadingParticleFlightDirection = TVector3( leadingParticle->getMomentum()[ 0 ] , leadingParticle->getMomentum()[ 1 ] , leadingParticle->getMomentum()[ 2 ] );
+		streamlog_out(DEBUG1) << "		Test 9, |flightDirection| = " << leadingParticleFlightDirection.Mag() << std::endl;
+		leadingParticleFlightDirection.SetMag( 1.0 );
+		if ( leadingParticle->getCharge() == 0 )
+		{
+			if ( leadingParticle->getType() == 22 )
+			{
+				leadingParticleStatus = 9;
+				streamlog_out(DEBUG1) << "		Leading particle in the jet is a photon " << std::endl;
 			}
 			else
 			{
-				leadingParticleStatus = 1;
+				leadingParticleStatus = 8;
+				streamlog_out(DEBUG1) << "		Leading particle in the jet is a neutral hadron " << std::endl;
 			}
 		}
+		else
+		{
+			leadingParticleStatus = 7;
+			streamlog_out(DEBUG1) << "		Leading particle in the jet is a charged particle " << std::endl;
+		}
+	}
+	else
+	{
+		leadingParticleStatus = 2;
 	}
 	return leadingParticleStatus;
 }
