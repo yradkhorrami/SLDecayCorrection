@@ -32,43 +32,13 @@ int getParentHadronFlightDirection( 	EVENT::LCEvent *pLCEvent , EVENT::MCParticl
 		ced_hit( 0.0 , 0.0 , 0.100 , 1 , 1 , 0xc765c4 );
 		ced_hit( 0.0 , 0.0 , 1.000 , 1 , 1 , 0xc765c4 );
 		ced_hit( 0.0 , 0.0 , 10.00 , 1 , 1 , 0xc765c4 );
+		drawMCParticles( SLDLepton->getParents()[ 0 ] );
 	}
 
 	const EVENT::MCParticle *MotherHadron = SLDLepton->getParents()[ 0 ];
 	trueFlightDirection = TVector3( MotherHadron->getMomentum()[ 0 ] , MotherHadron->getMomentum()[ 1 ] , MotherHadron->getMomentum()[ 2 ] );
 	streamlog_out(DEBUG1) << "		Test 2, |flightDirection| = " << trueFlightDirection.Mag() << std::endl;
 	trueFlightDirection.SetMag(1.0);
-
-	if ( m_displayEvent )
-	{
-//		double bField = 3.5;
-		double charge = MotherHadron->getCharge();
-		double scale = 1.0;
-		if ( std::fabs( charge ) <= 0.1 )
-		{
-			charge = 1.0;
-			scale = 100.0;
-		}
-		streamlog_out( DEBUG1 ) << "	charge = " << charge << std::endl;
-		double Px = scale * MotherHadron->getMomentumAtEndpoint()[ 0 ] ;
-		double Py = scale * MotherHadron->getMomentumAtEndpoint()[ 1 ] ;
-		double Pz = scale * MotherHadron->getMomentumAtEndpoint()[ 2 ] ;
-		double Xs = MotherHadron->getVertex()[ 0 ];
-		double Ys = MotherHadron->getVertex()[ 1 ];
-		double Zs = MotherHadron->getVertex()[ 2 ];
-		double Xe = MotherHadron->getEndpoint()[ 0 ];
-		double Ye = MotherHadron->getEndpoint()[ 1 ];
-		double Ze = MotherHadron->getEndpoint()[ 2 ];
-		ced_hit( Xs , Ys , Zs , 2 , 1 , 0x279132 );
-		ced_hit( Xs , Ys , Zs , 0 , 1 , 0x000000 );
-		ced_hit( Xe , Ye , Ze , 2 , 1 , 0x279132 );
-		ced_hit( Xe , Ye , Ze , 0 , 1 , 0x000000 );
-		for ( double t = 0.0 ; t <= ( Xe - Xs ) / Px ; t += 0.005 * ( Xe - Xs ) / Px )
-		{
-			ced_hit( Xs + Px * t , Ys + Py * t , Zs + Pz * t , 0 , 1 , 0x000000 );
-		}
-	}
-
 
 	int primaryVertexStatus = getPrimaryVertex( pLCEvent , SLDLepton , inputPrimaryVertex , false , primaryVertex , m_displayEvent );
 	int secondayVertexStatus = getSecondaryVertex( pLCEvent , SLDLepton , inputPrimaryVertex , inputBuildUpVertex , false , secondayVertex , inputJetCollection , recoMCTruthLinkCollection , mcTruthRecoLinkCollection , helicesDistance , SecondaryVertexPar , m_displayEvent );
@@ -90,7 +60,7 @@ int getParentHadronFlightDirection( 	EVENT::LCEvent *pLCEvent , EVENT::MCParticl
 		recoFlightDirection.SetMag( 1.0 );
 		streamlog_out(DEBUG1) << "			Flight Direction Scenario: finding primary/secondary vertices and reconstruct flight direction" << std::endl;
 	}
-	else if ( secondayVertexStatus == 2 )
+	else if ( secondayVertexStatus == 2 || secondayVertexStatus == 10 )
 	{
 		if ( vertexingScenario == 1 )
 		{
@@ -99,6 +69,8 @@ int getParentHadronFlightDirection( 	EVENT::LCEvent *pLCEvent , EVENT::MCParticl
 			streamlog_out(DEBUG1) << "		Test 4, |flightDirection| = " << recoFlightDirection.Mag() << std::endl;
 			recoFlightDirection.SetMag( 1.0 );
 			streamlog_out(DEBUG1) << "			Flight Direction Scenario: finding primary/secondary vertices and reconstruct flight direction" << std::endl;
+			if ( secondayVertexStatus == 2 ) flightDirectionStatus = 10;
+			if ( secondayVertexStatus == 10 ) flightDirectionStatus = 11;
 		}
 		else if ( vertexingScenario == 2 )
 		{
@@ -109,7 +81,8 @@ int getParentHadronFlightDirection( 	EVENT::LCEvent *pLCEvent , EVENT::MCParticl
 			if ( jetAssigningStatus == 1 )
 			{
 				streamlog_out(DEBUG1) << "			Successfully assigned jet axis to the flight direction of parent hadron" << std::endl;
-				flightDirectionStatus = 6;
+				if ( secondayVertexStatus == 2 ) flightDirectionStatus = 6;
+				if ( secondayVertexStatus == 10 ) flightDirectionStatus = 11;
 			}
 			else
 			{
@@ -121,13 +94,14 @@ int getParentHadronFlightDirection( 	EVENT::LCEvent *pLCEvent , EVENT::MCParticl
 		{
 			streamlog_out(DEBUG1) << "			Flight Direction Scenario: Assigning flight direction of leading particle in the jet to the flight direction of parent hadron" << std::endl;
 			int leadingParticleStatus = getLeadingParticleFlightDirection( pLCEvent , SLDLepton , recoFlightDirection , inputJetCollection , recoMCTruthLinkCollection , mcTruthRecoLinkCollection );
-			flightDirectionStatus = leadingParticleStatus;
 			streamlog_out(DEBUG1) << "		Test 6, |flightDirection| = " << recoFlightDirection.Mag() << std::endl;
 			recoFlightDirection.SetMag( 1.0 );
 			if ( leadingParticleStatus == 7 ) streamlog_out(DEBUG1) << "			Leading particle in the jet is a charged particle " << std::endl;
 			if ( leadingParticleStatus == 8 ) streamlog_out(DEBUG1) << "			Leading particle in the jet is a neutral hadron " << std::endl;
 			if ( leadingParticleStatus == 9 ) streamlog_out(DEBUG1) << "			Leading particle in the jet is a photon " << std::endl;
 			if ( leadingParticleStatus == 2 ) streamlog_out(DEBUG1) << "			!!! recoLepton does not belong to any jet !!!" << std::endl;
+			if ( secondayVertexStatus == 2 ) flightDirectionStatus = leadingParticleStatus;
+			if ( secondayVertexStatus == 10 ) flightDirectionStatus = 11;
 		}
 
 	}
@@ -239,6 +213,7 @@ int getSecondaryVertex( EVENT::LCEvent *pLCEvent , EVENT::MCParticle *SLDLepton 
 		ReconstructedParticle* linkedRecoLepton = getLinkedPFO( pLCEvent , SLDLepton , recoMCTruthLinkCollection , mcTruthRecoLinkCollection , true , false );
 		LCCollection *primaryVertexCollection = pLCEvent->getCollection( inputPrimaryVertex );
 		Vertex* primaryVtx = dynamic_cast<Vertex*>( primaryVertexCollection->getElementAt( 0 ) );
+		bool leptonInPrimaryVertex = false;
 		double primaryVertex[ 3 ]{ primaryVtx->getPosition()[ 0 ] , primaryVtx->getPosition()[ 1 ] , primaryVtx->getPosition()[ 2 ] };
 		LCCollection *jetCollection = pLCEvent->getCollection( inputJetCollection );
 		int n_Jet = jetCollection->getNumberOfElements();
@@ -252,326 +227,346 @@ int getSecondaryVertex( EVENT::LCEvent *pLCEvent , EVENT::MCParticle *SLDLepton 
 		}
 		else
 		{
-			for ( int i_vtx = 0 ; i_vtx < n_VTX ; ++i_vtx )
+			ReconstructedParticle* primaryParticle = primaryVtx->getAssociatedParticle();
+			int nPrimPar = ( primaryParticle->getParticles() ).size();
+			for ( int i_par = 0 ; i_par < nPrimPar ; ++i_par )
 			{
-				Vertex* secondaryVtx = dynamic_cast<Vertex*>( buildUpVertexCollection->getElementAt( i_vtx ) );
-				ReconstructedParticle* vertexRecoParticle = secondaryVtx->getAssociatedParticle();
-				int nVertexParticles = ( vertexRecoParticle->getParticles() ).size();
-				for ( int i_particle = 0 ; i_particle < nVertexParticles ; ++i_particle )
+				ReconstructedParticle* particle = primaryParticle->getParticles()[ i_par ];
+				if ( linkedRecoLepton == particle )
 				{
-					ReconstructedParticle* particle = vertexRecoParticle->getParticles()[ i_particle ];
-					if ( linkedRecoLepton == particle )
-					{
-						secondayVertex.push_back( secondaryVtx->getPosition()[ 0 ] );
-						secondayVertex.push_back( secondaryVtx->getPosition()[ 1 ] );
-						secondayVertex.push_back( secondaryVtx->getPosition()[ 2 ] );
-						secondayVertexStatus = 3;
-						foundSecondaryVertex = true;
-						streamlog_out(DEBUG1) << "	Found Reco Lepton in BuildUp Vertex" << std::endl;
-						if ( m_displayEvent )
-						{
-							ced_hit( secondayVertex[ 0 ] , secondayVertex[ 1 ] , secondayVertex[ 2 ] , 2 , 2 , 0x2b00ff );
-							double bField = 3.5;//marlinutil::getBzAtOrigin();
-							for ( int i_trk = 0 ; i_trk < nVertexParticles ; ++i_trk )
-							{
-								ReconstructedParticle* vtxRP = vertexRecoParticle->getParticles()[ i_trk ];
-								int color;
-								if ( linkedRecoLepton == vtxRP )
-								{
-									color = 0xff0000;
-								}
-								else
-								{
-									color = 0xb000e6;
-								}
-								Track *vtxTrack = vtxRP->getTracks()[ 0 ];
-								double charge = ( vtxTrack->getOmega() > 0.0 ?  1.0 : -1.0 );
-								double pT = bField * 3.0e-4 / std::fabs( vtxTrack->getOmega() );
-								double Px = pT * std::cos( vtxTrack->getPhi() ) ;
-								double Py = pT * std::sin( vtxTrack->getPhi() ) ;
-								double Pz = pT * vtxTrack->getTanLambda() ;
-								double Xs = vtxTrack->getReferencePoint()[ 0 ] - vtxTrack->getD0() * std::sin( vtxTrack->getPhi() );
-								double Ys = vtxTrack->getReferencePoint()[ 1 ] + vtxTrack->getD0() * std::cos( vtxTrack->getPhi() );
-								double Zs = vtxTrack->getReferencePoint()[ 2 ] + vtxTrack->getZ0();
-								DDMarlinCED::drawHelix( bField , charge , Xs , Ys , Zs , Px , Py , Pz , 1 , 2 , color , 0.0 , 2100.0 , 3000.0 , 0 );
-							}
-						}
-					}
+					leptonInPrimaryVertex = true;
+					secondayVertexStatus = 10;
 				}
 			}
-			if ( !foundSecondaryVertex )
+			if ( !leptonInPrimaryVertex )
 			{
-				std::vector<Vertex*> DownStreamVertices;
 				for ( int i_vtx = 0 ; i_vtx < n_VTX ; ++i_vtx )
 				{
 					Vertex* secondaryVtx = dynamic_cast<Vertex*>( buildUpVertexCollection->getElementAt( i_vtx ) );
 					ReconstructedParticle* vertexRecoParticle = secondaryVtx->getAssociatedParticle();
 					int nVertexParticles = ( vertexRecoParticle->getParticles() ).size();
-					float leadingEnergy = 0.0;
-					ReconstructedParticle* leadingParticle = NULL;
 					for ( int i_particle = 0 ; i_particle < nVertexParticles ; ++i_particle )
 					{
 						ReconstructedParticle* particle = vertexRecoParticle->getParticles()[ i_particle ];
-						if ( particle->getEnergy() > leadingEnergy )
+						if ( linkedRecoLepton == particle )
 						{
-							leadingEnergy = particle->getEnergy();
-							leadingParticle = particle;
-						}
-					}
-					for ( int i_Jet = 0 ; i_Jet < n_Jet ; ++i_Jet )
-					{
-						ReconstructedParticle* jet = dynamic_cast<ReconstructedParticle*>( jetCollection->getElementAt( i_Jet ) );
-						int nParticles = ( jet->getParticles() ).size();
-						for ( int i_particle = 0 ; i_particle < nParticles ; ++i_particle )
-						{
-							ReconstructedParticle* particle = jet->getParticles()[ i_particle ];
-							if ( particle == leadingParticle )
+							secondayVertex.push_back( secondaryVtx->getPosition()[ 0 ] );
+							secondayVertex.push_back( secondaryVtx->getPosition()[ 1 ] );
+							secondayVertex.push_back( secondaryVtx->getPosition()[ 2 ] );
+							secondayVertexStatus = 3;
+							foundSecondaryVertex = true;
+							streamlog_out(DEBUG1) << "	Found Reco Lepton in BuildUp Vertex" << std::endl;
+							if ( m_displayEvent )
 							{
-								for ( int i_lep = 0 ; i_lep < nParticles ; ++i_lep )
+								ced_hit( secondayVertex[ 0 ] , secondayVertex[ 1 ] , secondayVertex[ 2 ] , 2 , 2 , 0x2b00ff );
+								double bField = 3.5;//marlinutil::getBzAtOrigin();
+								for ( int i_trk = 0 ; i_trk < nVertexParticles ; ++i_trk )
 								{
-									ReconstructedParticle* testLepton = jet->getParticles()[ i_lep ];
-									if ( testLepton == linkedRecoLepton )
+									ReconstructedParticle* vtxRP = vertexRecoParticle->getParticles()[ i_trk ];
+									int color;
+									if ( linkedRecoLepton == vtxRP )
 									{
-										DownStreamVertices.push_back( secondaryVtx );
+										color = 0xff0000;
 									}
+									else
+									{
+										color = 0xb000e6;
+									}
+									Track *vtxTrack = vtxRP->getTracks()[ 0 ];
+									double charge = ( vtxTrack->getOmega() > 0.0 ?  1.0 : -1.0 );
+									double pT = bField * 3.0e-4 / std::fabs( vtxTrack->getOmega() );
+									double Px = pT * std::cos( vtxTrack->getPhi() ) ;
+									double Py = pT * std::sin( vtxTrack->getPhi() ) ;
+									double Pz = pT * vtxTrack->getTanLambda() ;
+									double Xs = vtxTrack->getReferencePoint()[ 0 ] - vtxTrack->getD0() * std::sin( vtxTrack->getPhi() );
+									double Ys = vtxTrack->getReferencePoint()[ 1 ] + vtxTrack->getD0() * std::cos( vtxTrack->getPhi() );
+									double Zs = vtxTrack->getReferencePoint()[ 2 ] + vtxTrack->getZ0();
+									DDMarlinCED::drawHelix( bField , charge , Xs , Ys , Zs , Px , Py , Pz , 1 , 2 , color , 0.0 , 2100.0 , 3000.0 , 0 );
 								}
 							}
 						}
 					}
 				}
-				streamlog_out(DEBUG1) << "	Found " << DownStreamVertices.size() << " DownStream Vertices in the same jet of semi-leptonic decay" << std::endl;
-				if ( DownStreamVertices.size() == 0 )
+				if ( !foundSecondaryVertex )
 				{
-					secondayVertexStatus = 2;
-					SecondaryVertexPar.push_back( 0.0 );
-					SecondaryVertexPar.push_back( 0.0 );
-					SecondaryVertexPar.push_back( 0.0 );
-					SecondaryVertexPar.push_back( 0.0 );
-					SecondaryVertexPar.push_back( 0.0 );
-					SecondaryVertexPar.push_back( 0.0 );
-				}
-				else
-				{
-					float minFlightDistance = 1000000.0;
-					Vertex* closetDownStreamVertex = NULL;
-					bool foundDownStreamVertex = false;
-					TVector3 trueDSVertex;
-					TVector3 trueDSVertexMomentum;
-					Track *leptonTrack	= linkedRecoLepton->getTracks()[ 0 ];
-					int trueDSVertexStatus = getTrueDownStreamVertex( SLDLepton , trueDSVertex , trueDSVertexMomentum );
-					streamlog_out(DEBUG1) << "	Found " << trueDSVertexStatus << " particles at True Down Stream vertex" << std::endl;
-					streamlog_out(DEBUG1) << "	True Down Stream vertex at (x,y,z) = 	( " << trueDSVertex.X() << "	,	" << trueDSVertex.Y() << "	,	" << trueDSVertex.Z() << "	)" << std::endl;
-					streamlog_out(DEBUG1) << "	True Down Stream vertex Momentum (Px,Py,Pz) = 	( " << trueDSVertexMomentum.Px() << "	,	" << trueDSVertexMomentum.Py() << "	,	" << trueDSVertexMomentum.Pz() << "	)" << std::endl;
-					for ( unsigned int i_dsVTX = 0 ; i_dsVTX < DownStreamVertices.size() ; ++i_dsVTX )
+					std::vector<Vertex*> DownStreamVertices;
+					for ( int i_vtx = 0 ; i_vtx < n_VTX ; ++i_vtx )
 					{
-						Vertex* downStreamVertex = DownStreamVertices[ i_dsVTX ];
-						std::vector<double> PCAatLeptonTrack;
-						std::vector<double> PCAatDownStreamLine;
-						streamlog_out(DEBUG1) << "	Checking Down Stream vertex at (x,y,z) = 	( " << downStreamVertex->getPosition()[ 0 ] << "	,	" << downStreamVertex->getPosition()[ 1 ] << "	,	" << downStreamVertex->getPosition()[ 2 ] << "	)" << std::endl;
-						std::vector<double> dsVertex;
-						dsVertex.push_back( downStreamVertex->getPosition()[ 0 ] );
-						dsVertex.push_back( downStreamVertex->getPosition()[ 1 ] );
-						dsVertex.push_back( downStreamVertex->getPosition()[ 2 ] );
-						TVector3 dsMomentum = TVector3( downStreamVertex->getAssociatedParticle()->getMomentum()[ 0 ] , downStreamVertex->getAssociatedParticle()->getMomentum()[ 1 ] , downStreamVertex->getAssociatedParticle()->getMomentum()[ 2 ] );
-//						float dsDistance = std::sqrt( pow( dsVertex[ 0 ] - primaryVertex[ 0 ] , 2 ) + pow( dsVertex[ 1 ] - primaryVertex[ 1 ] , 2 ) + pow( dsVertex[ 2 ] - primaryVertex[ 2 ] , 2 ) );
-						float dsDistance = intersectHelixLine( pLCEvent , leptonTrack , dsMomentum , dsVertex , PCAatLeptonTrack , PCAatDownStreamLine , inputPrimaryVertex );
-						if ( dsDistance < minFlightDistance )
+						Vertex* secondaryVtx = dynamic_cast<Vertex*>( buildUpVertexCollection->getElementAt( i_vtx ) );
+						ReconstructedParticle* vertexRecoParticle = secondaryVtx->getAssociatedParticle();
+						int nVertexParticles = ( vertexRecoParticle->getParticles() ).size();
+						float leadingEnergy = 0.0;
+						ReconstructedParticle* leadingParticle = NULL;
+						for ( int i_particle = 0 ; i_particle < nVertexParticles ; ++i_particle )
 						{
-							closetDownStreamVertex = downStreamVertex;
-							minFlightDistance = dsDistance;
-							foundDownStreamVertex = true;
-						}
-						if ( m_displayEvent )
-						{
-							double bField = 3.5;//marlinutil::getBzAtOrigin();
-							double lepcharge = ( leptonTrack->getOmega() > 0.0 ?  1.0 : -1.0 );
-							double leppT = bField * 3.0e-4 / std::fabs( leptonTrack->getOmega() );
-							double lepPx = leppT * std::cos( leptonTrack->getPhi() ) ;
-							double lepPy = leppT * std::sin( leptonTrack->getPhi() ) ;
-							double lepPz = leppT * leptonTrack->getTanLambda() ;
-							double lepXs = leptonTrack->getReferencePoint()[ 0 ] - leptonTrack->getD0() * std::sin( leptonTrack->getPhi() );
-							double lepYs = leptonTrack->getReferencePoint()[ 1 ] + leptonTrack->getD0() * std::cos( leptonTrack->getPhi() );
-							double lepZs = leptonTrack->getReferencePoint()[ 2 ] + leptonTrack->getZ0();
-							DDMarlinCED::drawHelix( bField , lepcharge , lepXs , lepYs , lepZs , lepPx , lepPy , lepPz , 1 , 2 , 0xff0000 , 0.0 , 2100.0 , 3000.0 , 0 );
-
-							ced_hit( PCAatLeptonTrack[ 0 ] , PCAatLeptonTrack[ 1 ] , PCAatLeptonTrack[ 2 ] , 2 , 1 , 0xff0000 );
-							ced_hit( PCAatLeptonTrack[ 0 ] , PCAatLeptonTrack[ 1 ] , PCAatLeptonTrack[ 2 ] , 0 , 1 , 0xff0000 );
-							DDMarlinCED::drawHelix( bField , lepcharge , PCAatLeptonTrack[ 0 ] , PCAatLeptonTrack[ 1 ] , PCAatLeptonTrack[ 2 ] , lepPx , lepPy , lepPz , 1 , 2 , 0xff0000 , 0.0 , 2100.0 , 3000.0 , 0 );
-
-
-							double dsCharge = -1.0 * lepcharge;
-							double scale = ( secondayVertexStatus == 4 ? -1.0 : -100.0 );
-							double dsPx = scale * dsMomentum[ 0 ];
-							double dsPy = scale * dsMomentum[ 1 ];
-							double dsPz = scale * dsMomentum[ 2 ];
-							double dsXs = dsVertex[ 0 ];
-							double dsYs = dsVertex[ 1 ];
-							double dsZs = dsVertex[ 2 ];
-
-							ced_hit( PCAatDownStreamLine[ 0 ] , PCAatDownStreamLine[ 1 ] , PCAatDownStreamLine[ 2 ] , 0 , 1 , 0x0000a8 );
-							ced_hit( dsVertex[ 0 ] , dsVertex[ 1 ] , dsVertex[ 2 ] , 0 , 1 , 0x0000a8 );
-							double vMin = -1.0 * ( dsMomentum.Px() * ( dsVertex[ 0 ] - PCAatDownStreamLine[ 0 ] ) + dsMomentum.Py() * ( dsVertex[ 1 ] - PCAatDownStreamLine[ 1 ] ) + dsMomentum.Pz() * ( dsVertex[ 2 ] - PCAatDownStreamLine[ 2 ] ) ) / dsMomentum.Mag2();
-							double vMax = 0.0;
-							double dsTestX	= dsVertex[ 0 ] + dsMomentum.Px() * vMin;
-							double dsTestY	= dsVertex[ 1 ] + dsMomentum.Py() * vMin;
-							double dsTestZ	= dsVertex[ 2 ] + dsMomentum.Pz() * vMin;
-							ced_hit( dsTestX , dsTestY , dsTestZ , 0 , 1 , 0x0000a8 );
-							dsTestX	= dsVertex[ 0 ] + dsMomentum.Px() * vMax;
-							dsTestY	= dsVertex[ 1 ] + dsMomentum.Py() * vMax;
-							dsTestZ	= dsVertex[ 2 ] + dsMomentum.Pz() * vMax;
-							ced_hit( dsTestX , dsTestY , dsTestZ , 0 , 1 , 0x0000a8 );
-							for ( double v = vMin ; v <= vMax ; v += ( vMax - vMin ) / 1000.0 )
+							ReconstructedParticle* particle = vertexRecoParticle->getParticles()[ i_particle ];
+							if ( particle->getEnergy() > leadingEnergy )
 							{
-								dsTestX	= dsVertex[ 0 ] + dsMomentum.Px() * v;
-								dsTestY	= dsVertex[ 1 ] + dsMomentum.Py() * v;
-								dsTestZ	= dsVertex[ 2 ] + dsMomentum.Pz() * v;
-								ced_hit( dsTestX , dsTestY , dsTestZ , 0 , 1 , 0x0000a8 );
+								leadingEnergy = particle->getEnergy();
+								leadingParticle = particle;
 							}
-
-							ced_hit( PCAatDownStreamLine[ 0 ] , PCAatDownStreamLine[ 1 ] , PCAatDownStreamLine[ 2 ] , 2 , 1 , 0x0000ff );
-//							ced_hit( downStreamPosition[ 0 ] , downStreamPosition[ 1 ] , downStreamPosition[ 2 ] , 2 , 1 , 0x0000ff );
-							DDMarlinCED::drawHelix( bField , dsCharge , dsXs , dsYs , dsZs , dsPx , dsPy , dsPz , 1 , 2 , 0x0000ff , 0.0 , 2100.0 , 3000.0 , 0 );
-							for ( unsigned int i_trk = 0 ; i_trk < ( downStreamVertex->getAssociatedParticle() )->getParticles().size() ; ++i_trk )
+						}
+						for ( int i_Jet = 0 ; i_Jet < n_Jet ; ++i_Jet )
+						{
+							ReconstructedParticle* jet = dynamic_cast<ReconstructedParticle*>( jetCollection->getElementAt( i_Jet ) );
+							int nParticles = ( jet->getParticles() ).size();
+							for ( int i_particle = 0 ; i_particle < nParticles ; ++i_particle )
 							{
-								ReconstructedParticle* vtxRP = ( downStreamVertex->getAssociatedParticle() )->getParticles()[ i_trk ];
-								Track *vtxTrack = vtxRP->getTracks()[ 0 ];
-								double charge = ( vtxTrack->getOmega() > 0.0 ?  1.0 : -1.0 );
-								double pT = bField * 3.0e-4 / std::fabs( vtxTrack->getOmega() );
-								double Px = pT * std::cos( vtxTrack->getPhi() ) ;
-								double Py = pT * std::sin( vtxTrack->getPhi() ) ;
-								double Pz = pT * vtxTrack->getTanLambda() ;
-								double Xs = dsVertex[ 0 ];
-								double Ys = dsVertex[ 1 ];
-								double Zs = dsVertex[ 2 ];
-//								double Xs = vtxTrack->getReferencePoint()[ 0 ] - vtxTrack->getD0() * std::sin( vtxTrack->getPhi() );
-//								double Ys = vtxTrack->getReferencePoint()[ 1 ] + vtxTrack->getD0() * std::cos( vtxTrack->getPhi() );
-//								double Zs = vtxTrack->getReferencePoint()[ 2 ] + vtxTrack->getZ0();
-								DDMarlinCED::drawHelix( bField , charge , Xs , Ys , Zs , Px , Py , Pz , 1 , 2 , 0xb000e6 , 0.0 , 2100.0 , 3000.0 , 0 );
+								ReconstructedParticle* particle = jet->getParticles()[ i_particle ];
+								if ( particle == leadingParticle )
+								{
+									for ( int i_lep = 0 ; i_lep < nParticles ; ++i_lep )
+									{
+										ReconstructedParticle* testLepton = jet->getParticles()[ i_lep ];
+										if ( testLepton == linkedRecoLepton )
+										{
+											DownStreamVertices.push_back( secondaryVtx );
+										}
+									}
+								}
 							}
 						}
 					}
-					if ( foundDownStreamVertex )
+					streamlog_out(DEBUG1) << "	Found " << DownStreamVertices.size() << " DownStream Vertices in the same jet of semi-leptonic decay" << std::endl;
+					if ( DownStreamVertices.size() == 0 )
 					{
-						streamlog_out(DEBUG1) << "	There are " << ( closetDownStreamVertex->getAssociatedParticle() )->getParticles().size() << " particle in DownStream Vertex" << std::endl;
-						std::vector<double> PCAatLeptonTrack;
-						std::vector<double> PCAatDownStreamLine;
-						TVector3 dsMomentum = TVector3( closetDownStreamVertex->getAssociatedParticle()->getMomentum()[ 0 ] , closetDownStreamVertex->getAssociatedParticle()->getMomentum()[ 1 ] , closetDownStreamVertex->getAssociatedParticle()->getMomentum()[ 2 ] );
-						std::vector<double> downStreamPosition;
-						downStreamPosition.push_back( closetDownStreamVertex->getPosition()[ 0 ] );
-						downStreamPosition.push_back( closetDownStreamVertex->getPosition()[ 1 ] );
-						downStreamPosition.push_back( closetDownStreamVertex->getPosition()[ 2 ] );
-
-
-						int n_dsTracks = 0;
-						for ( unsigned int i_dsPFOs = 0 ; i_dsPFOs < ( closetDownStreamVertex->getAssociatedParticle() )->getParticles().size() ; ++i_dsPFOs ) n_dsTracks += ( ( closetDownStreamVertex->getAssociatedParticle() )->getParticles()[ i_dsPFOs ] )->getTracks().size();
-						if ( n_dsTracks == 3 || n_dsTracks == 5 || n_dsTracks == 7 || n_dsTracks == 9 )
-						{
-//							helicesDistance = intersectHelixHelix( linkedRecoLepton , dsMomentum , downStreamPosition , PCAatLeptonTrack , PCAatDownStreamLine );
-							helicesDistance = intersectHelixLine( pLCEvent , leptonTrack , dsMomentum , downStreamPosition , PCAatLeptonTrack , PCAatDownStreamLine , inputPrimaryVertex );
-							secondayVertexStatus = 4;
-						}
-						else
-						{
-							helicesDistance = intersectHelixLine( pLCEvent , leptonTrack , dsMomentum , downStreamPosition , PCAatLeptonTrack , PCAatDownStreamLine , inputPrimaryVertex );
-							secondayVertexStatus = 5;
-						}
-						streamlog_out(DEBUG1) << "	Secondary Vertex on Lepton Track:(" << PCAatLeptonTrack[ 0 ] << "	,	" << PCAatLeptonTrack[ 1 ] << "	,	" << PCAatLeptonTrack[ 2 ] << "	)" << std::endl;
-						streamlog_out(DEBUG1) << "	Secondary Vertex on DownStream Line:(" << PCAatDownStreamLine[ 0 ] << "	,	" << PCAatDownStreamLine[ 1 ] << "	,	" << PCAatDownStreamLine[ 2 ] << "	)" << std::endl;
-						streamlog_out(DEBUG1) << "	Distance of Down Stream helix to SLDLepton helix = " << helicesDistance << " mm" << std::endl;
-						double lepXs = leptonTrack->getReferencePoint()[ 0 ] - leptonTrack->getD0() * std::sin( leptonTrack->getPhi() );
-						double lepYs = leptonTrack->getReferencePoint()[ 1 ] + leptonTrack->getD0() * std::cos( leptonTrack->getPhi() );
-						double lepZs = leptonTrack->getReferencePoint()[ 2 ] + leptonTrack->getZ0();
-						double lepRs = std::sqrt( std::pow( lepXs - primaryVertex[ 0 ] , 2 ) + std::pow( lepYs - primaryVertex[ 1 ] , 2 ) + std::pow( lepZs - primaryVertex[ 2 ] , 2 ) );
-						double dsRs  = std::sqrt( std::pow( downStreamPosition[ 0 ] - primaryVertex[ 0 ] , 2 ) + std::pow( downStreamPosition[ 1 ] - primaryVertex[ 1 ] , 2 ) + std::pow( downStreamPosition[ 2 ] - primaryVertex[ 2 ] , 2 ) );
-						if ( lepRs <= dsRs )
-						{
-							secondayVertex = PCAatLeptonTrack;
-						}
-						else
-						{
-							secondayVertex = PCAatDownStreamLine;
-						}
-						if ( m_displayEvent )
-						{
-							double bField = 3.5;//marlinutil::getBzAtOrigin();
-							double lepcharge = ( leptonTrack->getOmega() > 0.0 ?  1.0 : -1.0 );
-							double leppT = bField * 3.0e-4 / std::fabs( leptonTrack->getOmega() );
-							double lepPx = leppT * std::cos( leptonTrack->getPhi() ) ;
-							double lepPy = leppT * std::sin( leptonTrack->getPhi() ) ;
-							double lepPz = leppT * leptonTrack->getTanLambda() ;
-//							double lepXs = leptonTrack->getReferencePoint()[ 0 ] - leptonTrack->getD0() * std::sin( leptonTrack->getPhi() );
-//							double lepYs = leptonTrack->getReferencePoint()[ 1 ] + leptonTrack->getD0() * std::cos( leptonTrack->getPhi() );
-//							double lepZs = leptonTrack->getReferencePoint()[ 2 ] + leptonTrack->getZ0();
-							DDMarlinCED::drawHelix( bField , lepcharge , lepXs , lepYs , lepZs , lepPx , lepPy , lepPz , 1 , 2 , 0xff0000 , 0.0 , 2100.0 , 3000.0 , 0 );
-
-							ced_hit( PCAatLeptonTrack[ 0 ] , PCAatLeptonTrack[ 1 ] , PCAatLeptonTrack[ 2 ] , 2 , 1 , 0xff0000 );
-							ced_hit( PCAatLeptonTrack[ 0 ] , PCAatLeptonTrack[ 1 ] , PCAatLeptonTrack[ 2 ] , 0 , 1 , 0xff0000 );
-							DDMarlinCED::drawHelix( bField , lepcharge , PCAatLeptonTrack[ 0 ] , PCAatLeptonTrack[ 1 ] , PCAatLeptonTrack[ 2 ] , lepPx , lepPy , lepPz , 1 , 2 , 0xff0000 , 0.0 , 2100.0 , 3000.0 , 0 );
-
-
-							double dsCharge = -1.0 * lepcharge;
-							double scale = ( secondayVertexStatus == 4 ? -1.0 : -100.0 );
-							double dsPx = scale * dsMomentum[ 0 ];
-							double dsPy = scale * dsMomentum[ 1 ];
-							double dsPz = scale * dsMomentum[ 2 ];
-							double dsXs = downStreamPosition[ 0 ];
-							double dsYs = downStreamPosition[ 1 ];
-							double dsZs = downStreamPosition[ 2 ];
-
-							ced_hit( PCAatDownStreamLine[ 0 ] , PCAatDownStreamLine[ 1 ] , PCAatDownStreamLine[ 2 ] , 0 , 1 , 0x0000a8 );
-							ced_hit( downStreamPosition[ 0 ] , downStreamPosition[ 1 ] , downStreamPosition[ 2 ] , 0 , 1 , 0x0000a8 );
-							double vMin = -1.0 * ( dsMomentum.Px() * ( downStreamPosition[ 0 ] - PCAatDownStreamLine[ 0 ] ) + dsMomentum.Py() * ( downStreamPosition[ 1 ] - PCAatDownStreamLine[ 1 ] ) + dsMomentum.Pz() * ( downStreamPosition[ 2 ] - PCAatDownStreamLine[ 2 ] ) ) / dsMomentum.Mag2();
-							double vMax = 0.0;
-							double dsTestX	= downStreamPosition[ 0 ] + dsMomentum.Px() * vMin;
-							double dsTestY	= downStreamPosition[ 1 ] + dsMomentum.Py() * vMin;
-							double dsTestZ	= downStreamPosition[ 2 ] + dsMomentum.Pz() * vMin;
-							ced_hit( dsTestX , dsTestY , dsTestZ , 0 , 1 , 0x0000a8 );
-							dsTestX	= downStreamPosition[ 0 ] + dsMomentum.Px() * vMax;
-							dsTestY	= downStreamPosition[ 1 ] + dsMomentum.Py() * vMax;
-							dsTestZ	= downStreamPosition[ 2 ] + dsMomentum.Pz() * vMax;
-							ced_hit( dsTestX , dsTestY , dsTestZ , 0 , 1 , 0x0000a8 );
-							for ( double v = vMin ; v <= vMax ; v += ( vMax - vMin ) / 1000.0 )
-							{
-								dsTestX	= downStreamPosition[ 0 ] + dsMomentum.Px() * v;
-								dsTestY	= downStreamPosition[ 1 ] + dsMomentum.Py() * v;
-								dsTestZ	= downStreamPosition[ 2 ] + dsMomentum.Pz() * v;
-								ced_hit( dsTestX , dsTestY , dsTestZ , 0 , 1 , 0x0000a8 );
-							}
-
-							ced_hit( PCAatDownStreamLine[ 0 ] , PCAatDownStreamLine[ 1 ] , PCAatDownStreamLine[ 2 ] , 2 , 1 , 0x0000ff );
-//							ced_hit( downStreamPosition[ 0 ] , downStreamPosition[ 1 ] , downStreamPosition[ 2 ] , 2 , 1 , 0x0000ff );
-							DDMarlinCED::drawHelix( bField , dsCharge , dsXs , dsYs , dsZs , dsPx , dsPy , dsPz , 1 , 2 , 0x0000ff , 0.0 , 2100.0 , 3000.0 , 0 );
-							for ( unsigned int i_trk = 0 ; i_trk < ( closetDownStreamVertex->getAssociatedParticle() )->getParticles().size() ; ++i_trk )
-							{
-								ReconstructedParticle* vtxRP = ( closetDownStreamVertex->getAssociatedParticle() )->getParticles()[ i_trk ];
-								Track *vtxTrack = vtxRP->getTracks()[ 0 ];
-								double charge = ( vtxTrack->getOmega() > 0.0 ?  1.0 : -1.0 );
-								double pT = bField * 3.0e-4 / std::fabs( vtxTrack->getOmega() );
-								double Px = pT * std::cos( vtxTrack->getPhi() ) ;
-								double Py = pT * std::sin( vtxTrack->getPhi() ) ;
-								double Pz = pT * vtxTrack->getTanLambda() ;
-								double Xs = downStreamPosition[ 0 ];
-								double Ys = downStreamPosition[ 1 ];
-								double Zs = downStreamPosition[ 2 ];
-//								double Xs = vtxTrack->getReferencePoint()[ 0 ] - vtxTrack->getD0() * std::sin( vtxTrack->getPhi() );
-//								double Ys = vtxTrack->getReferencePoint()[ 1 ] + vtxTrack->getD0() * std::cos( vtxTrack->getPhi() );
-//								double Zs = vtxTrack->getReferencePoint()[ 2 ] + vtxTrack->getZ0();
-								DDMarlinCED::drawHelix( bField , charge , Xs , Ys , Zs , Px , Py , Pz , 1 , 2 , 0xb000e6 , 0.0 , 2100.0 , 3000.0 , 0 );
-							}
-						}
-
-//						secondayVertex = PCAatDownStreamLine;
+						secondayVertexStatus = 2;
+						SecondaryVertexPar.push_back( 0.0 );
+						SecondaryVertexPar.push_back( 0.0 );
+						SecondaryVertexPar.push_back( 0.0 );
+						SecondaryVertexPar.push_back( 0.0 );
+						SecondaryVertexPar.push_back( 0.0 );
+						SecondaryVertexPar.push_back( 0.0 );
 					}
 					else
 					{
-						secondayVertexStatus = 2;
+						float minFlightDistance = 1000000.0;
+						Vertex* closetDownStreamVertex = NULL;
+						bool foundDownStreamVertex = false;
+						TVector3 trueDSVertex;
+						TVector3 trueDSVertexMomentum;
+						streamlog_out(DEBUG1) << *linkedRecoLepton << std::endl;
+						Track *leptonTrack	= linkedRecoLepton->getTracks()[ 0 ];
+
+						int trueDSVertexStatus = getTrueDownStreamVertex( SLDLepton , trueDSVertex , trueDSVertexMomentum );
+						streamlog_out(DEBUG1) << "	Found " << trueDSVertexStatus << " particles at True Down Stream vertex" << std::endl;
+						streamlog_out(DEBUG1) << "	True Down Stream vertex at (x,y,z) = 	( " << trueDSVertex.X() << "	,	" << trueDSVertex.Y() << "	,	" << trueDSVertex.Z() << "	)" << std::endl;
+						streamlog_out(DEBUG1) << "	True Down Stream vertex Momentum (Px,Py,Pz) = 	( " << trueDSVertexMomentum.Px() << "	,	" << trueDSVertexMomentum.Py() << "	,	" << trueDSVertexMomentum.Pz() << "	)" << std::endl;
+						for ( unsigned int i_dsVTX = 0 ; i_dsVTX < DownStreamVertices.size() ; ++i_dsVTX )
+						{
+							Vertex* downStreamVertex = DownStreamVertices[ i_dsVTX ];
+							std::vector<double> PCAatLeptonTrack;
+							std::vector<double> PCAatDownStreamLine;
+							streamlog_out(DEBUG1) << "	Checking Down Stream vertex at (x,y,z) = 	( " << downStreamVertex->getPosition()[ 0 ] << "	,	" << downStreamVertex->getPosition()[ 1 ] << "	,	" << downStreamVertex->getPosition()[ 2 ] << "	)" << std::endl;
+							std::vector<double> dsVertex;
+							dsVertex.push_back( downStreamVertex->getPosition()[ 0 ] );
+							dsVertex.push_back( downStreamVertex->getPosition()[ 1 ] );
+							dsVertex.push_back( downStreamVertex->getPosition()[ 2 ] );
+							TVector3 dsMomentum = TVector3( downStreamVertex->getAssociatedParticle()->getMomentum()[ 0 ] , downStreamVertex->getAssociatedParticle()->getMomentum()[ 1 ] , downStreamVertex->getAssociatedParticle()->getMomentum()[ 2 ] );
+	//						float dsDistance = std::sqrt( pow( dsVertex[ 0 ] - primaryVertex[ 0 ] , 2 ) + pow( dsVertex[ 1 ] - primaryVertex[ 1 ] , 2 ) + pow( dsVertex[ 2 ] - primaryVertex[ 2 ] , 2 ) );
+							float dsDistance = intersectHelixLine( pLCEvent , leptonTrack , dsMomentum , dsVertex , PCAatLeptonTrack , PCAatDownStreamLine , inputPrimaryVertex );
+							if ( dsDistance < minFlightDistance )
+							{
+								closetDownStreamVertex = downStreamVertex;
+								minFlightDistance = dsDistance;
+								foundDownStreamVertex = true;
+							}
+							if ( m_displayEvent )
+							{
+								double bField = 3.5;//marlinutil::getBzAtOrigin();
+								double lepcharge = ( leptonTrack->getOmega() > 0.0 ?  1.0 : -1.0 );
+								double leppT = bField * 3.0e-4 / std::fabs( leptonTrack->getOmega() );
+								double lepPx = leppT * std::cos( leptonTrack->getPhi() ) ;
+								double lepPy = leppT * std::sin( leptonTrack->getPhi() ) ;
+								double lepPz = leppT * leptonTrack->getTanLambda() ;
+								double lepXs = leptonTrack->getReferencePoint()[ 0 ] - leptonTrack->getD0() * std::sin( leptonTrack->getPhi() );
+								double lepYs = leptonTrack->getReferencePoint()[ 1 ] + leptonTrack->getD0() * std::cos( leptonTrack->getPhi() );
+								double lepZs = leptonTrack->getReferencePoint()[ 2 ] + leptonTrack->getZ0();
+								 DDMarlinCED::drawHelix( bField , lepcharge , lepXs , lepYs , lepZs , lepPx , lepPy , lepPz , 1 , 2 , 0xff0000 , 0.0 , 2100.0 , 3000.0 , 0 );
+
+								ced_hit( PCAatLeptonTrack[ 0 ] , PCAatLeptonTrack[ 1 ] , PCAatLeptonTrack[ 2 ] , 2 , 1 , 0xff0000 );
+								ced_hit( PCAatLeptonTrack[ 0 ] , PCAatLeptonTrack[ 1 ] , PCAatLeptonTrack[ 2 ] , 0 , 1 , 0xff0000 );
+								// DDMarlinCED::drawHelix( bField , lepcharge , lepXs , lepYs , lepZs , lepPx , lepPy , lepPz , 1 , 2 , 0x000000 , 0.0 , 2100.0 , 3000.0 , 0 );
+
+	//							DDMarlinCED::drawHelix( bField , lepcharge , PCAatLeptonTrack[ 0 ] , PCAatLeptonTrack[ 1 ] , PCAatLeptonTrack[ 2 ] , lepPx , lepPy , lepPz , 1 , 2 , 0xff0000 , 0.0 , 2100.0 , 3000.0 , 0 );
+
+
+								double dsCharge = -1.0 * lepcharge;
+								double scale = ( secondayVertexStatus == 4 ? -1.0 : -100.0 );
+								double dsPx = scale * dsMomentum[ 0 ];
+								double dsPy = scale * dsMomentum[ 1 ];
+								double dsPz = scale * dsMomentum[ 2 ];
+								double dsXs = dsVertex[ 0 ];
+								double dsYs = dsVertex[ 1 ];
+								double dsZs = dsVertex[ 2 ];
+
+								ced_hit( PCAatDownStreamLine[ 0 ] , PCAatDownStreamLine[ 1 ] , PCAatDownStreamLine[ 2 ] , 2 , 1 , 0x0000ff );
+								ced_hit( PCAatDownStreamLine[ 0 ] , PCAatDownStreamLine[ 1 ] , PCAatDownStreamLine[ 2 ] , 0 , 1 , 0x0000a8 );
+								ced_hit( dsVertex[ 0 ] , dsVertex[ 1 ] , dsVertex[ 2 ] , 0 , 1 , 0x0000a8 );
+								ced_line( dsVertex[ 0 ] , dsVertex[ 1 ] , dsVertex[ 2 ] , PCAatDownStreamLine[ 0 ] , PCAatDownStreamLine[ 1 ] , PCAatDownStreamLine[ 2 ] , 2 , 2 , 0x0000a8 );
+	/*							double vMin = -1.0 * ( dsMomentum.Px() * ( dsVertex[ 0 ] - PCAatDownStreamLine[ 0 ] ) + dsMomentum.Py() * ( dsVertex[ 1 ] - PCAatDownStreamLine[ 1 ] ) + dsMomentum.Pz() * ( dsVertex[ 2 ] - PCAatDownStreamLine[ 2 ] ) ) / dsMomentum.Mag2();
+								double vMax = 0.0;
+								double dsTestX	= dsVertex[ 0 ] + dsMomentum.Px() * vMin;
+								double dsTestY	= dsVertex[ 1 ] + dsMomentum.Py() * vMin;
+								double dsTestZ	= dsVertex[ 2 ] + dsMomentum.Pz() * vMin;
+								ced_hit( dsTestX , dsTestY , dsTestZ , 0 , 1 , 0x0000a8 );
+								dsTestX	= dsVertex[ 0 ] + dsMomentum.Px() * vMax;
+								dsTestY	= dsVertex[ 1 ] + dsMomentum.Py() * vMax;
+								dsTestZ	= dsVertex[ 2 ] + dsMomentum.Pz() * vMax;
+								ced_hit( dsTestX , dsTestY , dsTestZ , 0 , 1 , 0x0000a8 );
+								for ( double v = vMin ; v <= vMax ; v += ( vMax - vMin ) / 1000.0 )
+								{
+									dsTestX	= dsVertex[ 0 ] + dsMomentum.Px() * v;
+									dsTestY	= dsVertex[ 1 ] + dsMomentum.Py() * v;
+									dsTestZ	= dsVertex[ 2 ] + dsMomentum.Pz() * v;
+									ced_hit( dsTestX , dsTestY , dsTestZ , 0 , 1 , 0x0000a8 );
+								}
+	*/
+								DDMarlinCED::drawHelix( bField , dsCharge , dsXs , dsYs , dsZs , dsPx , dsPy , dsPz , 1 , 2 , 0x0000ff , 0.0 , 2100.0 , 3000.0 , 0 );
+								for ( unsigned int i_trk = 0 ; i_trk < ( downStreamVertex->getAssociatedParticle() )->getParticles().size() ; ++i_trk )
+								{
+									ReconstructedParticle* vtxRP = ( downStreamVertex->getAssociatedParticle() )->getParticles()[ i_trk ];
+									Track *vtxTrack = vtxRP->getTracks()[ 0 ];
+									double charge = ( vtxTrack->getOmega() > 0.0 ?  1.0 : -1.0 );
+									double pT = bField * 3.0e-4 / std::fabs( vtxTrack->getOmega() );
+									double Px = pT * std::cos( vtxTrack->getPhi() ) ;
+									double Py = pT * std::sin( vtxTrack->getPhi() ) ;
+									double Pz = pT * vtxTrack->getTanLambda() ;
+									double Xs = dsVertex[ 0 ];
+									double Ys = dsVertex[ 1 ];
+									double Zs = dsVertex[ 2 ];
+									DDMarlinCED::drawHelix( bField , charge , Xs , Ys , Zs , Px , Py , Pz , 1 , 2 , 0xb000e6 , 0.0 , 2100.0 , 3000.0 , 0 );
+								}
+							}
+						}
+						if ( foundDownStreamVertex )
+						{
+							streamlog_out(DEBUG1) << "	There are " << ( closetDownStreamVertex->getAssociatedParticle() )->getParticles().size() << " particle in DownStream Vertex" << std::endl;
+							std::vector<double> PCAatLeptonTrack;
+							std::vector<double> PCAatDownStreamLine;
+							TVector3 dsMomentum = TVector3( closetDownStreamVertex->getAssociatedParticle()->getMomentum()[ 0 ] , closetDownStreamVertex->getAssociatedParticle()->getMomentum()[ 1 ] , closetDownStreamVertex->getAssociatedParticle()->getMomentum()[ 2 ] );
+							std::vector<double> downStreamPosition;
+							downStreamPosition.push_back( closetDownStreamVertex->getPosition()[ 0 ] );
+							downStreamPosition.push_back( closetDownStreamVertex->getPosition()[ 1 ] );
+							downStreamPosition.push_back( closetDownStreamVertex->getPosition()[ 2 ] );
+
+
+							int n_dsTracks = 0;
+							for ( unsigned int i_dsPFOs = 0 ; i_dsPFOs < ( closetDownStreamVertex->getAssociatedParticle() )->getParticles().size() ; ++i_dsPFOs ) n_dsTracks += ( ( closetDownStreamVertex->getAssociatedParticle() )->getParticles()[ i_dsPFOs ] )->getTracks().size();
+							if ( n_dsTracks == 3 || n_dsTracks == 5 || n_dsTracks == 7 || n_dsTracks == 9 )
+							{
+	//							helicesDistance = intersectHelixHelix( linkedRecoLepton , dsMomentum , downStreamPosition , PCAatLeptonTrack , PCAatDownStreamLine );
+								helicesDistance = intersectHelixLine( pLCEvent , leptonTrack , dsMomentum , downStreamPosition , PCAatLeptonTrack , PCAatDownStreamLine , inputPrimaryVertex );
+								secondayVertexStatus = 4;
+							}
+							else
+							{
+								helicesDistance = intersectHelixLine( pLCEvent , leptonTrack , dsMomentum , downStreamPosition , PCAatLeptonTrack , PCAatDownStreamLine , inputPrimaryVertex );
+								secondayVertexStatus = 5;
+							}
+							streamlog_out(DEBUG1) << "	Secondary Vertex on Lepton Track:(" << PCAatLeptonTrack[ 0 ] << "	,	" << PCAatLeptonTrack[ 1 ] << "	,	" << PCAatLeptonTrack[ 2 ] << "	)" << std::endl;
+							streamlog_out(DEBUG1) << "	Secondary Vertex on DownStream Line:(" << PCAatDownStreamLine[ 0 ] << "	,	" << PCAatDownStreamLine[ 1 ] << "	,	" << PCAatDownStreamLine[ 2 ] << "	)" << std::endl;
+							streamlog_out(DEBUG1) << "	Distance of Down Stream helix to SLDLepton helix = " << helicesDistance << " mm" << std::endl;
+							double lepXs = leptonTrack->getReferencePoint()[ 0 ] - leptonTrack->getD0() * std::sin( leptonTrack->getPhi() );
+							double lepYs = leptonTrack->getReferencePoint()[ 1 ] + leptonTrack->getD0() * std::cos( leptonTrack->getPhi() );
+							double lepZs = leptonTrack->getReferencePoint()[ 2 ] + leptonTrack->getZ0();
+							double lepRs = std::sqrt( std::pow( lepXs - primaryVertex[ 0 ] , 2 ) + std::pow( lepYs - primaryVertex[ 1 ] , 2 ) + std::pow( lepZs - primaryVertex[ 2 ] , 2 ) );
+							double dsRs  = std::sqrt( std::pow( downStreamPosition[ 0 ] - primaryVertex[ 0 ] , 2 ) + std::pow( downStreamPosition[ 1 ] - primaryVertex[ 1 ] , 2 ) + std::pow( downStreamPosition[ 2 ] - primaryVertex[ 2 ] , 2 ) );
+							if ( lepRs <= dsRs )
+							{
+								secondayVertex = PCAatLeptonTrack;
+							}
+							else
+							{
+								secondayVertex = PCAatDownStreamLine;
+							}
+	/*						if ( m_displayEvent )
+							{
+								double bField = 3.5;//marlinutil::getBzAtOrigin();
+								double lepcharge = ( leptonTrack->getOmega() > 0.0 ?  1.0 : -1.0 );
+								double leppT = bField * 3.0e-4 / std::fabs( leptonTrack->getOmega() );
+								double lepPx = leppT * std::cos( leptonTrack->getPhi() ) ;
+								double lepPy = leppT * std::sin( leptonTrack->getPhi() ) ;
+								double lepPz = leppT * leptonTrack->getTanLambda() ;
+								lepXs = leptonTrack->getReferencePoint()[ 0 ] - leptonTrack->getD0() * std::sin( leptonTrack->getPhi() );
+								lepYs = leptonTrack->getReferencePoint()[ 1 ] + leptonTrack->getD0() * std::cos( leptonTrack->getPhi() );
+								lepZs = leptonTrack->getReferencePoint()[ 2 ] + leptonTrack->getZ0();
+								DDMarlinCED::drawHelix( bField , lepcharge , lepXs , lepYs , lepZs , lepPx , lepPy , lepPz , 1 , 2 , 0xff0000 , 0.0 , 2100.0 , 3000.0 , 0 );
+								DDMarlinCED::drawHelix( -bField , -lepcharge , lepXs , lepYs , lepZs , lepPx , lepPy , lepPz , 1 , 2 , 0xff0000 , 0.0 , 2100.0 , 3000.0 , 0 );
+								DDMarlinCED::drawHelix( bField , lepcharge , 0 , 0 , 0 , lepPx , lepPy , lepPz , 1 , 2 , 0x00ff40 , 0.0 , 2100.0 , 3000.0 , 0 );
+								DDMarlinCED::drawHelix( -bField , -lepcharge , 0 , 0 , 0 , lepPx , lepPy , lepPz , 1 , 2 , 0x00ff40 , 0.0 , 2100.0 , 3000.0 , 0 );
+								DDMarlinCED::drawHelix( bField , lepcharge , -3.34e+00 , 1.65e-01 , 5.36e+00 , -1.706949 , 0.402711 , 4.861839 , 1 , 2 , 0x000000 , 0.0 , 2100.0 , 3000.0 , 0 );
+								DDMarlinCED::drawHelix( -bField , -lepcharge , -3.34e+00 , 1.65e-01 , 5.36e+00 , -1.706949 , 0.402711 , 4.861839 , 1 , 2 , 0x000000 , 0.0 , 2100.0 , 3000.0 , 0 );
+
+								ced_hit( PCAatLeptonTrack[ 0 ] , PCAatLeptonTrack[ 1 ] , PCAatLeptonTrack[ 2 ] , 2 , 1 , 0xff0000 );
+								ced_hit( PCAatLeptonTrack[ 0 ] , PCAatLeptonTrack[ 1 ] , PCAatLeptonTrack[ 2 ] , 0 , 1 , 0xff0000 );
+	//							DDMarlinCED::drawHelix( bField , lepcharge , PCAatLeptonTrack[ 0 ] , PCAatLeptonTrack[ 1 ] , PCAatLeptonTrack[ 2 ] , lepPx , lepPy , lepPz , 1 , 2 , 0x000000 , 0.0 , 2100.0 , 3000.0 , 0 );
+
+
+								double dsCharge = -1.0 * lepcharge;
+								double scale = ( secondayVertexStatus == 4 ? -1.0 : -100.0 );
+								double dsPx = scale * dsMomentum[ 0 ];
+								double dsPy = scale * dsMomentum[ 1 ];
+								double dsPz = scale * dsMomentum[ 2 ];
+								double dsXs = downStreamPosition[ 0 ];
+								double dsYs = downStreamPosition[ 1 ];
+								double dsZs = downStreamPosition[ 2 ];
+
+								ced_hit( PCAatDownStreamLine[ 0 ] , PCAatDownStreamLine[ 1 ] , PCAatDownStreamLine[ 2 ] , 0 , 1 , 0x0000a8 );
+								ced_hit( downStreamPosition[ 0 ] , downStreamPosition[ 1 ] , downStreamPosition[ 2 ] , 0 , 1 , 0x0000a8 );
+								double vMin = -1.0 * ( dsMomentum.Px() * ( downStreamPosition[ 0 ] - PCAatDownStreamLine[ 0 ] ) + dsMomentum.Py() * ( downStreamPosition[ 1 ] - PCAatDownStreamLine[ 1 ] ) + dsMomentum.Pz() * ( downStreamPosition[ 2 ] - PCAatDownStreamLine[ 2 ] ) ) / dsMomentum.Mag2();
+								double vMax = 0.0;
+								double dsTestX	= downStreamPosition[ 0 ] + dsMomentum.Px() * vMin;
+								double dsTestY	= downStreamPosition[ 1 ] + dsMomentum.Py() * vMin;
+								double dsTestZ	= downStreamPosition[ 2 ] + dsMomentum.Pz() * vMin;
+								ced_hit( dsTestX , dsTestY , dsTestZ , 0 , 1 , 0x0000a8 );
+								dsTestX	= downStreamPosition[ 0 ] + dsMomentum.Px() * vMax;
+								dsTestY	= downStreamPosition[ 1 ] + dsMomentum.Py() * vMax;
+								dsTestZ	= downStreamPosition[ 2 ] + dsMomentum.Pz() * vMax;
+								ced_hit( dsTestX , dsTestY , dsTestZ , 0 , 1 , 0x0000a8 );
+								for ( double v = vMin ; v <= vMax ; v += ( vMax - vMin ) / 1000.0 )
+								{
+									dsTestX	= downStreamPosition[ 0 ] + dsMomentum.Px() * v;
+									dsTestY	= downStreamPosition[ 1 ] + dsMomentum.Py() * v;
+									dsTestZ	= downStreamPosition[ 2 ] + dsMomentum.Pz() * v;
+									ced_hit( dsTestX , dsTestY , dsTestZ , 0 , 1 , 0x0000a8 );
+								}
+
+								ced_hit( PCAatDownStreamLine[ 0 ] , PCAatDownStreamLine[ 1 ] , PCAatDownStreamLine[ 2 ] , 2 , 1 , 0x0000ff );
+	//							ced_hit( downStreamPosition[ 0 ] , downStreamPosition[ 1 ] , downStreamPosition[ 2 ] , 2 , 1 , 0x0000ff );
+	//							DDMarlinCED::drawHelix( bField , dsCharge , dsXs , dsYs , dsZs , dsPx , dsPy , dsPz , 1 , 2 , 0x0000ff , 0.0 , 2100.0 , 3000.0 , 0 );
+								for ( unsigned int i_trk = 0 ; i_trk < ( closetDownStreamVertex->getAssociatedParticle() )->getParticles().size() ; ++i_trk )
+								{
+									ReconstructedParticle* vtxRP = ( closetDownStreamVertex->getAssociatedParticle() )->getParticles()[ i_trk ];
+									Track *vtxTrack = vtxRP->getTracks()[ 0 ];
+									double charge = ( vtxTrack->getOmega() > 0.0 ?  1.0 : -1.0 );
+									double pT = bField * 3.0e-4 / std::fabs( vtxTrack->getOmega() );
+									double Px = pT * std::cos( vtxTrack->getPhi() ) ;
+									double Py = pT * std::sin( vtxTrack->getPhi() ) ;
+									double Pz = pT * vtxTrack->getTanLambda() ;
+									double Xs = downStreamPosition[ 0 ];
+									double Ys = downStreamPosition[ 1 ];
+									double Zs = downStreamPosition[ 2 ];
+	//								double Xs = vtxTrack->getReferencePoint()[ 0 ] - vtxTrack->getD0() * std::sin( vtxTrack->getPhi() );
+	//								double Ys = vtxTrack->getReferencePoint()[ 1 ] + vtxTrack->getD0() * std::cos( vtxTrack->getPhi() );
+	//								double Zs = vtxTrack->getReferencePoint()[ 2 ] + vtxTrack->getZ0();
+	//								DDMarlinCED::drawHelix( bField , charge , Xs , Ys , Zs , Px , Py , Pz , 1 , 2 , 0xb000e6 , 0.0 , 2100.0 , 3000.0 , 0 );
+								}
+							}
+	*/
+	//						secondayVertex = PCAatDownStreamLine;
+						}
+						else
+						{
+							secondayVertexStatus = 2;
+						}
+						SecondaryVertexPar.push_back( trueDSVertex.X() );
+						SecondaryVertexPar.push_back( trueDSVertex.Y() );
+						SecondaryVertexPar.push_back( trueDSVertex.Z() );
+						SecondaryVertexPar.push_back( closetDownStreamVertex->getPosition()[ 0 ] );
+						SecondaryVertexPar.push_back( closetDownStreamVertex->getPosition()[ 1 ] );
+						SecondaryVertexPar.push_back( closetDownStreamVertex->getPosition()[ 2 ] );
 					}
-					SecondaryVertexPar.push_back( trueDSVertex.X() );
-					SecondaryVertexPar.push_back( trueDSVertex.Y() );
-					SecondaryVertexPar.push_back( trueDSVertex.Z() );
-					SecondaryVertexPar.push_back( closetDownStreamVertex->getPosition()[ 0 ] );
-					SecondaryVertexPar.push_back( closetDownStreamVertex->getPosition()[ 1 ] );
-					SecondaryVertexPar.push_back( closetDownStreamVertex->getPosition()[ 2 ] );
 				}
 			}
 		}
@@ -725,7 +720,7 @@ float intersectHelixHelix( 	EVENT::ReconstructedParticle *linkedRecoLepton , TVe
 	lepZs = leptonHelix.getReferencePoint()[ 2 ] + leptonHelix.getZ0();
 */
 
-	DDMarlinCED::drawHelix( m_Bfield , lepcharge , lepXs , lepYs , lepZs , lepPx , lepPy , lepPz , 2 , 1 , 0x000000 , 0.0 , 2100.0 , 3000.0 , 0 );
+//	DDMarlinCED::drawHelix( m_Bfield , lepcharge , lepXs , lepYs , lepZs , lepPx , lepPy , lepPz , 2 , 1 , 0x000000 , 0.0 , 2100.0 , 3000.0 , 0 );
 
 
 
@@ -1027,4 +1022,48 @@ int getTrueVertex( EVENT::MCParticle *MotherParticle , TVector3 &trueDSVertex ,T
 		}
 	}
 	return nChargedParticles;
+}
+
+void drawMCParticles( EVENT::MCParticle *MotherHadron )
+{
+	float m_Bfield = 3.5;
+	ced_line( MotherHadron->getEndpoint()[ 0 ] , MotherHadron->getEndpoint()[ 1 ] , MotherHadron->getEndpoint()[ 2 ] , MotherHadron->getVertex()[ 0 ] , MotherHadron->getVertex()[ 1 ] , MotherHadron->getVertex()[ 2 ] , 2 , 1 , 0x474747 );
+	for ( unsigned int i_daughter = 0 ; i_daughter < MotherHadron->getDaughters().size() ; ++i_daughter )
+	{
+		MCParticle *duaughter = MotherHadron->getDaughters()[ i_daughter ];
+		if ( duaughter->getGeneratorStatus() == 1 )
+		{
+			if ( std::fabs( duaughter->getPDG() ) == 12 || std::fabs( duaughter->getPDG() ) == 14 || std::fabs( duaughter->getPDG() ) == 16 )
+			{
+				DDMarlinCED::drawHelix( m_Bfield , +1.0 , duaughter->getVertex()[ 0 ] , duaughter->getVertex()[ 1 ] , duaughter->getVertex()[ 2 ] , 100.0 * duaughter->getMomentum()[ 0 ] , 100.0 * duaughter->getMomentum()[ 1 ] , 100.0 * duaughter->getMomentum()[ 2 ] , 2 , 1 , 0x949494 , 0.0 , 2100.0 , 3000.0 , 0 );
+			}
+			else if ( std::fabs( duaughter->getPDG() ) == 11 || std::fabs( duaughter->getPDG() ) == 13 || std::fabs( duaughter->getPDG() ) == 15 )
+			{
+				DDMarlinCED::drawHelix( m_Bfield , +1.0 , duaughter->getVertex()[ 0 ] , duaughter->getVertex()[ 1 ] , duaughter->getVertex()[ 2 ] , 100.0 * duaughter->getMomentum()[ 0 ] , 100.0 * duaughter->getMomentum()[ 1 ] , 100.0 * duaughter->getMomentum()[ 2 ] , 2 , 1 , 0xf76f6f , 0.0 , 2100.0 , 3000.0 , 0 );
+			}
+			else if ( std::fabs( duaughter->getCharge() ) <=0.1 )
+			{
+				DDMarlinCED::drawHelix( m_Bfield , +1.0 , duaughter->getVertex()[ 0 ] , duaughter->getVertex()[ 1 ] , duaughter->getVertex()[ 2 ] , 100.0 * duaughter->getMomentum()[ 0 ] , 100.0 * duaughter->getMomentum()[ 1 ] , 100.0 * duaughter->getMomentum()[ 2 ] , 2 , 1 , 0x56fc5b , 0.0 , 2100.0 , 3000.0 , 0 );
+			}
+			else
+			{
+				DDMarlinCED::drawHelix( m_Bfield , duaughter->getCharge() , duaughter->getVertex()[ 0 ] , duaughter->getVertex()[ 1 ] , duaughter->getVertex()[ 2 ] , duaughter->getMomentum()[ 0 ] , duaughter->getMomentum()[ 1 ] , duaughter->getMomentum()[ 2 ] , 2 , 1 , 0x5a6ffa , 0.0 , 2100.0 , 3000.0 , 0 );
+			}
+		}
+		else if ( duaughter->getGeneratorStatus() == 2 )
+		{
+			drawMCParticles( duaughter );
+		}
+		else
+		{
+			if ( std::fabs( duaughter->getCharge() ) <=0.1 )
+			{
+				DDMarlinCED::drawHelix( m_Bfield , +1.0 , duaughter->getVertex()[ 0 ] , duaughter->getVertex()[ 1 ] , duaughter->getVertex()[ 2 ] , 100.0 * duaughter->getMomentum()[ 0 ] , 100.0 * duaughter->getMomentum()[ 1 ] , 100.0 * duaughter->getMomentum()[ 2 ] , 2 , 1 , 0x403131 , 0.0 , 2100.0 , 3000.0 , 0 );
+			}
+			else
+			{
+				DDMarlinCED::drawHelix( m_Bfield , duaughter->getCharge() , duaughter->getVertex()[ 0 ] , duaughter->getVertex()[ 1 ] , duaughter->getVertex()[ 2 ] , duaughter->getMomentum()[ 0 ] , duaughter->getMomentum()[ 1 ] , duaughter->getMomentum()[ 2 ] , 2 , 1 , 0x403131 , 0.0 , 2100.0 , 3000.0 , 0 );
+			}
+		}
+	}
 }

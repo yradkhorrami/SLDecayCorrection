@@ -415,7 +415,7 @@ void SLDCorrection::init()
 		h_foundVertex->GetXaxis()->SetBinLabel(2,"vertex found");
 		h_foundVertex->GetYaxis()->SetBinLabel(1,"vertex not found");
 		h_foundVertex->GetYaxis()->SetBinLabel(2,"vertex found");
-		h_secondaryVertex = new TH1F( "secondary_vertices" , ";" , 9 , 0 , 9 ); n_secondaryVertex = 0;
+		h_secondaryVertex = new TH1F( "secondary_vertices" , ";" , 11 , 0 , 11 ); n_secondaryVertex = 0;
 		h_secondaryVertex->GetXaxis()->SetBinLabel(1,"reco lep not found");
 		h_secondaryVertex->GetXaxis()->SetBinLabel(2,"reco lep not in jet");
 		h_secondaryVertex->GetXaxis()->SetBinLabel(3,"lep in Sec. Vtx");
@@ -425,6 +425,8 @@ void SLDCorrection::init()
 		h_secondaryVertex->GetXaxis()->SetBinLabel(7,"lead. par. in jet (Ch.)");
 		h_secondaryVertex->GetXaxis()->SetBinLabel(8,"lead. par. in jet (N.)");
 		h_secondaryVertex->GetXaxis()->SetBinLabel(9,"lead. par. in jet (#gamma)");
+		h_secondaryVertex->GetXaxis()->SetBinLabel(10,"SLD-lep");
+		h_secondaryVertex->GetXaxis()->SetBinLabel(11,"lep in Prim. Vtx");
 	//	h_secondaryVertex->GetXaxis()->SetBinLabel(6,"other(?)");
 		h_parentHadronCharge = new TH1I( "parentHadronCharge" , "; Parent Hadron Charge" , 5 , 0 , 5 );
 		h_parentHadronCharge->GetXaxis()->SetBinLabel(1,"-2");

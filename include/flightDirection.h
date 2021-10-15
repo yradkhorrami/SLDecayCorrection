@@ -21,5 +21,7 @@ float intersectHelixLine( EVENT::LCEvent *pLCEvent , EVENT::Track *track , TVect
 int getTrueDownStreamVertex( EVENT::MCParticle *SLDLepton , TVector3 &trueDSVertex , TVector3 &trueDSVertexMomentum );
 int getTrueVertex( EVENT::MCParticle *MotherParticle , TVector3 &trueDSVertex ,TVector3 &trueDSVertexMomentum );
 
+void drawMCParticles( EVENT::MCParticle *MotherHadron );
+
 
 #endif
