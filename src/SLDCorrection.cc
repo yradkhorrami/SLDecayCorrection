@@ -760,7 +760,7 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 	streamlog_out(DEBUG2) << "			Used:(	" << "qqq" << "	, " << chargedFourMomentum.M() << "	, " << chargedFourMomentum.Px() << "	, " << chargedFourMomentum.Py() << "	, " << chargedFourMomentum.Pz() << "	, " << chargedFourMomentum.E() << "	, " << (int)restCharge << "		)" << std::endl;
 	streamlog_out(DEBUG2) << "" << std::endl;
 	getNeutralFourMomentum( pLCEvent , SLDLepton  , m_cheatNeutral4momentum , neutralFourMomentum , trueNeutralFourMomentum , m_RecoMCTruthLinkCollection , m_MCTruthRecoLinkCollection );
-	streamlog_out(DEBUG2) << "			Used:(	" << "nnn" << "	, " << chargedFourMomentum.M() << "	, " << chargedFourMomentum.Px() << "	, " << chargedFourMomentum.Py() << "	, " << chargedFourMomentum.Pz() << "	, " << chargedFourMomentum.E() << "	, " << "0" << "		)" << std::endl;
+	streamlog_out(DEBUG2) << "			Used:(	" << "nnn" << "	, " << neutralFourMomentum.M() << "	, " << neutralFourMomentum.Px() << "	, " << neutralFourMomentum.Py() << "	, " << neutralFourMomentum.Pz() << "	, " << neutralFourMomentum.E() << "	, " << "0" << "		)" << std::endl;
 	streamlog_out(DEBUG2) << "" << std::endl;
 	streamlog_out(DEBUG2) << "			     (  X		, Y		, Z	)" << std::endl;
 	int flightDirectionStatus = getParentHadronFlightDirection( pLCEvent , SLDLepton , trueFlightDirection , recoFlightDirection , m_inputPrimaryVertex , m_inputBuildUpVertex , m_inputJetCollection , m_vertexingScenario , m_RecoMCTruthLinkCollection , m_MCTruthRecoLinkCollection , helicesDistance , SecondaryVertexPar , m_displayEvent , this );
