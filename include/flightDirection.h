@@ -11,7 +11,10 @@
 #include <marlinutil/HelixClass.h>
 #include "SLDCorrection.h"
 
-int getPrimaryVertex( EVENT::LCEvent *pLCEvent , EVENT::MCParticle *SLDLepton , std::string inputPrimaryVertex , bool cheatVertices , std::vector<double> &primaryVertex , bool m_displayEvent );
+void cheatTrueFlightDirection( EVENT::MCParticle *SLDLepton , TVector3 &trueFlightDirection , bool m_displayEvent );
+int getStartVertexPosition( EVENT::Vertex *startVertex , std::vector<double> &startVertexPosition , bool m_displayEvent );
+int getEndVertexPosition( EVENT::Vertex *primaryVtx , std::vector<EVENT::Vertex *> buildUpVertices , EVENT::ReconstructedParticle *linkedRecoLepton , std::vector<double> &endVertexPosition , double helicesDistance , bool m_displayEvent );
+//int getPrimaryVertex( EVENT::LCEvent *pLCEvent , EVENT::MCParticle *SLDLepton , std::string inputPrimaryVertex , bool cheatVertices , std::vector<double> &primaryVertex , bool m_displayEvent );
 int getParentHadronFlightDirection( EVENT::LCEvent *pLCEvent , EVENT::MCParticle *SLDLepton , TVector3 &trueFlightDirection , TVector3 &recoFlightDirection , std::string inputPrimaryVertex , std::string inputBuildUpVertex , std::string inputJetCollection , int vertexingScenario , std::string recoMCTruthLinkCollection , std::string mcTruthRecoLinkCollection , float &helicesDistance , std::vector<double> &SecondaryVertexPar , bool m_displayEvent , SLDCorrection* thisProcessor );
 int getSecondaryVertex( EVENT::LCEvent *pLCEvent , EVENT::MCParticle *SLDLepton , std::string inputPrimaryVertex , std::string inputBuildUpVertex , bool cheatVertices , std::vector<double> &secondayVertex , std::string inputJetCollection , std::string recoMCTruthLinkCollection , std::string mcTruthRecoLinkCollection , float &helicesDistance , std::vector<double> &SecondaryVertexPar , bool m_displayEvent );
 int getJetAxis( EVENT::LCEvent *pLCEvent , EVENT::MCParticle *SLDLepton , TVector3 &jetAxis , std::string inputJetCollection , std::string recoMCTruthLinkCollection , std::string mcTruthRecoLinkCollection );

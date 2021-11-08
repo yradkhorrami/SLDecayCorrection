@@ -193,6 +193,9 @@ private:
 	DoubleVector				m_SecVertexResidualX{};
 	DoubleVector				m_SecVertexResidualY{};
 	DoubleVector				m_SecVertexResidualZ{};
+	DoubleVector				m_parentHadronMass{};
+	DoubleVector				m_parentHadronFlightDistance{};
+	DoubleVector				m_daughterHadronMass{};
 	TH1F					*h_NuPxResidual{};
 	TH1F					*h_NuPyResidual{};
 	TH1F					*h_NuPzResidual{};

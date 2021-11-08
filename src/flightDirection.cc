@@ -9,6 +9,14 @@
 using namespace lcio;
 using namespace marlin;
 
+void cheatTrueFlightDirection( EVENT::MCParticle *SLDLepton , TVector3 &trueFlightDirection , bool m_displayEvent )
+{
+	const EVENT::MCParticle *MotherHadron = SLDLepton->getParents()[ 0 ];
+	trueFlightDirection = TVector3( MotherHadron->getMomentum()[ 0 ] , MotherHadron->getMomentum()[ 1 ] , MotherHadron->getMomentum()[ 2 ] );
+	trueFlightDirection.SetMag(1.0);
+	if ( m_displayEvent ) ced_hit( MotherHadron->getVertex()[ 0 ] , MotherHadron->getVertex()[ 1 ] , MotherHadron->getVertex()[ 2 ] , 2 , 2 , 0x000000 );
+}
+
 int getParentHadronFlightDirection( 	EVENT::LCEvent *pLCEvent , EVENT::MCParticle *SLDLepton ,
 					TVector3 &trueFlightDirection , TVector3 &recoFlightDirection ,
 					std::string inputPrimaryVertex , std::string inputBuildUpVertex ,
@@ -17,11 +25,10 @@ int getParentHadronFlightDirection( 	EVENT::LCEvent *pLCEvent , EVENT::MCParticl
 					float &helicesDistance , std::vector<double> &SecondaryVertexPar , bool m_displayEvent , SLDCorrection* thisProcessor )
 {
 	int flightDirectionStatus = 0;
-	std::vector<double> primaryVertex;
+	std::vector<double> startVertexPosition;
+	std::vector<double> endVertexPosition;
 	std::vector<double> secondayVertex;
 	std::vector<double> tritaryVertex;
-
-
 
 	if ( m_displayEvent )
 	{
@@ -40,22 +47,30 @@ int getParentHadronFlightDirection( 	EVENT::LCEvent *pLCEvent , EVENT::MCParticl
 	streamlog_out(DEBUG1) << "		Test 2, |flightDirection| = " << trueFlightDirection.Mag() << std::endl;
 	trueFlightDirection.SetMag(1.0);
 
-	int primaryVertexStatus = getPrimaryVertex( pLCEvent , SLDLepton , inputPrimaryVertex , false , primaryVertex , m_displayEvent );
+	ReconstructedParticle* linkedRecoLepton = getLinkedPFO( pLCEvent , SLDLepton , recoMCTruthLinkCollection , mcTruthRecoLinkCollection , true , false );
+	LCCollection *primaryVertexCollection = pLCEvent->getCollection( inputPrimaryVertex );
+	Vertex* primaryVtx = dynamic_cast<Vertex*>( primaryVertexCollection->getElementAt( 0 ) );
+
+	std::vector<EVENT::Vertex *> buildUpVertices;
+	int startVertexStatus = getStartVertexPosition( primaryVtx , startVertexPosition , m_displayEvent );
+	int endVertexStatus = getEndVertexPosition( primaryVtx , buildUpVertices , linkedRecoLepton , endVertexPosition , helicesDistance , m_displayEvent );
+
+
 	int secondayVertexStatus = getSecondaryVertex( pLCEvent , SLDLepton , inputPrimaryVertex , inputBuildUpVertex , false , secondayVertex , inputJetCollection , recoMCTruthLinkCollection , mcTruthRecoLinkCollection , helicesDistance , SecondaryVertexPar , m_displayEvent );
 	SecondaryVertexPar.push_back( MotherHadron->getEndpoint()[ 0 ] );
 	SecondaryVertexPar.push_back( MotherHadron->getEndpoint()[ 1 ] );
 	SecondaryVertexPar.push_back( MotherHadron->getEndpoint()[ 2 ] );
 	streamlog_out(DEBUG1) << "	Parent Hadron Charge: " << MotherHadron->getCharge() << std::endl;
-	streamlog_out(DEBUG1) << "	Primary Vertex status: " << primaryVertexStatus << std::endl;
+	streamlog_out(DEBUG1) << "	Primary Vertex status: " << startVertexStatus << std::endl;
 	streamlog_out(DEBUG1) << "	Secondary Vertex status: " << secondayVertexStatus << std::endl;
 	streamlog_out(DEBUG1) << "		Secondary Vertex" << std::endl;
 	streamlog_out(DEBUG1) << "			True:(	" << SLDLepton->getVertex()[ 0 ] << "	, " << SLDLepton->getVertex()[ 1 ] << "	, " << SLDLepton->getVertex()[ 2 ] << " 		)" << std::endl;
 
-	if ( ( secondayVertexStatus == 3 || secondayVertexStatus == 4 || secondayVertexStatus == 5 ) && primaryVertexStatus == 2 )
+	if ( ( secondayVertexStatus == 3 || secondayVertexStatus == 4 || secondayVertexStatus == 5 ) && startVertexStatus == 2 )
 	{
 		flightDirectionStatus = secondayVertexStatus;
 		streamlog_out(DEBUG1) << "			Reco:(	" << secondayVertex[ 0 ] << "	, " << secondayVertex[ 1 ] << "	, " << secondayVertex[ 2 ] << " 		)" << std::endl;
-		recoFlightDirection = TVector3( secondayVertex[ 0 ] - primaryVertex[ 0 ] , secondayVertex[ 1 ] - primaryVertex[ 1 ] , secondayVertex[ 2 ] - primaryVertex[ 2 ] );
+		recoFlightDirection = TVector3( secondayVertex[ 0 ] - startVertexPosition[ 0 ] , secondayVertex[ 1 ] - startVertexPosition[ 1 ] , secondayVertex[ 2 ] - startVertexPosition[ 2 ] );
 		streamlog_out(DEBUG1) << "		Test 3, |flightDirection| = " << recoFlightDirection.Mag() << std::endl;
 		recoFlightDirection.SetMag( 1.0 );
 		streamlog_out(DEBUG1) << "			Flight Direction Scenario: finding primary/secondary vertices and reconstruct flight direction" << std::endl;
@@ -64,7 +79,7 @@ int getParentHadronFlightDirection( 	EVENT::LCEvent *pLCEvent , EVENT::MCParticl
 	{
 		if ( vertexingScenario == 1 )
 		{
-			ReconstructedParticle* linkedRecoLepton = getLinkedPFO( pLCEvent , SLDLepton , recoMCTruthLinkCollection , mcTruthRecoLinkCollection , true , false );
+//			ReconstructedParticle* linkedRecoLepton = getLinkedPFO( pLCEvent , SLDLepton , recoMCTruthLinkCollection , mcTruthRecoLinkCollection , true , false );
 			recoFlightDirection = TVector3( linkedRecoLepton->getMomentum()[ 0 ] , linkedRecoLepton->getMomentum()[ 1 ] , linkedRecoLepton->getMomentum()[ 2 ] );
 			streamlog_out(DEBUG1) << "		Test 4, |flightDirection| = " << recoFlightDirection.Mag() << std::endl;
 			recoFlightDirection.SetMag( 1.0 );
@@ -134,49 +149,35 @@ int getParentHadronFlightDirection( 	EVENT::LCEvent *pLCEvent , EVENT::MCParticl
 	return flightDirectionStatus;
 }
 
-int getPrimaryVertex( 	EVENT::LCEvent *pLCEvent , EVENT::MCParticle *SLDLepton ,
-			std::string inputPrimaryVertex , bool cheatVertices ,
-			std::vector<double> &primaryVertex , bool m_displayEvent )
+int getStartVertexPosition( 	EVENT::Vertex *startVertex , std::vector<double> &startVertexPosition , bool m_displayEvent )
 {
-	int primaryVertexStatus = 0;
-
-	try
+	int startVertexPositionStatus = 0;
+	if( startVertex != NULL )
 	{
-		LCCollection *primaryVertexCollection = pLCEvent->getCollection( inputPrimaryVertex );
-		streamlog_out(DEBUG0) << "	There is " << primaryVertexCollection->getNumberOfElements() << " Primary Vertex" << std::endl;
-	}
-	catch (DataNotAvailableException &e)
-	{
-		streamlog_out(WARNING) << "Could not find the Primary Vertex collection" << std::endl;
-		return -1;
-	}
-
-	if ( cheatVertices )
-	{
-		const EVENT::MCParticle *MotherHadron = SLDLepton->getParents()[ 0 ];
-		primaryVertex.push_back( MotherHadron->getVertex()[ 0 ] );
-		primaryVertex.push_back( MotherHadron->getVertex()[ 1 ] );
-		primaryVertex.push_back( MotherHadron->getVertex()[ 2 ] );
-		primaryVertexStatus = 1;
-		streamlog_out(DEBUG0) << "		true primary Vertex (x,y,z): 		" << primaryVertex[ 0 ] << "	, " << primaryVertex[ 1 ] << "	, " << primaryVertex[ 2 ] << std::endl;
+		streamlog_out(DEBUG0) << "	There is a start vertex for parent hadron" << std::endl;
+		startVertexPosition.push_back( startVertex->getPosition()[ 0 ] );
+		startVertexPosition.push_back( startVertex->getPosition()[ 1 ] );
+		startVertexPosition.push_back( startVertex->getPosition()[ 2 ] );
+		startVertexPositionStatus = 1;
+		streamlog_out(DEBUG0) << "		reco primary Vertex (x,y,z): 	" << startVertexPosition[ 0 ] << "	, " << startVertexPosition[ 1 ] << "	, " << startVertexPosition[ 2 ] << std::endl;
+		if ( m_displayEvent ) ced_hit( startVertexPosition[ 0 ] , startVertexPosition[ 1 ] , startVertexPosition[ 2 ] , 2 , 2 , 0xff7300 );
 	}
 	else
 	{
-		LCCollection *primaryVertexCollection = pLCEvent->getCollection( inputPrimaryVertex );
-		Vertex* primaryVtx = dynamic_cast<Vertex*>( primaryVertexCollection->getElementAt( 0 ) );
-		primaryVertex.push_back( primaryVtx->getPosition()[ 0 ] );
-		primaryVertex.push_back( primaryVtx->getPosition()[ 1 ] );
-		primaryVertex.push_back( primaryVtx->getPosition()[ 2 ] );
-		primaryVertexStatus = 2;
-		streamlog_out(DEBUG0) << "		reco primary Vertex (x,y,z): 	" << primaryVertex[ 0 ] << "	, " << primaryVertex[ 1 ] << "	, " << primaryVertex[ 2 ] << std::endl;
+		streamlog_out(DEBUG0) << "	There is no start vertex for parent hadron" << std::endl;
+		startVertexPositionStatus = -1;
 	}
-	if ( m_displayEvent )
-	{
-		const EVENT::MCParticle *MotherHadron = SLDLepton->getParents()[ 0 ];
-		ced_hit( MotherHadron->getVertex()[ 0 ] , MotherHadron->getVertex()[ 1 ] , MotherHadron->getVertex()[ 2 ] , 2 , 2 , 0x000000 );
-		ced_hit( primaryVertex[ 0 ] , primaryVertex[ 1 ] , primaryVertex[ 2 ] , 2 , 2 , 0xff7300 );
-	}
-	return primaryVertexStatus;
+	return startVertexPositionStatus;
+}
+
+int getEndVertexPosition(	EVENT::Vertex *primaryVtx , std::vector<EVENT::Vertex *> buildUpVertices ,
+				EVENT::ReconstructedParticle *linkedRecoLepton , std::vector<double> &endVertexPosition ,
+				double helicesDistance , bool m_displayEvent )
+{
+	int secondayVertexStatus = -999;
+	bool foundSecondaryVertex = false;
+
+	return secondayVertexStatus;
 }
 
 int getSecondaryVertex( EVENT::LCEvent *pLCEvent , EVENT::MCParticle *SLDLepton ,
@@ -1027,25 +1028,25 @@ int getTrueVertex( EVENT::MCParticle *MotherParticle , TVector3 &trueDSVertex ,T
 void drawMCParticles( EVENT::MCParticle *MotherHadron )
 {
 	float m_Bfield = 3.5;
-	ced_line( MotherHadron->getEndpoint()[ 0 ] , MotherHadron->getEndpoint()[ 1 ] , MotherHadron->getEndpoint()[ 2 ] , MotherHadron->getVertex()[ 0 ] , MotherHadron->getVertex()[ 1 ] , MotherHadron->getVertex()[ 2 ] , 2 , 1 , 0x474747 );
+	ced_line( MotherHadron->getEndpoint()[ 0 ] , MotherHadron->getEndpoint()[ 1 ] , MotherHadron->getEndpoint()[ 2 ] , MotherHadron->getVertex()[ 0 ] , MotherHadron->getVertex()[ 1 ] , MotherHadron->getVertex()[ 2 ] , 2 , 1 , 0x00E0FF ); //DRAW UNSTABLE PARTICLES IN CYAN
 	for ( unsigned int i_daughter = 0 ; i_daughter < MotherHadron->getDaughters().size() ; ++i_daughter )
 	{
 		MCParticle *duaughter = MotherHadron->getDaughters()[ i_daughter ];
 		if ( duaughter->getGeneratorStatus() == 1 )
 		{
-			if ( std::fabs( duaughter->getPDG() ) == 12 || std::fabs( duaughter->getPDG() ) == 14 || std::fabs( duaughter->getPDG() ) == 16 )
+			if ( std::fabs( duaughter->getPDG() ) == 12 || std::fabs( duaughter->getPDG() ) == 14 || std::fabs( duaughter->getPDG() ) == 16 ) //DRAW Neutrinos in GRAY
 			{
 				DDMarlinCED::drawHelix( m_Bfield , +1.0 , duaughter->getVertex()[ 0 ] , duaughter->getVertex()[ 1 ] , duaughter->getVertex()[ 2 ] , 100.0 * duaughter->getMomentum()[ 0 ] , 100.0 * duaughter->getMomentum()[ 1 ] , 100.0 * duaughter->getMomentum()[ 2 ] , 2 , 1 , 0x949494 , 0.0 , 2100.0 , 3000.0 , 0 );
 			}
-			else if ( std::fabs( duaughter->getPDG() ) == 11 || std::fabs( duaughter->getPDG() ) == 13 || std::fabs( duaughter->getPDG() ) == 15 )
+			else if ( std::fabs( duaughter->getPDG() ) == 11 || std::fabs( duaughter->getPDG() ) == 13 || std::fabs( duaughter->getPDG() ) == 15 ) // DRAW Leptons in RED
 			{
-				DDMarlinCED::drawHelix( m_Bfield , +1.0 , duaughter->getVertex()[ 0 ] , duaughter->getVertex()[ 1 ] , duaughter->getVertex()[ 2 ] , 100.0 * duaughter->getMomentum()[ 0 ] , 100.0 * duaughter->getMomentum()[ 1 ] , 100.0 * duaughter->getMomentum()[ 2 ] , 2 , 1 , 0xf76f6f , 0.0 , 2100.0 , 3000.0 , 0 );
+				DDMarlinCED::drawHelix( m_Bfield , +1.0 , duaughter->getVertex()[ 0 ] , duaughter->getVertex()[ 1 ] , duaughter->getVertex()[ 2 ] , 100.0 * duaughter->getMomentum()[ 0 ] , 100.0 * duaughter->getMomentum()[ 1 ] , 100.0 * duaughter->getMomentum()[ 2 ] , 2 , 1 , 0xfe1100 , 0.0 , 2100.0 , 3000.0 , 0 );
 			}
-			else if ( std::fabs( duaughter->getCharge() ) <=0.1 )
+			else if ( std::fabs( duaughter->getCharge() ) <=0.1 ) //DRAW Neutral Particles in GREEN
 			{
 				DDMarlinCED::drawHelix( m_Bfield , +1.0 , duaughter->getVertex()[ 0 ] , duaughter->getVertex()[ 1 ] , duaughter->getVertex()[ 2 ] , 100.0 * duaughter->getMomentum()[ 0 ] , 100.0 * duaughter->getMomentum()[ 1 ] , 100.0 * duaughter->getMomentum()[ 2 ] , 2 , 1 , 0x56fc5b , 0.0 , 2100.0 , 3000.0 , 0 );
 			}
-			else
+			else //DRAW Charged Particles in BLUE
 			{
 				DDMarlinCED::drawHelix( m_Bfield , duaughter->getCharge() , duaughter->getVertex()[ 0 ] , duaughter->getVertex()[ 1 ] , duaughter->getVertex()[ 2 ] , duaughter->getMomentum()[ 0 ] , duaughter->getMomentum()[ 1 ] , duaughter->getMomentum()[ 2 ] , 2 , 1 , 0x5a6ffa , 0.0 , 2100.0 , 3000.0 , 0 );
 			}
@@ -1054,15 +1055,15 @@ void drawMCParticles( EVENT::MCParticle *MotherHadron )
 		{
 			drawMCParticles( duaughter );
 		}
-		else
+		else //DRAW Unstable Particles in BLACK
 		{
 			if ( std::fabs( duaughter->getCharge() ) <=0.1 )
 			{
-				DDMarlinCED::drawHelix( m_Bfield , +1.0 , duaughter->getVertex()[ 0 ] , duaughter->getVertex()[ 1 ] , duaughter->getVertex()[ 2 ] , 100.0 * duaughter->getMomentum()[ 0 ] , 100.0 * duaughter->getMomentum()[ 1 ] , 100.0 * duaughter->getMomentum()[ 2 ] , 2 , 1 , 0x403131 , 0.0 , 2100.0 , 3000.0 , 0 );
+				DDMarlinCED::drawHelix( m_Bfield , +1.0 , duaughter->getVertex()[ 0 ] , duaughter->getVertex()[ 1 ] , duaughter->getVertex()[ 2 ] , 100.0 * duaughter->getMomentum()[ 0 ] , 100.0 * duaughter->getMomentum()[ 1 ] , 100.0 * duaughter->getMomentum()[ 2 ] , 2 , 1 , 0xbcbcbc , 0.0 , 2100.0 , 3000.0 , 0 );
 			}
 			else
 			{
-				DDMarlinCED::drawHelix( m_Bfield , duaughter->getCharge() , duaughter->getVertex()[ 0 ] , duaughter->getVertex()[ 1 ] , duaughter->getVertex()[ 2 ] , duaughter->getMomentum()[ 0 ] , duaughter->getMomentum()[ 1 ] , duaughter->getMomentum()[ 2 ] , 2 , 1 , 0x403131 , 0.0 , 2100.0 , 3000.0 , 0 );
+				DDMarlinCED::drawHelix( m_Bfield , duaughter->getCharge() , duaughter->getVertex()[ 0 ] , duaughter->getVertex()[ 1 ] , duaughter->getVertex()[ 2 ] , duaughter->getMomentum()[ 0 ] , duaughter->getMomentum()[ 1 ] , duaughter->getMomentum()[ 2 ] , 2 , 1 , 0xbcbcbc , 0.0 , 2100.0 , 3000.0 , 0 );
 			}
 		}
 	}

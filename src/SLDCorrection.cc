@@ -31,6 +31,8 @@
 
 #include "visibleFourMomentum.h"
 #include "flightDirection.h"
+#include "AssignParticlestoSLD.h"
+#include "linkedPFO.h"
 
 using namespace lcio ;
 using namespace marlin ;
@@ -372,6 +374,9 @@ void SLDCorrection::init()
 		m_pTTree->Branch("secVertexResidualX", &m_SecVertexResidualX);
 		m_pTTree->Branch("secVertexResidualY", &m_SecVertexResidualY);
 		m_pTTree->Branch("secVertexResidualZ", &m_SecVertexResidualZ);
+		m_pTTree->Branch("parentHadronMass", &m_parentHadronMass );
+		m_pTTree->Branch("parentHadronFlightDistance", &m_parentHadronFlightDistance );
+		m_pTTree->Branch("daughterHadronMass", &m_daughterHadronMass );
 		h_NuPxResidual = new TH1F( "PxResidual" , "; _{}p_{x,#nu}^{REC} - p_{x,#nu}^{MC} [GeV]; Normalized Entries / 0.1" , 2000 , -10.0 , 10.0 ); n_NuPxResidual = 0;
 		h_NuPyResidual = new TH1F( "PyResidual" , "; _{}p_{y,#nu}^{REC} - p_{y,#nu}^{MC} [GeV]; Normalized Entries / 0.1" , 2000 , -10.0 , 10.0 ); n_NuPyResidual = 0;
 		h_NuPzResidual = new TH1F( "PzResidual" , "; _{}p_{z,#nu}^{REC} - p_{z,#nu}^{MC}  [GeV]; Normalized Entries / 0.1" , 2000 , -10.0 , 10.0 ); n_NuPzResidual = 0;
@@ -519,6 +524,9 @@ void SLDCorrection::Clear()
 	m_SecVertexResidualX.clear();
 	m_SecVertexResidualY.clear();
 	m_SecVertexResidualZ.clear();
+	m_parentHadronMass.clear();
+	m_parentHadronFlightDistance.clear();
+	m_daughterHadronMass.clear();
 	m_distRecoLeptonToDownStreamVertex.clear();
 
 }
@@ -614,6 +622,15 @@ void SLDCorrection::processEvent( EVENT::LCEvent *pLCEvent )
 						if ( m_fillRootTree ) h_SLDecayOrder->Fill( 1.5 );
 						m_jetFlavourPDG.push_back( jetFlavourPDG );
 						doSLDCorrection( pLCEvent , testLepton );
+						m_parentHadronMass.push_back( ( testLepton->getParents()[ 0 ] )->getMass() );
+						m_parentHadronFlightDistance.push_back( std::sqrt( std::pow( testLepton->getParents()[ 0 ]->getEndpoint()[ 0 ] - testLepton->getParents()[ 0 ]->getVertex()[ 0 ] , 2 ) + std::pow( testLepton->getParents()[ 0 ]->getEndpoint()[ 1 ] - testLepton->getParents()[ 0 ]->getVertex()[ 1 ] , 2 ) + std::pow( testLepton->getParents()[ 0 ]->getEndpoint()[ 2 ] - testLepton->getParents()[ 0 ]->getVertex()[ 2 ] , 2 ) ) );
+						for ( unsigned int i_d = 0 ; i_d < ( testLepton->getParents()[ 0 ] )->getDaughters().size() ; ++i_d )
+						{
+							MCParticle *mcDaughter = ( testLepton->getParents()[ 0 ] )->getDaughters()[ i_d ];
+							int daughterPDG = std::abs( mcDaughter->getPDG() );
+							if ( daughterPDG < 11 || daughterPDG > 16 ) m_daughterHadronMass.push_back( mcDaughter->getMass() );
+						}
+
 					}
 				}
 			}
@@ -760,7 +777,7 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 	streamlog_out(DEBUG2) << "			Used:(	" << "qqq" << "	, " << chargedFourMomentum.M() << "	, " << chargedFourMomentum.Px() << "	, " << chargedFourMomentum.Py() << "	, " << chargedFourMomentum.Pz() << "	, " << chargedFourMomentum.E() << "	, " << (int)restCharge << "		)" << std::endl;
 	streamlog_out(DEBUG2) << "" << std::endl;
 	getNeutralFourMomentum( pLCEvent , SLDLepton  , m_cheatNeutral4momentum , neutralFourMomentum , trueNeutralFourMomentum , m_RecoMCTruthLinkCollection , m_MCTruthRecoLinkCollection );
-	streamlog_out(DEBUG2) << "			Used:(	" << "nnn" << "	, " << chargedFourMomentum.M() << "	, " << chargedFourMomentum.Px() << "	, " << chargedFourMomentum.Py() << "	, " << chargedFourMomentum.Pz() << "	, " << chargedFourMomentum.E() << "	, " << "0" << "		)" << std::endl;
+	streamlog_out(DEBUG2) << "			Used:(	" << "nnn" << "	, " << neutralFourMomentum.M() << "	, " << neutralFourMomentum.Px() << "	, " << neutralFourMomentum.Py() << "	, " << neutralFourMomentum.Pz() << "	, " << neutralFourMomentum.E() << "	, " << "0" << "		)" << std::endl;
 	streamlog_out(DEBUG2) << "" << std::endl;
 	streamlog_out(DEBUG2) << "			     (  X		, Y		, Z	)" << std::endl;
 	int flightDirectionStatus = getParentHadronFlightDirection( pLCEvent , SLDLepton , trueFlightDirection , recoFlightDirection , m_inputPrimaryVertex , m_inputBuildUpVertex , m_inputJetCollection , m_vertexingScenario , m_RecoMCTruthLinkCollection , m_MCTruthRecoLinkCollection , helicesDistance , SecondaryVertexPar , m_displayEvent , this );
