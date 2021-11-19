@@ -8,13 +8,14 @@
 #include "UTIL/LCRelationNavigator.h"
 #include "TLorentzVector.h"
 #include <string>
+#include "FindParticle.h"
 
 typedef std::vector<EVENT::ReconstructedParticle*> pfoVector;
 
 typedef std::vector<EVENT::MCParticle*> mcpVector;
 
 //EVENT::ReconstructedParticle* getLinkedPFO( EVENT::LCEvent *pLCEvent , EVENT::MCParticle *visibleMCP , std::string recoMCTruthLinkCollection , std::string mcTruthRecoLinkCollection , bool getChargedTLV , bool getNeutralTLV );
-
+/*
 int getLeptonFourMomentum( EVENT::LCEvent *pLCEvent , EVENT::MCParticle *SLDLepton  , bool cheatLepton4momentum , TLorentzVector &fourMomentumLepton , TLorentzVector &trueFourMomentumLepton , std::string recoMCTruthLinkCollection , std::string mcTruthRecoLinkCollection );
 
 int getChargedFourMomentum( EVENT::LCEvent *pLCEvent , EVENT::MCParticle *SLDLepton  , bool cheatCharged4momentum , TLorentzVector &fourMomentumCharged , TLorentzVector &trueFourMomentumCharged , float &restCharge , std::string recoMCTruthLinkCollection , std::string mcTruthRecoLinkCollection );
@@ -30,6 +31,6 @@ int getLinkedNeutralPFOs( EVENT::LCEvent *pLCEvent , EVENT::MCParticle *SLDLepto
 int getLinkedNeutralMCPs( EVENT::LCEvent *pLCEvent , EVENT::MCParticle *SLDLepton , EVENT::MCParticle *parentHadron , mcpVector &neutralMCPs );
 
 //int getCovMatrixMomenta(EVENT::ReconstructedParticle const *, EVENT::FloatVec &);
-
+*/
 
 #endif

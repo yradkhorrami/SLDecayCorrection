@@ -1,4 +1,5 @@
 #!/bin/bash
+
 rm -rf build
 rm -rf lib
 mkdir build
