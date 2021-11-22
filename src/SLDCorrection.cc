@@ -403,24 +403,46 @@ void SLDCorrection::init()
 		m_pTTree1->Branch("nAloneChargedPFOsFromSLD",&m_nAloneChargedPFOsFromSLD);
 		m_pTTree1->Branch("distLeptonAlonePFOsNotFromSLD",&m_distLeptonAlonePFOsNotFromSLD);
 		m_pTTree1->Branch("distLeptonAlonePFOsFromSLD",&m_distLeptonAlonePFOsFromSLD);
-		m_pTTree1->Branch("widestConeAlphaNeutrals", &m_widestConeAlphaNeutrals );
-		m_pTTree1->Branch("widestConeAlphaVertices", &m_widestConeAlphaVertices );
-		m_pTTree1->Branch("widestConeAlphaAloneCharged", &m_widestConeAlphaCharged );
-		m_pTTree1->Branch("widestConeCosAlphaNeutrals", &m_widestConeCosAlphaNeutrals );
-		m_pTTree1->Branch("widestConeCosAlphaVertices", &m_widestConeCosAlphaVertices );
-		m_pTTree1->Branch("widestConeCosAlphaAloneCharged", &m_widestConeCosAlphaCharged );
-		m_pTTree1->Branch("widestConeAlphaAlonePFOsFromSLDwrtLepton", &m_widestConeAlphaAlonePFOsFromSLDwrtLepton );
-		m_pTTree1->Branch("widestConeCosAlphaAlonePFOsFromSLDwrtLepton", &m_widestConeCosAlphaAlonePFOsFromSLDwrtLepton );
-		m_pTTree1->Branch("widestConeAlphaAlonePFOsFromSLDwrtFD", &m_widestConeAlphaAlonePFOsFromSLDwrtFD );
-		m_pTTree1->Branch("widestConeCosAlphaAlonePFOsFromSLDwrtFD", &m_widestConeCosAlphaAlonePFOsFromSLDwrtFD );
-		m_pTTree1->Branch("widestConeAlphaAlonePFOsFromSLDwrtJet", &m_widestConeAlphaAlonePFOsFromSLDwrtJet );
-		m_pTTree1->Branch("widestConeCosAlphaAlonePFOsFromSLDwrtJet", &m_widestConeCosAlphaAlonePFOsFromSLDwrtJet );
-		m_pTTree1->Branch("widestConeAlphaAlonePFOsNotFromSLDwrtLepton", &m_widestConeAlphaAlonePFOsNotFromSLDwrtLepton );
-		m_pTTree1->Branch("widestConeCosAlphaAlonePFOsNotFromSLDwrtLepton", &m_widestConeCosAlphaAlonePFOsNotFromSLDwrtLepton );
-		m_pTTree1->Branch("widestConeAlphaAlonePFOsNotFromSLDwrtFD", &m_widestConeAlphaAlonePFOsNotFromSLDwrtFD );
-		m_pTTree1->Branch("widestConeCosAlphaAlonePFOsNotFromSLDwrtFD", &m_widestConeCosAlphaAlonePFOsNotFromSLDwrtFD );
-		m_pTTree1->Branch("widestConeAlphaAlonePFOsNotFromSLDwrtJet", &m_widestConeAlphaAlonePFOsNotFromSLDwrtJet );
-		m_pTTree1->Branch("widestConeCosAlphaAlonePFOsNotFromSLDwrtJet", &m_widestConeCosAlphaAlonePFOsNotFromSLDwrtJet );
+		m_pTTree1->Branch("alphaTrueNeutrals", &m_alphaTrueNeutrals );
+		m_pTTree1->Branch("alphaTrueCharged", &m_alphaTrueCharged );
+		m_pTTree1->Branch("cosAlphaNeutrals", &m_cosAlphaNeutrals );
+		m_pTTree1->Branch("cosAlphaAloneCharged", &m_cosAlphaCharged );
+		m_pTTree1->Branch("alphaChargedPFOsFromSLDwrtLepton", &m_alphaChargedPFOsFromSLDwrtLepton );
+		m_pTTree1->Branch("cosAlphaChargedPFOsFromSLDwrtLepton", &m_cosAlphaChargedPFOsFromSLDwrtLepton );
+		m_pTTree1->Branch("alphaChargedPFOsFromSLDwrtFD", &m_alphaChargedPFOsFromSLDwrtFD );
+		m_pTTree1->Branch("cosAlphaChargedPFOsFromSLDwrtFD", &m_cosAlphaChargedPFOsFromSLDwrtFD );
+		m_pTTree1->Branch("alphaChargedPFOsFromSLDwrtJet", &m_alphaChargedPFOsFromSLDwrtJet );
+		m_pTTree1->Branch("cosAlphaChargedPFOsFromSLDwrtJet", &m_cosAlphaChargedPFOsFromSLDwrtJet );
+		m_pTTree1->Branch("alphaChargedPFOsNotFromSLDwrtLepton", &m_alphaChargedPFOsNotFromSLDwrtLepton );
+		m_pTTree1->Branch("cosAlphaChargedPFOsNotFromSLDwrtLepton", &m_cosAlphaChargedPFOsNotFromSLDwrtLepton );
+		m_pTTree1->Branch("alphaChargedPFOsNotFromSLDwrtFD", &m_alphaChargedPFOsNotFromSLDwrtFD );
+		m_pTTree1->Branch("cosAlphaChargedPFOsNotFromSLDwrtFD", &m_cosAlphaChargedPFOsNotFromSLDwrtFD );
+		m_pTTree1->Branch("alphaChargedPFOsNotFromSLDwrtJet", &m_alphaChargedPFOsNotFromSLDwrtJet );
+		m_pTTree1->Branch("cosAlphaChargedPFOsNotFromSLDwrtJet", &m_cosAlphaChargedPFOsNotFromSLDwrtJet );
+		m_pTTree1->Branch("alphaAloneChargedPFOsFromSLDwrtLepton", &m_alphaAloneChargedPFOsFromSLDwrtLepton );
+		m_pTTree1->Branch("cosAlphaAloneChargedPFOsFromSLDwrtLepton", &m_cosAlphaAloneChargedPFOsFromSLDwrtLepton );
+		m_pTTree1->Branch("alphaAloneChargedPFOsFromSLDwrtFD", &m_alphaAloneChargedPFOsFromSLDwrtFD );
+		m_pTTree1->Branch("cosAlphaAloneChargedPFOsFromSLDwrtFD", &m_cosAlphaAloneChargedPFOsFromSLDwrtFD );
+		m_pTTree1->Branch("alphaAloneChargedPFOsFromSLDwrtJet", &m_alphaAloneChargedPFOsFromSLDwrtJet );
+		m_pTTree1->Branch("cosAlphaAloneChargedPFOsFromSLDwrtJet", &m_cosAlphaAloneChargedPFOsFromSLDwrtJet );
+		m_pTTree1->Branch("alphaAloneChargedPFOsNotFromSLDwrtLepton", &m_alphaAloneChargedPFOsNotFromSLDwrtLepton );
+		m_pTTree1->Branch("cosAlphaAloneChargedPFOsNotFromSLDwrtLepton", &m_cosAlphaAloneChargedPFOsNotFromSLDwrtLepton );
+		m_pTTree1->Branch("alphaAloneChargedPFOsNotFromSLDwrtFD", &m_alphaAloneChargedPFOsNotFromSLDwrtFD );
+		m_pTTree1->Branch("cosAlphaAloneChargedPFOsNotFromSLDwrtFD", &m_cosAlphaAloneChargedPFOsNotFromSLDwrtFD );
+		m_pTTree1->Branch("alphaAloneChargedPFOsNotFromSLDwrtJet", &m_alphaAloneChargedPFOsNotFromSLDwrtJet );
+		m_pTTree1->Branch("cosAlphaAloneChargedPFOsNotFromSLDwrtJet", &m_cosAlphaAloneChargedPFOsNotFromSLDwrtJet );
+		m_pTTree1->Branch("alphaNeutralPFOsFromSLDwrtLepton", &m_alphaNeutralPFOsFromSLDwrtLepton );
+		m_pTTree1->Branch("cosAlphaNeutralPFOsFromSLDwrtLepton", &m_cosAlphaNeutralPFOsFromSLDwrtLepton );
+		m_pTTree1->Branch("alphaNeutralPFOsFromSLDwrtFD", &m_alphaNeutralPFOsFromSLDwrtFD );
+		m_pTTree1->Branch("cosAlphaNeutralPFOsFromSLDwrtFD", &m_cosAlphaNeutralPFOsFromSLDwrtFD );
+		m_pTTree1->Branch("alphaNeutralPFOsFromSLDwrtJet", &m_alphaNeutralPFOsFromSLDwrtJet );
+		m_pTTree1->Branch("cosAlphaNeutralPFOsFromSLDwrtJet", &m_cosAlphaNeutralPFOsFromSLDwrtJet );
+		m_pTTree1->Branch("alphaNeutralPFOsNotFromSLDwrtLepton", &m_alphaNeutralPFOsNotFromSLDwrtLepton );
+		m_pTTree1->Branch("cosAlphaNeutralPFOsNotFromSLDwrtLepton", &m_cosAlphaNeutralPFOsNotFromSLDwrtLepton );
+		m_pTTree1->Branch("alphaNeutralPFOsNotFromSLDwrtFD", &m_alphaNeutralPFOsNotFromSLDwrtFD );
+		m_pTTree1->Branch("cosAlphaNeutralPFOsNotFromSLDwrtFD", &m_cosAlphaNeutralPFOsNotFromSLDwrtFD );
+		m_pTTree1->Branch("alphaNeutralPFOsNotFromSLDwrtJet", &m_alphaNeutralPFOsNotFromSLDwrtJet );
+		m_pTTree1->Branch("cosAlphaNeutralPFOsNotFromSLDwrtJet", &m_cosAlphaNeutralPFOsNotFromSLDwrtJet );
 		m_pTTree1->Branch("weightPFOtoMCP_Lepton", &m_weightPFOtoMCP_Lepton );
 		m_pTTree1->Branch("weightMCPtoPFO_Lepton", &m_weightMCPtoPFO_Lepton );
 		m_pTTree1->Branch("weightPFOtoMCP_Neutral", &m_weightPFOtoMCP_Neutral );
@@ -650,24 +672,46 @@ void SLDCorrection::Clear()
 	m_parentHadronFlightDistance.clear();
 	m_daughterHadronMass.clear();
 	m_SLDStatus.clear();
-	m_widestConeAlphaNeutrals.clear();
-	m_widestConeAlphaVertices.clear();
-	m_widestConeAlphaCharged.clear();
-	m_widestConeCosAlphaNeutrals.clear();
-	m_widestConeCosAlphaVertices.clear();
-	m_widestConeCosAlphaCharged.clear();
-	m_widestConeAlphaAlonePFOsFromSLDwrtLepton.clear();
-	m_widestConeCosAlphaAlonePFOsFromSLDwrtLepton.clear();
-	m_widestConeAlphaAlonePFOsFromSLDwrtFD.clear();
-	m_widestConeCosAlphaAlonePFOsFromSLDwrtFD.clear();
-	m_widestConeAlphaAlonePFOsFromSLDwrtJet.clear();
-	m_widestConeCosAlphaAlonePFOsFromSLDwrtJet.clear();
-	m_widestConeAlphaAlonePFOsNotFromSLDwrtLepton.clear();
-	m_widestConeCosAlphaAlonePFOsNotFromSLDwrtLepton.clear();
-	m_widestConeAlphaAlonePFOsNotFromSLDwrtFD.clear();
-	m_widestConeCosAlphaAlonePFOsNotFromSLDwrtFD.clear();
-	m_widestConeAlphaAlonePFOsNotFromSLDwrtJet.clear();
-	m_widestConeCosAlphaAlonePFOsNotFromSLDwrtJet.clear();
+	m_alphaTrueNeutrals.clear();
+	m_alphaTrueCharged.clear();
+	m_cosAlphaNeutrals.clear();
+	m_cosAlphaCharged.clear();
+	m_alphaChargedPFOsFromSLDwrtLepton.clear();
+	m_cosAlphaChargedPFOsFromSLDwrtLepton.clear();
+	m_alphaChargedPFOsFromSLDwrtFD.clear();
+	m_cosAlphaChargedPFOsFromSLDwrtFD.clear();
+	m_alphaChargedPFOsFromSLDwrtJet.clear();
+	m_cosAlphaChargedPFOsFromSLDwrtJet.clear();
+	m_alphaChargedPFOsNotFromSLDwrtLepton.clear();
+	m_cosAlphaChargedPFOsNotFromSLDwrtLepton.clear();
+	m_alphaChargedPFOsNotFromSLDwrtFD.clear();
+	m_cosAlphaChargedPFOsNotFromSLDwrtFD.clear();
+	m_alphaChargedPFOsNotFromSLDwrtJet.clear();
+	m_cosAlphaChargedPFOsNotFromSLDwrtJet.clear();
+	m_alphaAloneChargedPFOsFromSLDwrtLepton.clear();
+	m_cosAlphaAloneChargedPFOsFromSLDwrtLepton.clear();
+	m_alphaAloneChargedPFOsFromSLDwrtFD.clear();
+	m_cosAlphaAloneChargedPFOsFromSLDwrtFD.clear();
+	m_alphaAloneChargedPFOsFromSLDwrtJet.clear();
+	m_cosAlphaAloneChargedPFOsFromSLDwrtJet.clear();
+	m_alphaAloneChargedPFOsNotFromSLDwrtLepton.clear();
+	m_cosAlphaAloneChargedPFOsNotFromSLDwrtLepton.clear();
+	m_alphaAloneChargedPFOsNotFromSLDwrtFD.clear();
+	m_cosAlphaAloneChargedPFOsNotFromSLDwrtFD.clear();
+	m_alphaAloneChargedPFOsNotFromSLDwrtJet.clear();
+	m_cosAlphaAloneChargedPFOsNotFromSLDwrtJet.clear();
+	m_alphaNeutralPFOsFromSLDwrtLepton.clear();
+	m_cosAlphaNeutralPFOsFromSLDwrtLepton.clear();
+	m_alphaNeutralPFOsFromSLDwrtFD.clear();
+	m_cosAlphaNeutralPFOsFromSLDwrtFD.clear();
+	m_alphaNeutralPFOsFromSLDwrtJet.clear();
+	m_cosAlphaNeutralPFOsFromSLDwrtJet.clear();
+	m_alphaNeutralPFOsNotFromSLDwrtLepton.clear();
+	m_cosAlphaNeutralPFOsNotFromSLDwrtLepton.clear();
+	m_alphaNeutralPFOsNotFromSLDwrtFD.clear();
+	m_cosAlphaNeutralPFOsNotFromSLDwrtFD.clear();
+	m_alphaNeutralPFOsNotFromSLDwrtJet.clear();
+	m_cosAlphaNeutralPFOsNotFromSLDwrtJet.clear();
 	m_weightPFOtoMCP_Lepton.clear();
 	m_weightMCPtoPFO_Lepton.clear();
 	m_weightPFOtoMCP_Neutral.clear();
@@ -970,12 +1014,46 @@ int SLDCorrection::getVertexInJetsDistribution( Vertex* testVertex , pfoVector j
 void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDLepton )
 {
 	++n_SLDStatus;
-	ReconstructedParticle *assignedJet = NULL;
+
+	vtxVector SLDVertices{};
+	pfoVector SLDVerticesRP{};
+
+	mcpVector trueDecayProducts{};
+	mcpVector trueNeutralDecayProducts{};
+	mcpVector trueChargedDecayProducts{};
+
+	pfoVector jetVector{};
+	pfoVector allPFOsInJet{};
+	pfoVector allPFOsInJetFromSLD{};
+	pfoVector allPFOsInJetNotFromSLD{};
+	pfoVector chargedPFOsInJet{};
+	pfoVector chargedPFOsInJetFromSLD{};
+	pfoVector chargedPFOsInJetNotFromSLD{};
+	pfoVector neutralPFOsInJet{};
+	pfoVector neutralPFOsInJetFromSLD{};
+	pfoVector neutralPFOsInJetNotFromSLD{};
+	pfoVector aloneChargedPFOsInJet{};
+	pfoVector aloneChargedPFOsInJetFromSLD{};
+	pfoVector aloneChargedPFOsInJetNotFromSLD{};
+
+	pfoVector recoDecayProducts{};
+	pfoVector recoNeutralDecayProducts{};
+	pfoVector recoChargedDecayProducts{};
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////									    ////
+////			Get Primary Information from event		    ////
+////									    ////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+	LCRelationNavigator RecoMCParticleNav( pLCEvent->getCollection( m_RecoMCTruthLinkCollection ) );
+	LCRelationNavigator MCParticleRecoNav( pLCEvent->getCollection( m_MCTruthRecoLinkCollection ) );
 	LCCollection *primaryVertexCollection = pLCEvent->getCollection( m_inputPrimaryVertex );
 	Vertex* primaryVertex = dynamic_cast<Vertex*>( primaryVertexCollection->getElementAt( 0 ) );
 	Vertex* startVertex = dynamic_cast<Vertex*>( primaryVertexCollection->getElementAt( 0 ) );
 	LCCollection *jetCollection = pLCEvent->getCollection( m_inputJetCollection );
-	pfoVector jetVector{};
 	for ( int i_jet = 0 ; i_jet < jetCollection->getNumberOfElements(); ++i_jet)
 	{
 		ReconstructedParticle* jet = dynamic_cast<ReconstructedParticle*>( jetCollection->getElementAt( i_jet ) );
@@ -988,7 +1066,14 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 		Vertex* vertex = dynamic_cast<Vertex*>( buildUpVertexCollection->getElementAt( i_vtx ) );
 		buildUpVertexVector.push_back( vertex );
 	}
-	bool recoLeptonIsInJet = false;
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////									    ////
+////		Draw semi-leptonic decay with MCParticles		    ////
+////									    ////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 	if ( m_displayEvent )
 	{
@@ -998,17 +1083,23 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 		pHandler.update(pLCEvent);
 		drawMCParticles( SLDLepton->getParents()[ 0 ] );
 	}
-	LCRelationNavigator RecoMCParticleNav( pLCEvent->getCollection( m_RecoMCTruthLinkCollection ) );
-	LCRelationNavigator MCParticleRecoNav( pLCEvent->getCollection( m_MCTruthRecoLinkCollection ) );
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////									    ////
+////	Initialize Input/Output variables for neutrino correction	    ////
+////									    ////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
+	MCParticle* trueNeutrino = getTrueNeutrino( SLDLepton );
+	MCParticle *parentHadron = SLDLepton->getParents()[ 0 ];
+	TLorentzVector trueNeutrinoFourMomentum( trueNeutrino->getMomentum() , trueNeutrino->getEnergy() );
+	TLorentzVector trueHadronFourMomentum( parentHadron->getMomentum() , parentHadron->getEnergy() );
 	TLorentzVector trueLeptonFourMomentum( SLDLepton->getMomentum() , SLDLepton->getEnergy() );
 	TLorentzVector trueChargedFourMomentum( 0.0 , 0.0 , 0.0 , 0.0 );
 	TLorentzVector trueNeutralFourMomentum( 0.0 , 0.0 , 0.0 , 0.0 );
 	TLorentzVector trueVisibleFourMomentum( 0.0 , 0.0 , 0.0 , 0.0 );
-	TLorentzVector trueNeutrinoFourMomentum( 0.0 , 0.0 , 0.0 , 0.0 );
-	MCParticle* trueNeutrino = getTrueNeutrino( SLDLepton , trueNeutrinoFourMomentum );
-	TLorentzVector trueHadronFourMomentum( ( SLDLepton->getParents()[ 0 ] )->getMomentum() , ( SLDLepton->getParents()[ 0 ] )->getEnergy() );
 
 	TLorentzVector recoLeptonFourMomentum( 0.0 , 0.0 , 0.0 , 0.0 );
 	TLorentzVector recoChargedFourMomentum( 0.0 , 0.0 , 0.0 , 0.0 );
@@ -1025,32 +1116,24 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 	TLorentzVector neutralFourMomentum( 0.0 , 0.0 , 0.0 , 0.0 );
 	TLorentzVector visibleFourMomentum( 0.0 , 0.0 , 0.0 , 0.0 );
 
-
-	TVector3 trueFlightDirection( 0.0 , 0.0 , 0.0 );
-	TVector3 recoFlightDirection( 0.0 , 0.0 , 0.0 );
-	TVector3 flightDirection( 0.0 , 0.0 , 0.0 );
-	double parentHadronMass = 0.0;
-	float helicesDistance = 0.0;
-
-	std::vector<double> SecondaryVertexPar;
-
-	MCParticle *parentHadron = SLDLepton->getParents()[ 0 ];
-	parentHadronMass = ( SLDLepton->getParents()[ 0 ] )->getMass();
-	mcpVector trueNeutralDecayProducts{};
-	mcpVector trueChargedDecayProductsAll{};
-	mcpVector trueChargedDecayProducts{};
-	mcpVector aloneChargedDecayProducts{};
-	mcpVector MCParticlesWithVertex{};
-	pfoVector PFOswithAloneTracks{};
-	pfoVector PFOswithAloneTracksFromSLD{};
-	pfoVector PFOswithAloneTracksNotFromSLD{};
-	vtxVector SLDVertices{};
-	pfoVector SLDVerticesRP{};
-
 	std::vector<float> truePrimaryVertex{};
 	truePrimaryVertex.push_back( parentHadron->getVertex()[ 0 ] );
 	truePrimaryVertex.push_back( parentHadron->getVertex()[ 1 ] );
 	truePrimaryVertex.push_back( parentHadron->getVertex()[ 2 ] );
+
+	TVector3 trueFlightDirection( 0.0 , 0.0 , 0.0 );
+	TVector3 recoFlightDirection( 0.0 , 0.0 , 0.0 );
+	TVector3 flightDirection( 0.0 , 0.0 , 0.0 );
+	double parentHadronMass = parentHadron->getMass();// Cheated for the time being
+	float helicesDistance = 0.0;
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////									    ////
+////	Get True Visible decay products, four-momentum & flight direction   ////
+////									    ////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 	streamlog_out(DEBUG2) << "" << std::endl;
 	streamlog_out(DEBUG2) << "----------------------------------------------------------------------" << std::endl;
@@ -1064,11 +1147,297 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 	streamlog_out(DEBUG2) << "----------------------------------------------------------------------" << std::endl;
 	streamlog_out(DEBUG2) << "--------------------- Stable Charged MCParticles ---------------------" << std::endl;
 	streamlog_out(DEBUG2) << "----------------------------------------------------------------------" << std::endl;
-	int nTrueChargedMCPs = getChargedMCPs( SLDLepton , parentHadron , trueChargedDecayProductsAll );
+	int nTrueChargedMCPs = getChargedMCPs( SLDLepton , parentHadron , trueChargedDecayProducts );
 	streamlog_out(DEBUG2) << "----------------------------------------------------------------------" << std::endl;
 	streamlog_out(DEBUG2) << "----------------- " << nTrueChargedMCPs << " Stable Charged MCParticles Found------------------" << std::endl;
 	streamlog_out(DEBUG2) << "----------------------------------------------------------------------" << std::endl;
 	streamlog_out(DEBUG2) << "" << std::endl;
+	for ( unsigned int i_par = 0 ; i_par < trueNeutralDecayProducts.size() ; ++i_par )
+	{
+		trueDecayProducts.push_back( trueNeutralDecayProducts[ i_par ] );
+		trueNeutralFourMomentum += TLorentzVector( ( trueNeutralDecayProducts[ i_par ] )->getMomentum() , ( trueNeutralDecayProducts[ i_par ] )->getEnergy() );
+	}
+	for ( unsigned int i_par = 0 ; i_par < trueChargedDecayProducts.size() ; ++i_par )
+	{
+		trueDecayProducts.push_back( trueChargedDecayProducts[ i_par ] );
+		trueChargedFourMomentum += TLorentzVector( ( trueChargedDecayProducts[ i_par ] )->getMomentum() , ( trueChargedDecayProducts[ i_par ] )->getEnergy() );
+	}
+	trueVisibleFourMomentum = trueNeutralFourMomentum + trueChargedFourMomentum;
+
+	std::vector<double> trueStartVertex{};
+	std::vector<double> trueSLDVertex{};
+	getTrueFlightDirection( SLDLepton , trueFlightDirection , trueStartVertex , trueSLDVertex );
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////									    ////
+////	Identify Reconstrcuted Lepton and the jet/vertex assigned to SLD    ////
+////									    ////
+////////////////////////////////////////////////////////////////////////////////
+////			If there is no Reconstrcuted Lepton		    ////
+////					OR				    ////
+////			Reconstrcuted Lepton is not in a jet		    ////
+////					OR				    ////
+////		     Reconstrcuted Lepton is in Primary Vertex		    ////
+////									    ////
+////			     Neutrino Correction FAILS			    ////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+	float weightPFOtoMCP = 0.0;
+	float weightMCPtoPFO = 0.0;
+	ReconstructedParticle* linkedRecoLepton = getLinkedPFO( SLDLepton , RecoMCParticleNav , MCParticleRecoNav , true , false , weightPFOtoMCP , weightMCPtoPFO );
+	if ( linkedRecoLepton == NULL )
+	{
+		m_SLDStatus.push_back( 1 );
+		streamlog_out(WARNING) << "	||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" << std::endl;
+		streamlog_out(WARNING) << "	||||||||||||||||| Reconstructed Lepton is not found ||||||||||||||||||" << std::endl;
+		streamlog_out(WARNING) << "	||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" << std::endl;
+		if ( m_fillRootTree ) h_SLDStatus->Fill( 1 );
+		return;
+	}
+
+	bool recoLeptonIsInJet = false;
+	ReconstructedParticle *assignedJet = NULL;
+	assignedJet = getJetAssignedToParticle( linkedRecoLepton , jetVector , recoLeptonIsInJet );
+	if ( !recoLeptonIsInJet )
+	{
+		m_SLDStatus.push_back( 2 );
+		streamlog_out(WARNING) << "	||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" << std::endl;
+		streamlog_out(WARNING) << "	||||||||||| Reconstructed Lepton doesn't belong to any jet |||||||||||" << std::endl;
+		streamlog_out(WARNING) << "	||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" << std::endl;
+		if ( m_fillRootTree ) h_SLDStatus->Fill( 2 );
+		return;
+	}
+
+	if ( isParticleInVertex( linkedRecoLepton , primaryVertex ) )
+	{
+		m_SLDStatus.push_back( 3 );
+		streamlog_out(WARNING) << "	||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" << std::endl;
+		streamlog_out(WARNING) << "	||||||||||||| Reconstructed Lepton is in primary vertex ||||||||||||||" << std::endl;
+		streamlog_out(WARNING) << "	||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" << std::endl;
+		if ( m_fillRootTree ) h_SLDStatus->Fill( 3 );
+		return;
+	}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////									    ////
+////	   Investigate ALL Reconstructed Particles in the assigned jet      ////
+////									    ////
+////		     FromSLD and NotFromSLD is Cheated			    ////
+////									    ////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+	for ( unsigned int i_par = 0 ; i_par < assignedJet->getParticles().size() ; ++i_par )
+	{
+		ReconstructedParticle* jetParticle = assignedJet->getParticles()[ i_par ];
+		weightPFOtoMCP = 0.0;
+		weightMCPtoPFO = 0.0;
+		MCParticle* linkedNeutralMCP = getLinkedMCP( jetParticle , RecoMCParticleNav , MCParticleRecoNav , false , true , weightPFOtoMCP , weightMCPtoPFO );
+		MCParticle* linkedChargedMCP = getLinkedMCP( jetParticle , RecoMCParticleNav , MCParticleRecoNav , true , false , weightPFOtoMCP , weightMCPtoPFO );
+		bool MCPisFromSLD = false;
+		allPFOsInJet.push_back( jetParticle );
+		if ( jetParticle->getTracks().size() == 0 )
+		{
+			neutralPFOsInJet.push_back( jetParticle );
+			isMCParticleFromSLD( parentHadron , linkedNeutralMCP , MCPisFromSLD );
+			if ( MCPisFromSLD )
+			{
+				neutralPFOsInJetFromSLD.push_back( jetParticle );
+				allPFOsInJetFromSLD.push_back( jetParticle );
+			}
+			else
+			{
+				neutralPFOsInJetNotFromSLD.push_back( jetParticle );
+				allPFOsInJetNotFromSLD.push_back( jetParticle );
+			}
+		}
+		else
+		{
+			chargedPFOsInJet.push_back( jetParticle );
+			isMCParticleFromSLD( parentHadron , linkedChargedMCP , MCPisFromSLD );
+			if ( MCPisFromSLD )
+			{
+				chargedPFOsInJetFromSLD.push_back( jetParticle );
+				allPFOsInJetFromSLD.push_back( jetParticle );
+			}
+			else
+			{
+				chargedPFOsInJetNotFromSLD.push_back( jetParticle );
+				allPFOsInJetNotFromSLD.push_back( jetParticle );
+			}
+		}
+	}
+	aloneChargedPFOsInJet = getParticlesWithAloneTracks( linkedRecoLepton , assignedJet , primaryVertex , buildUpVertexVector );
+	for ( unsigned int i_par = 0 ; i_par < aloneChargedPFOsInJet.size() ; ++i_par )
+	{
+		ReconstructedParticle* testParticle = aloneChargedPFOsInJet[ i_par ];
+		weightPFOtoMCP = 0.0;
+		weightMCPtoPFO = 0.0;
+		MCParticle* linkedChargedMCP = getLinkedMCP( testParticle , RecoMCParticleNav , MCParticleRecoNav , true , false , weightPFOtoMCP , weightMCPtoPFO );
+		bool MCPisFromSLD = false;
+		isMCParticleFromSLD( parentHadron , linkedChargedMCP , MCPisFromSLD );
+		if ( MCPisFromSLD )
+		{
+			aloneChargedPFOsInJetFromSLD.push_back( testParticle );
+		}
+		else
+		{
+			aloneChargedPFOsInJetNotFromSLD.push_back( testParticle );
+		}
+	}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////									    ////
+////	   Reconstruction of Flight Direction of Parent Hadron		    ////
+////									    ////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+	TVector3 leptonDirection = TVector3( SLDLepton->getMomentum() ); leptonDirection.SetMag( 1.0 );
+	TVector3 jetAxis = TVector3( assignedJet->getMomentum() ); jetAxis.SetMag( 1.0 );
+
+	vtxVector verticesInJet = getVerticesInJet( assignedJet , buildUpVertexVector );
+	m_nRecoVerticesInJet.push_back( verticesInJet.size() );
+
+	int vertexingScenario = m_vertexingScenario;
+	pfoVector sortedChargedPFOs;
+	if ( aloneChargedPFOsInJet.size() != 0 ) sortParticles( sortedChargedPFOs , aloneChargedPFOsInJet , jetAxis );
+	if ( sortedChargedPFOs.size() == 0 && m_vertexingScenario == 4 ) vertexingScenario = 1;
+	m_flightDirectionStatus.push_back( vertexingScenario );
+	int SLDStatus = getRecoFlightDirection( linkedRecoLepton , recoFlightDirection , primaryVertex , startVertex , SLDVertices , SLDVerticesRP , assignedJet , verticesInJet , sortedChargedPFOs , helicesDistance , vertexingScenario );
+	m_distRecoLeptonToDownStreamVertex.push_back( helicesDistance );
+	m_FlightDirectionErrorCosAlpha.push_back( trueFlightDirection.Dot( recoFlightDirection ) );
+	m_FlightDirectionErrorSinAlpha.push_back( std::sin( acos( trueFlightDirection.Dot( recoFlightDirection ) ) ) );
+	m_FlightDirectionErrorAlpha.push_back( acos( trueFlightDirection.Dot( recoFlightDirection ) ) * 180.0 / 3.14159265 );
+
+	m_SLDStatus.push_back( SLDStatus );
+	if ( m_fillRootTree ) h_SLDStatus->Fill( SLDStatus );
+
+	if ( m_cheatFlightDirection )
+	{
+		flightDirection = trueFlightDirection;
+	}
+	else
+	{
+		flightDirection = recoFlightDirection;
+	}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////									    ////
+////		Particle Association to the semi-leptonic decay		    ////
+////									    ////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+	evaluatePFOsAngle( aloneChargedPFOsInJetFromSLD , aloneChargedPFOsInJetNotFromSLD , chargedPFOsInJetFromSLD , chargedPFOsInJetNotFromSLD , neutralPFOsInJetFromSLD , neutralPFOsInJetNotFromSLD , leptonDirection , jetAxis , recoFlightDirection , SLDStatus );
+
+	if ( m_cheatPIDneutral )
+	{
+		for ( unsigned int i_par = 0 ; i_par < trueNeutralDecayProducts.size() ; ++i_par )
+		{
+			ReconstructedParticle* linkedPFO = getLinkedPFO( trueNeutralDecayProducts[ i_par ] , RecoMCParticleNav , MCParticleRecoNav , false , true , weightPFOtoMCP , weightMCPtoPFO );
+			if ( linkedPFO != NULL )
+			{
+				recoNeutralDecayProducts.push_back( linkedPFO );
+				recoDecayProducts.push_back( linkedPFO );
+				if ( m_displayEvent ) drawReconstructedParticle( linkedPFO , primaryVertex , 0x0075df , 0x2e8e04 );
+			}
+		}
+	}
+	else
+	{
+		streamlog_out(WARNING) << "Nothing TODO for associating neutral particles to semi-leptonic decay" << std::endl;
+	}
+	if ( m_cheatPIDcharged )
+	{
+		for ( unsigned int i_par = 0 ; i_par < trueChargedDecayProducts.size() ; ++i_par )
+		{
+			ReconstructedParticle* linkedPFO = getLinkedPFO( trueChargedDecayProducts[ i_par ] , RecoMCParticleNav , MCParticleRecoNav , true , false , weightPFOtoMCP , weightMCPtoPFO );
+			if ( linkedPFO != NULL )
+			{
+				recoChargedDecayProducts.push_back( linkedPFO );
+				recoDecayProducts.push_back( linkedPFO );
+				if ( m_displayEvent ) drawReconstructedParticle( linkedPFO , primaryVertex , 0x0075df , 0x000000 );
+			}
+		}
+	}
+	else if ( SLDStatus == 4 )
+	{
+		for ( unsigned int i_vtx = 0 ; i_vtx < SLDVertices.size() ; ++i_vtx )
+		{
+			ReconstructedParticle* sldVertexRP = SLDVerticesRP[ i_vtx ];
+			for ( unsigned int i_par = 0 ; i_par < sldVertexRP->getParticles().size() ; ++i_par )
+			{
+				ReconstructedParticle* chargedDecayProduct = sldVertexRP->getParticles()[ i_par ];
+				if ( chargedDecayProduct != linkedRecoLepton )
+				{
+					recoChargedDecayProducts.push_back( chargedDecayProduct );
+					recoDecayProducts.push_back( chargedDecayProduct );
+					if ( m_displayEvent ) drawReconstructedParticle( chargedDecayProduct , primaryVertex , 0x0075df , 0x000000 );
+				}
+			}
+		}
+	}
+	else if ( SLDStatus == 5 )
+	{
+		for ( unsigned int i_vtx = 0 ; i_vtx < SLDVertices.size() ; ++i_vtx )
+		{
+			ReconstructedParticle* sldVertexRP = SLDVerticesRP[ i_vtx ];
+			for ( unsigned int i_par = 0 ; i_par < sldVertexRP->getParticles().size() ; ++i_par )
+			{
+				ReconstructedParticle* chargedDecayProduct = sldVertexRP->getParticles()[ i_par ];
+				recoChargedDecayProducts.push_back( chargedDecayProduct );
+				recoDecayProducts.push_back( chargedDecayProduct );
+				if ( m_displayEvent ) drawReconstructedParticle( chargedDecayProduct , primaryVertex , 0x0075df , 0x2e8e04 );
+			}
+		}
+	}
+	else
+	{
+		streamlog_out(WARNING) << "Nothing TODO for associating charged particles to semi-leptonic decay in absence of a vertex in jet" << std::endl;
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+
+
+
+
+
+
+	mcpVector aloneChargedDecayProducts{};
+	mcpVector MCParticlesWithVertex{};
+	pfoVector PFOswithAloneTracks{};
+	pfoVector PFOswithAloneTracksFromSLD{};
+	pfoVector PFOswithAloneTracksNotFromSLD{};
+
+
+
+
+
+
+
+
+
 	streamlog_out(DEBUG2) << "----------------------------------------------------------------------" << std::endl;
 	streamlog_out(DEBUG2) << "-------------------- Vertex of Stable MCParticles --------------------" << std::endl;
 	streamlog_out(DEBUG2) << "----------------------------------------------------------------------" << std::endl;
@@ -1113,27 +1482,22 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 		trueChargedFourMomentum += TLorentzVector( trueChargedDecayProductsAll[ i_mcp ]->getMomentum() , trueChargedDecayProductsAll[ i_mcp ]->getEnergy() );
 	}
 
-	std::vector<double> trueStartVertex{};
-	std::vector<double> trueSLDVertex{};
-	getTrueFlightDirection( SLDLepton , trueFlightDirection , trueStartVertex , trueSLDVertex );
 	if ( MCParticlesWithVertex.size() != 0 )
 	{
-		m_widestConeAlphaVertices.push_back( acos( getWidestCosAlphaOfVertices( MCParticlesWithVertex , trueFlightDirection , truePrimaryVertex ) ) * 180.0 / 3.14159265 );
-		m_widestConeCosAlphaVertices.push_back( getWidestCosAlphaOfVertices( MCParticlesWithVertex , trueFlightDirection , truePrimaryVertex ) );
+		m_alphaTrueVertices.push_back( acos( getWidestCosAlphaOfVertices( MCParticlesWithVertex , trueFlightDirection , truePrimaryVertex ) ) * 180.0 / 3.14159265 );
+		m_cosAlphaVertices.push_back( getWidestCosAlphaOfVertices( MCParticlesWithVertex , trueFlightDirection , truePrimaryVertex ) );
 	}
 	if ( trueNeutralDecayProducts.size() != 0 )
 	{
-		m_widestConeAlphaNeutrals.push_back( acos( getWidestCosAlphaOfDecayProducts( trueNeutralDecayProducts , trueFlightDirection ) ) * 180.0 / 3.14159265 );
-		m_widestConeCosAlphaNeutrals.push_back( getWidestCosAlphaOfDecayProducts( trueNeutralDecayProducts , trueFlightDirection ) );
+		m_alphaTrueNeutrals.push_back( acos( getWidestCosAlphaOfDecayProducts( trueNeutralDecayProducts , trueFlightDirection ) ) * 180.0 / 3.14159265 );
+		m_cosAlphaNeutrals.push_back( getWidestCosAlphaOfDecayProducts( trueNeutralDecayProducts , trueFlightDirection ) );
 	}
 	if ( aloneChargedDecayProducts.size() != 0 )
 	{
-		m_widestConeAlphaCharged.push_back( acos( getWidestCosAlphaOfDecayProducts( aloneChargedDecayProducts , trueFlightDirection ) ) * 180.0 / 3.14159265 );
-		m_widestConeCosAlphaCharged.push_back( getWidestCosAlphaOfDecayProducts( aloneChargedDecayProducts , trueFlightDirection ) );
+		m_alphaTrueCharged.push_back( acos( getWidestCosAlphaOfDecayProducts( aloneChargedDecayProducts , trueFlightDirection ) ) * 180.0 / 3.14159265 );
+		m_cosAlphaCharged.push_back( getWidestCosAlphaOfDecayProducts( aloneChargedDecayProducts , trueFlightDirection ) );
 	}
 
-	float weightPFOtoMCP = 0.0;
-	float weightMCPtoPFO = 0.0;
 
 	for ( unsigned int i_vtx = 0 ; i_vtx < buildUpVertexVector.size() ; ++i_vtx )
 	{
@@ -1141,40 +1505,36 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 	}
 
 
-	ReconstructedParticle* linkedRecoLepton = getLinkedPFO( SLDLepton , RecoMCParticleNav , MCParticleRecoNav , true , false , weightPFOtoMCP , weightMCPtoPFO );
-	if ( linkedRecoLepton == NULL )
-	{
-		m_SLDStatus.push_back( 1 );
-		streamlog_out(WARNING) << "	||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" << std::endl;
-		streamlog_out(WARNING) << "	||||||||||||||||| Reconstructed Lepton is not found ||||||||||||||||||" << std::endl;
-		streamlog_out(WARNING) << "	||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" << std::endl;
-		if ( m_fillRootTree ) h_SLDStatus->Fill( 1 );
-		return;
-	}
-	assignedJet = getJetAssignedToParticle( linkedRecoLepton , jetVector , recoLeptonIsInJet );
-	if ( !recoLeptonIsInJet )
-	{
-		m_SLDStatus.push_back( 2 );
-		streamlog_out(WARNING) << "	||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" << std::endl;
-		streamlog_out(WARNING) << "	||||||||||| Reconstructed Lepton doesn't belong to any jet |||||||||||" << std::endl;
-		streamlog_out(WARNING) << "	||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" << std::endl;
-		if ( m_fillRootTree ) h_SLDStatus->Fill( 2 );
-		return;
-	}
-	if ( isParticleInVertex( linkedRecoLepton , primaryVertex ) )
-	{
-		m_SLDStatus.push_back( 3 );
-		streamlog_out(WARNING) << "	||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" << std::endl;
-		streamlog_out(WARNING) << "	||||||||||||| Reconstructed Lepton is in primary vertex ||||||||||||||" << std::endl;
-		streamlog_out(WARNING) << "	||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" << std::endl;
-		if ( m_fillRootTree ) h_SLDStatus->Fill( 3 );
-		return;
-	}
-
 	m_weightPFOtoMCP_Lepton.push_back( weightPFOtoMCP );
 	m_weightMCPtoPFO_Lepton.push_back( weightMCPtoPFO );
 
-	PFOswithAloneTracks = getParticlesWithAloneTracks( linkedRecoLepton , assignedJet , primaryVertex , buildUpVertexVector );
+	for ( unsigned int i_par = 0 ; i_par < assignedJet->getParticles().size() ; ++i_par )
+	{
+		ReconstructedParticle* jetParticle = assignedJet->getParticles()[ i_par ];
+		allPFOsInJet.push_back( jetParticle );
+		weightPFOtoMCP = 0.0;
+		weightMCPtoPFO = 0.0;
+		MCParticle* linkedMCP;
+		if ( jetParticle->getTracks().size() == 0 )
+		{
+			linkedMCP = getLinkedMCP( jetParticle , RecoMCParticleNav , MCParticleRecoNav , false , true , weightPFOtoMCP , weightMCPtoPFO );
+		}
+		else
+		{
+			linkedMCP = getLinkedMCP( jetParticle , RecoMCParticleNav , MCParticleRecoNav , true , false , weightPFOtoMCP , weightMCPtoPFO );
+		}
+		bool isMCPFromSLD = false;
+		isMCParticleFromSLD( SLDLepton->getParents()[ 0 ] , linkedMCP , isMCPFromSLD );
+		if ( isMCPFromSLD )
+		{
+			allPFOsInJetFromSLD.push_back( jetParticle );
+		}
+		else
+		{
+			allPFOsInJetNotFromSLD.push_back( jetParticle );
+		}
+	}
+
 	for ( unsigned int i_pfo = 0 ; i_pfo < PFOswithAloneTracks.size() ; ++i_pfo )
 	{
 		weightPFOtoMCP = 0.0;
@@ -1194,105 +1554,40 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 			PFOswithAloneTracksNotFromSLD.push_back( PFOswithAloneTracks[ i_pfo ] );
 		}
 	}
-	TVector3 leptonDirection = TVector3( SLDLepton->getMomentum() ); leptonDirection.SetMag( 1.0 );
-	TVector3 jetAxis = TVector3( assignedJet->getMomentum() ); jetAxis.SetMag( 1.0 );
+	m_nAloneChargedPFOs.push_back( PFOswithAloneTracks.size() );
+	m_nAloneChargedPFOsFromSLD.push_back( PFOswithAloneTracksFromSLD.size() );
+
+
 
 	if ( PFOswithAloneTracksFromSLD.size() != 0 )
 	{
 		for ( unsigned int i_pfo = 0 ; i_pfo < PFOswithAloneTracksFromSLD.size() ; ++i_pfo )
 		{
-			m_widestConeAlphaAlonePFOsFromSLDwrtLepton.push_back( acos( getWidestCosAlphaOfChargedPFOs( PFOswithAloneTracksFromSLD , leptonDirection ) ) );
-			m_widestConeCosAlphaAlonePFOsFromSLDwrtLepton.push_back( getWidestCosAlphaOfChargedPFOs( PFOswithAloneTracksFromSLD , leptonDirection ) );
-			m_widestConeAlphaAlonePFOsFromSLDwrtFD.push_back( acos( getWidestCosAlphaOfChargedPFOs( PFOswithAloneTracksFromSLD , trueFlightDirection ) ) );
-			m_widestConeCosAlphaAlonePFOsFromSLDwrtFD.push_back( getWidestCosAlphaOfChargedPFOs( PFOswithAloneTracksFromSLD , trueFlightDirection ) );
-			m_widestConeAlphaAlonePFOsFromSLDwrtJet.push_back( acos( getWidestCosAlphaOfChargedPFOs( PFOswithAloneTracksFromSLD , jetAxis ) ) );
-			m_widestConeCosAlphaAlonePFOsFromSLDwrtJet.push_back( getWidestCosAlphaOfChargedPFOs( PFOswithAloneTracksFromSLD , jetAxis ) );
+			m_alphaAloneChargedPFOsFromSLDwrtLepton.push_back( acos( getWidestCosAlphaOfChargedPFOs( PFOswithAloneTracksFromSLD , leptonDirection ) ) );
+			m_cosAlphaAloneChargedPFOsFromSLDwrtLepton.push_back( getWidestCosAlphaOfChargedPFOs( PFOswithAloneTracksFromSLD , leptonDirection ) );
+			if ( SLDStatus == 4 || SLDStatus == 5 )
+			{
+				m_alphaAloneChargedPFOsFromSLDwrtFD.push_back( acos( getWidestCosAlphaOfChargedPFOs( PFOswithAloneTracksFromSLD , recoFlightDirection ) ) );
+				m_cosAlphaAloneChargedPFOsFromSLDwrtFD.push_back( getWidestCosAlphaOfChargedPFOs( PFOswithAloneTracksFromSLD , recoFlightDirection ) );
+			}
+			m_alphaAloneChargedPFOsFromSLDwrtJet.push_back( acos( getWidestCosAlphaOfChargedPFOs( PFOswithAloneTracksFromSLD , jetAxis ) ) );
+			m_cosAlphaAloneChargedPFOsFromSLDwrtJet.push_back( getWidestCosAlphaOfChargedPFOs( PFOswithAloneTracksFromSLD , jetAxis ) );
 		}
 	}
 	if ( PFOswithAloneTracksNotFromSLD.size() != 0 )
 	{
 		for ( unsigned int i_pfo = 0 ; i_pfo < PFOswithAloneTracksNotFromSLD.size() ; ++i_pfo )
 		{
-			m_widestConeAlphaAlonePFOsNotFromSLDwrtLepton.push_back( acos( getWidestCosAlphaOfChargedPFOs( PFOswithAloneTracksNotFromSLD , leptonDirection ) ) );
-			m_widestConeCosAlphaAlonePFOsNotFromSLDwrtLepton.push_back( getWidestCosAlphaOfChargedPFOs( PFOswithAloneTracksNotFromSLD , leptonDirection ) );
-			m_widestConeAlphaAlonePFOsNotFromSLDwrtFD.push_back( acos( getWidestCosAlphaOfChargedPFOs( PFOswithAloneTracksNotFromSLD , trueFlightDirection ) ) );
-			m_widestConeCosAlphaAlonePFOsNotFromSLDwrtFD.push_back( getWidestCosAlphaOfChargedPFOs( PFOswithAloneTracksNotFromSLD , trueFlightDirection ) );
-			m_widestConeAlphaAlonePFOsNotFromSLDwrtJet.push_back( acos( getWidestCosAlphaOfChargedPFOs( PFOswithAloneTracksNotFromSLD , jetAxis ) ) );
-			m_widestConeCosAlphaAlonePFOsNotFromSLDwrtJet.push_back( getWidestCosAlphaOfChargedPFOs( PFOswithAloneTracksNotFromSLD , jetAxis ) );
+			m_alphaAloneChargedPFOsNotFromSLDwrtLepton.push_back( acos( getWidestCosAlphaOfChargedPFOs( PFOswithAloneTracksNotFromSLD , leptonDirection ) ) );
+			m_cosAlphaAloneChargedPFOsNotFromSLDwrtLepton.push_back( getWidestCosAlphaOfChargedPFOs( PFOswithAloneTracksNotFromSLD , leptonDirection ) );
+			if ( SLDStatus == 4 || SLDStatus == 5 )
+			{
+				m_alphaAloneChargedPFOsNotFromSLDwrtFD.push_back( acos( getWidestCosAlphaOfChargedPFOs( PFOswithAloneTracksNotFromSLD , recoFlightDirection ) ) );
+				m_cosAlphaAloneChargedPFOsNotFromSLDwrtFD.push_back( getWidestCosAlphaOfChargedPFOs( PFOswithAloneTracksNotFromSLD , recoFlightDirection ) );
+			}
+			m_alphaAloneChargedPFOsNotFromSLDwrtJet.push_back( acos( getWidestCosAlphaOfChargedPFOs( PFOswithAloneTracksNotFromSLD , jetAxis ) ) );
+			m_cosAlphaAloneChargedPFOsNotFromSLDwrtJet.push_back( getWidestCosAlphaOfChargedPFOs( PFOswithAloneTracksNotFromSLD , jetAxis ) );
 		}
-	}
-/*
-	Track* leptonTrack = linkedRecoLepton->getTracks()[ 0 ];
-	std::vector<double> PCAatTrack1;
-	std::vector<double> PCAatTrack2;
-	std::vector<double> PCAatTrack;
-	std::vector<double> PCAatLine;
-	for ( unsigned int i_pfo = 0 ; i_pfo < PFOswithAloneTracksNotFromSLD.size() ; ++i_pfo )
-	{
-		ReconstructedParticle* testPFO = PFOswithAloneTracksNotFromSLD[ i_pfo ];
-		if ( testPFO->getTracks().size() == 1 )
-		{
-			PCAatTrack1.clear();
-			PCAatTrack2.clear();
-			m_distLeptonAlonePFOsNotFromSLD.push_back( intersectTrackTrack( leptonTrack , testPFO->getTracks()[ 0 ] , PCAatTrack1 , PCAatTrack2 ) );
-		}
-		else
-		{
-			PCAatTrack.clear();
-			PCAatLine.clear();
-			TVector3 momentumOfLine( testPFO->getMomentum() );
-			PCAatTrack1.clear();
-			PCAatTrack2.clear();
-			Track* track1 = testPFO->getTracks()[ 0 ];
-			Track* track2 = testPFO->getTracks()[ 1 ];
-			intersectTrackTrack( track1 , track2 , PCAatTrack1 , PCAatTrack2 );
-			std::vector<double> pointOnLine{};
-			pointOnLine = ( std::fabs( track1->getOmega() ) < std::fabs( track2->getOmega() ) ? PCAatTrack1 : PCAatTrack2 );
-			m_distLeptonAlonePFOsNotFromSLD.push_back( intersectTrackLine( leptonTrack , primaryVertex , momentumOfLine , pointOnLine , PCAatTrack , PCAatLine ) );
-		}
-	}
-	for ( unsigned int i_pfo = 0 ; i_pfo < PFOswithAloneTracksFromSLD.size() ; ++i_pfo )
-	{
-		ReconstructedParticle* testPFO = PFOswithAloneTracksFromSLD[ i_pfo ];
-		if ( testPFO->getTracks().size() == 1 )
-		{
-			PCAatTrack1.clear();
-			PCAatTrack2.clear();
-			m_distLeptonAlonePFOsFromSLD.push_back( intersectTrackTrack( leptonTrack , testPFO->getTracks()[ 0 ] , PCAatTrack1 , PCAatTrack2 ) );
-		}
-		else
-		{
-			PCAatTrack.clear();
-			PCAatLine.clear();
-			TVector3 momentumOfLine( testPFO->getMomentum() );
-			PCAatTrack1.clear();
-			PCAatTrack2.clear();
-			Track* track1 = testPFO->getTracks()[ 0 ];
-			Track* track2 = testPFO->getTracks()[ 1 ];
-			intersectTrackTrack( track1 , track2 , PCAatTrack1 , PCAatTrack2 );
-			std::vector<double> pointOnLine{};
-			pointOnLine = ( std::fabs( track1->getOmega() ) < std::fabs( track2->getOmega() ) ? PCAatTrack1 : PCAatTrack2 );
-			m_distLeptonAlonePFOsFromSLD.push_back( intersectTrackLine( leptonTrack , primaryVertex , momentumOfLine , pointOnLine , PCAatTrack , PCAatLine ) );
-		}
-	}
-*/
-	vtxVector verticesInJet = getVerticesInJet( assignedJet , buildUpVertexVector );
-	m_nRecoVerticesInJet.push_back( verticesInJet.size() );
-	m_nAloneChargedPFOs.push_back( PFOswithAloneTracks.size() );
-	m_nAloneChargedPFOsFromSLD.push_back( PFOswithAloneTracksFromSLD.size() );
-	int SLDStatus = getRecoFlightDirection( linkedRecoLepton , recoFlightDirection , primaryVertex , startVertex , SLDVertices , SLDVerticesRP , assignedJet , verticesInJet , PFOswithAloneTracks , helicesDistance );
-	m_distRecoLeptonToDownStreamVertex.push_back( helicesDistance );
-
-	m_SLDStatus.push_back( SLDStatus );
-	if ( m_fillRootTree ) h_SLDStatus->Fill( SLDStatus );
-
-	if ( m_cheatFlightDirection )
-	{
-		flightDirection = trueFlightDirection;
-	}
-	else
-	{
-		flightDirection = recoFlightDirection;
 	}
 
 
@@ -1307,41 +1602,6 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 	}
 
 	pfoVector recoChargedDecayProducts{};
-	if ( m_cheatPIDcharged )
-	{
-		for ( unsigned int i_par = 0 ; i_par < trueChargedDecayProductsAll.size() ; ++i_par )
-		{
-			ReconstructedParticle* linkedPFO = getLinkedPFO( trueChargedDecayProductsAll[ i_par ] , RecoMCParticleNav , MCParticleRecoNav , true , false , weightPFOtoMCP , weightMCPtoPFO );
-			if ( linkedPFO != NULL )
-			{
-				recoChargedDecayProducts.push_back( linkedPFO );
-				if ( m_displayEvent ) drawReconstructedParticle( linkedPFO , primaryVertex , 0x0075df , 0x000000 );
-			}
-		}
-	}
-	else if ( SLDStatus == 4 )
-	{
-		ReconstructedParticle* sldVertexRP = SLDVerticesRP[ 0 ];
-		for ( unsigned int i_par = 0 ; i_par < sldVertexRP->getParticles().size() ; ++i_par )
-		{
-			ReconstructedParticle* chargedDecayProduct = sldVertexRP->getParticles()[ i_par ];
-			if ( chargedDecayProduct != linkedRecoLepton )
-			{
-				recoChargedDecayProducts.push_back( chargedDecayProduct );
-				if ( m_displayEvent ) drawReconstructedParticle( chargedDecayProduct , primaryVertex , 0x0075df , 0x000000 );
-			}
-		}
-	}
-	else if ( SLDStatus == 5 )
-	{
-		ReconstructedParticle* sldVertexRP = SLDVerticesRP[ 0 ];
-		for ( unsigned int i_par = 0 ; i_par < sldVertexRP->getParticles().size() ; ++i_par )
-		{
-			ReconstructedParticle* chargedDecayProduct = sldVertexRP->getParticles()[ i_par ];
-			recoChargedDecayProducts.push_back( chargedDecayProduct );
-			if ( m_displayEvent ) drawReconstructedParticle( chargedDecayProduct , primaryVertex , 0x0075df , 0x2e8e04 );
-		}
-	}
 
 	for ( unsigned int i_par = 0 ; i_par < recoChargedDecayProducts.size() ; ++i_par )
 	{
@@ -1358,22 +1618,6 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 	}
 
 	pfoVector recoNeutralDecayProducts{};
-	if ( m_cheatPIDneutral )
-	{
-		for ( unsigned int i_par = 0 ; i_par < trueNeutralDecayProducts.size() ; ++i_par )
-		{
-			ReconstructedParticle* linkedPFO = getLinkedPFO( trueNeutralDecayProducts[ i_par ] , RecoMCParticleNav , MCParticleRecoNav , false , true , weightPFOtoMCP , weightMCPtoPFO );
-			if ( linkedPFO != NULL )
-			{
-				recoNeutralDecayProducts.push_back( linkedPFO );
-				if ( m_displayEvent ) drawReconstructedParticle( linkedPFO , primaryVertex , 0x0075df , 0x2e8e04 );
-			}
-		}
-	}
-	else
-	{
-		streamlog_out(WARNING) << "Nothing TODO for associating neutral particles to semi-leptonic decay" << std::endl;
-	}
 
 	for ( unsigned int i_par = 0 ; i_par < recoNeutralDecayProducts.size() ; ++i_par )
 	{
@@ -1421,59 +1665,59 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 	m_recoNuNegPy.push_back( recoNeutrinoFourMomentumNeg.Py() );
 	m_recoNuNegPz.push_back( recoNeutrinoFourMomentumNeg.Pz() );
 	m_recoNuNegE.push_back( recoNeutrinoFourMomentumNeg.E() );
+*/
 
 
-/*
-	streamlog_out(DEBUG2) << "			     (  PDG	, Mass		, Px		, Py		, Pz		, E		, Charge	)" << std::endl;
-	streamlog_out(DEBUG2) << "		Neutrino" << std::endl;
-	streamlog_out(DEBUG2) << "			True:(	" << "***" << "	, " << trueNeutrinoFourMomentum.M() << "	, " << trueNeutrinoFourMomentum.Px() << "	, " << trueNeutrinoFourMomentum.Py() << "	, " << trueNeutrinoFourMomentum.Pz() << "	, " << trueNeutrinoFourMomentum.E() << "	, " << "0" << "	)" << std::endl;
-	streamlog_out(DEBUG2) << "" << std::endl;
-	streamlog_out(DEBUG2) << "		Hadron" << std::endl;
-	streamlog_out(DEBUG2) << "			True:(	" << parentHadron->getPDG() << "	, " << parentHadron->getMass() << "	, " << parentHadron->getMomentum()[ 0 ] << "	, " << parentHadron->getMomentum()[ 1 ] << "	, " << parentHadron->getMomentum()[ 2 ] << "	, " << parentHadron->getEnergy() << "	, " << parentHadron->getCharge() << "	)" << std::endl;
-	streamlog_out(DEBUG2) << "" << std::endl;
-	getLeptonFourMomentum( pLCEvent , SLDLepton  , m_cheatLepton4momentum , leptonFourMomentum , trueLeptonFourMomentum , m_RecoMCTruthLinkCollection , m_MCTruthRecoLinkCollection );
-	streamlog_out(DEBUG2) << "			Used:(	" << SLDLepton->getPDG() << "	, " << leptonFourMomentum.M() << "	, " << leptonFourMomentum.Px() << "	, " << leptonFourMomentum.Py() << "	, " << leptonFourMomentum.Pz() << "	, " << leptonFourMomentum.E() << "	, " << (int)SLDLepton->getCharge() << "		)" << std::endl;
-	streamlog_out(DEBUG2) << "" << std::endl;
-	getChargedFourMomentum( pLCEvent , SLDLepton  , m_cheatCharged4momentum , chargedFourMomentum , trueChargedFourMomentum , restCharge , m_RecoMCTruthLinkCollection , m_MCTruthRecoLinkCollection );
-	streamlog_out(DEBUG2) << "			Used:(	" << "qqq" << "	, " << chargedFourMomentum.M() << "	, " << chargedFourMomentum.Px() << "	, " << chargedFourMomentum.Py() << "	, " << chargedFourMomentum.Pz() << "	, " << chargedFourMomentum.E() << "	, " << (int)restCharge << "		)" << std::endl;
-	streamlog_out(DEBUG2) << "" << std::endl;
-	getNeutralFourMomentum( pLCEvent , SLDLepton  , m_cheatNeutral4momentum , neutralFourMomentum , trueNeutralFourMomentum , m_RecoMCTruthLinkCollection , m_MCTruthRecoLinkCollection );
-	streamlog_out(DEBUG2) << "			Used:(	" << "nnn" << "	, " << neutralFourMomentum.M() << "	, " << neutralFourMomentum.Px() << "	, " << neutralFourMomentum.Py() << "	, " << neutralFourMomentum.Pz() << "	, " << neutralFourMomentum.E() << "	, " << "0" << "		)" << std::endl;
-	streamlog_out(DEBUG2) << "" << std::endl;
-	streamlog_out(DEBUG2) << "			     (  X		, Y		, Z	)" << std::endl;
+//	streamlog_out(DEBUG2) << "			     (  PDG	, Mass		, Px		, Py		, Pz		, E		, Charge	)" << std::endl;
+//	streamlog_out(DEBUG2) << "		Neutrino" << std::endl;
+//	streamlog_out(DEBUG2) << "			True:(	" << "***" << "	, " << trueNeutrinoFourMomentum.M() << "	, " << trueNeutrinoFourMomentum.Px() << "	, " << trueNeutrinoFourMomentum.Py() << "	, " << trueNeutrinoFourMomentum.Pz() << "	, " << trueNeutrinoFourMomentum.E() << "	, " << "0" << "	)" << std::endl;
+//	streamlog_out(DEBUG2) << "" << std::endl;
+//	streamlog_out(DEBUG2) << "		Hadron" << std::endl;
+//	streamlog_out(DEBUG2) << "			True:(	" << parentHadron->getPDG() << "	, " << parentHadron->getMass() << "	, " << parentHadron->getMomentum()[ 0 ] << "	, " << parentHadron->getMomentum()[ 1 ] << "	, " << parentHadron->getMomentum()[ 2 ] << "	, " << parentHadron->getEnergy() << "	, " << parentHadron->getCharge() << "	)" << std::endl;
+//	streamlog_out(DEBUG2) << "" << std::endl;
+//	getLeptonFourMomentum( pLCEvent , SLDLepton  , m_cheatLepton4momentum , leptonFourMomentum , trueLeptonFourMomentum , m_RecoMCTruthLinkCollection , m_MCTruthRecoLinkCollection );
+//	streamlog_out(DEBUG2) << "			Used:(	" << SLDLepton->getPDG() << "	, " << leptonFourMomentum.M() << "	, " << leptonFourMomentum.Px() << "	, " << leptonFourMomentum.Py() << "	, " << leptonFourMomentum.Pz() << "	, " << leptonFourMomentum.E() << "	, " << (int)SLDLepton->getCharge() << "		)" << std::endl;
+//	streamlog_out(DEBUG2) << "" << std::endl;
+//	getChargedFourMomentum( pLCEvent , SLDLepton  , m_cheatCharged4momentum , chargedFourMomentum , trueChargedFourMomentum , restCharge , m_RecoMCTruthLinkCollection , m_MCTruthRecoLinkCollection );
+//	streamlog_out(DEBUG2) << "			Used:(	" << "qqq" << "	, " << chargedFourMomentum.M() << "	, " << chargedFourMomentum.Px() << "	, " << chargedFourMomentum.Py() << "	, " << chargedFourMomentum.Pz() << "	, " << chargedFourMomentum.E() << "	, " << (int)restCharge << "		)" << std::endl;
+//	streamlog_out(DEBUG2) << "" << std::endl;
+//	getNeutralFourMomentum( pLCEvent , SLDLepton  , m_cheatNeutral4momentum , neutralFourMomentum , trueNeutralFourMomentum , m_RecoMCTruthLinkCollection , m_MCTruthRecoLinkCollection );
+//	streamlog_out(DEBUG2) << "			Used:(	" << "nnn" << "	, " << neutralFourMomentum.M() << "	, " << neutralFourMomentum.Px() << "	, " << neutralFourMomentum.Py() << "	, " << neutralFourMomentum.Pz() << "	, " << neutralFourMomentum.E() << "	, " << "0" << "		)" << std::endl;
+//	streamlog_out(DEBUG2) << "" << std::endl;
+//	streamlog_out(DEBUG2) << "			     (  X		, Y		, Z	)" << std::endl;
 
 
-	ReconstructedParticle *assignedJet = NULL;
+//	ReconstructedParticle *assignedJet = NULL;
 
-	int flightDirectionStatus = 0;
-	if ( linkedRecoLepton != NULL ) flightDirectionStatus = getRecoFlightDirection( linkedRecoLepton , recoFlightDirection , primaryVertex , startVertex , SLDVertex , SLDVertexRP , assignedJet , jetVector , buildUpVertexVector );
+//	int flightDirectionStatus = 0;
+//	if ( linkedRecoLepton != NULL ) flightDirectionStatus = getRecoFlightDirection( linkedRecoLepton , recoFlightDirection , primaryVertex , startVertex , SLDVertex , SLDVertexRP , assignedJet , jetVector , buildUpVertexVector );
+//
+//	if ( assignedJet != NULL ) streamlog_out(DEBUG1) << *assignedJet << std::endl;
+//	if ( SLDVertex != NULL ) streamlog_out(DEBUG1) << *SLDVertex << std::endl;
 
-	if ( assignedJet != NULL ) streamlog_out(DEBUG1) << *assignedJet << std::endl;
-	if ( SLDVertex != NULL ) streamlog_out(DEBUG1) << *SLDVertex << std::endl;
-
-	std::vector<EVENT::MCParticle*> trueNeutralDecayProducts{};
-	getNeutralMCPs( SLDLepton->getParents()[ 0 ] , trueNeutralDecayProducts );
+//	std::vector<EVENT::MCParticle*> trueNeutralDecayProducts{};
+//	getNeutralMCPs( SLDLepton->getParents()[ 0 ] , trueNeutralDecayProducts );
 
 
-	std::vector<EVENT::MCParticle*> trueChargedDecayProducts{};
-	getChargedMCPs( SLDLepton->getParents()[ 0 ] , trueChargedDecayProducts );
+//	std::vector<EVENT::MCParticle*> trueChargedDecayProducts{};
+//	getChargedMCPs( SLDLepton->getParents()[ 0 ] , trueChargedDecayProducts );
 
-	std::vector<EVENT::ReconstructedParticle*> aloneChargedPFOs{};
-	std::vector<EVENT::ReconstructedParticle*> recoChargedDecayProducts{};
-	if ( assignedJet != NULL ) aloneChargedPFOs = getParticlesWithAloneTracks( linkedRecoLepton , assignedJet , primaryVertex , buildUpVertexVector );
-	if ( aloneChargedPFOs.size() != 0 )
-	{
-		for ( unsigned int i_trk = 0 ; i_trk < aloneChargedPFOs.size() ; ++i_trk )
-		{
-			ReconstructedParticle* testPFO = (ReconstructedParticle*) aloneChargedPFOs[ i_trk ];
-			MCParticle* linkedMCP = getLinkedMCP( pLCEvent , testPFO , m_RecoMCTruthLinkCollection , m_MCTruthRecoLinkCollection , true , false );
-			for ( unsigned int i_mcp = 0 ; i_mcp < trueChargedDecayProducts.size() ; ++i_mcp )
-			{
-				MCParticle* testMCP = (MCParticle*) trueChargedDecayProducts[ i_mcp ];
-				if ( testMCP == linkedMCP ) recoChargedDecayProducts.push_back( testPFO );
-			}
-		}
-	}
+//	std::vector<EVENT::ReconstructedParticle*> aloneChargedPFOs{};
+//	std::vector<EVENT::ReconstructedParticle*> recoChargedDecayProducts{};
+//	if ( assignedJet != NULL ) aloneChargedPFOs = getParticlesWithAloneTracks( linkedRecoLepton , assignedJet , primaryVertex , buildUpVertexVector );
+//	if ( aloneChargedPFOs.size() != 0 )
+//	{
+//		for ( unsigned int i_trk = 0 ; i_trk < aloneChargedPFOs.size() ; ++i_trk )
+//		{
+//			ReconstructedParticle* testPFO = (ReconstructedParticle*) aloneChargedPFOs[ i_trk ];
+//			MCParticle* linkedMCP = getLinkedMCP( pLCEvent , testPFO , m_RecoMCTruthLinkCollection , m_MCTruthRecoLinkCollection , true , false );
+//			for ( unsigned int i_mcp = 0 ; i_mcp < trueChargedDecayProducts.size() ; ++i_mcp )
+//			{
+//				MCParticle* testMCP = (MCParticle*) trueChargedDecayProducts[ i_mcp ];
+//				if ( testMCP == linkedMCP ) recoChargedDecayProducts.push_back( testPFO );
+//			}
+//		}
+//	}
 
 
 
@@ -1481,42 +1725,42 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 //	int flightDirectionStatus = 0;
 //	flightDirectionStatus = getParentHadronFlightDirection( pLCEvent , SLDLepton , trueFlightDirection , recoFlightDirection , m_inputPrimaryVertex , m_inputBuildUpVertex , m_inputJetCollection , m_vertexingScenario , m_RecoMCTruthLinkCollection , m_MCTruthRecoLinkCollection , helicesDistance , SecondaryVertexPar , m_displayEvent );
 //	if ( helicesDistance > 400.0 ) getParentHadronFlightDirection( pLCEvent , SLDLepton , trueFlightDirection , recoFlightDirection , m_inputPrimaryVertex , m_inputBuildUpVertex , m_inputJetCollection , m_vertexingScenario , m_RecoMCTruthLinkCollection , m_MCTruthRecoLinkCollection , helicesDistance , SecondaryVertexPar , true , this );
-	if ( m_fillRootTree )
-	{
-		h_secondaryVertex->Fill( flightDirectionStatus - 0.5 );
-		++n_secondaryVertex;
-	}
-*/
+//	if ( m_fillRootTree )
+//	{
+//		h_secondaryVertex->Fill( flightDirectionStatus - 0.5 );
+//		++n_secondaryVertex;
+//	}
 
-/*
-	m_flightDirectionStatus.push_back( flightDirectionStatus );
-	m_distRecoLeptonToDownStreamVertex.push_back( helicesDistance );
-	m_FlightDirectionErrorCosAlpha.push_back( trueFlightDirection.Dot( recoFlightDirection ) );
-	m_FlightDirectionErrorSinAlpha.push_back( sqrt( 1 - pow( trueFlightDirection.Dot( recoFlightDirection ) , 2 ) ) );
-	m_FlightDirectionErrorAlpha.push_back( acos( trueFlightDirection.Dot( recoFlightDirection ) ) * 180.0 / 3.14159265 );
-	m_dsVertexResidualX.push_back( SecondaryVertexPar[ 3 ] - SecondaryVertexPar[ 0 ] );
-	m_dsVertexResidualY.push_back( SecondaryVertexPar[ 4 ] - SecondaryVertexPar[ 1 ] );
-	m_dsVertexResidualZ.push_back( SecondaryVertexPar[ 5 ] - SecondaryVertexPar[ 2 ] );
-	m_SecVertexResidualX.push_back( SecondaryVertexPar[ 9 ] - SecondaryVertexPar[ 6 ] );
-	m_SecVertexResidualY.push_back( SecondaryVertexPar[ 10 ] - SecondaryVertexPar[ 7 ] );
-	m_SecVertexResidualZ.push_back( SecondaryVertexPar[ 11 ] - SecondaryVertexPar[ 8 ] );
-*/
 
-/*
-	if ( m_cheatFlightDirection )
-	{
-		flightDirection = trueFlightDirection;
-	}
-	else
-	{
-		flightDirection = recoFlightDirection;
-	}
-	streamlog_out(DEBUG4) << "" << std::endl;
-	streamlog_out(DEBUG4) << "		Flight Direction Error:		CosAlpha = " << trueFlightDirection.Dot( recoFlightDirection ) << "	, Alpha = " << acos( trueFlightDirection.Dot( recoFlightDirection ) ) * 180.0 / 3.14159265 << " deg" << std::endl;
+
+//	m_flightDirectionStatus.push_back( flightDirectionStatus );
+//	m_distRecoLeptonToDownStreamVertex.push_back( helicesDistance );
+//	m_FlightDirectionErrorCosAlpha.push_back( trueFlightDirection.Dot( recoFlightDirection ) );
+//	m_FlightDirectionErrorSinAlpha.push_back( sqrt( 1 - pow( trueFlightDirection.Dot( recoFlightDirection ) , 2 ) ) );
+//	m_FlightDirectionErrorAlpha.push_back( acos( trueFlightDirection.Dot( recoFlightDirection ) ) * 180.0 / 3.14159265 );
+//	m_dsVertexResidualX.push_back( SecondaryVertexPar[ 3 ] - SecondaryVertexPar[ 0 ] );
+//	m_dsVertexResidualY.push_back( SecondaryVertexPar[ 4 ] - SecondaryVertexPar[ 1 ] );
+//	m_dsVertexResidualZ.push_back( SecondaryVertexPar[ 5 ] - SecondaryVertexPar[ 2 ] );
+//	m_SecVertexResidualX.push_back( SecondaryVertexPar[ 9 ] - SecondaryVertexPar[ 6 ] );
+//	m_SecVertexResidualY.push_back( SecondaryVertexPar[ 10 ] - SecondaryVertexPar[ 7 ] );
+//	m_SecVertexResidualZ.push_back( SecondaryVertexPar[ 11 ] - SecondaryVertexPar[ 8 ] );
+
+
+
+//	if ( m_cheatFlightDirection )
+//	{
+//		flightDirection = trueFlightDirection;
+//	}
+//	else
+//	{
+//		flightDirection = recoFlightDirection;
+//	}
+//	streamlog_out(DEBUG4) << "" << std::endl;
+//	streamlog_out(DEBUG4) << "		Flight Direction Error:		CosAlpha = " << trueFlightDirection.Dot( recoFlightDirection ) << "	, Alpha = " << acos( trueFlightDirection.Dot( recoFlightDirection ) ) * 180.0 / 3.14159265 << " deg" << std::endl;
 //	if ( flightDirectionStatus == 1 ) return;
-	recoNeutrinoFourMomentumPos = getNeutrinoFourMomentum( flightDirection , leptonFourMomentum , chargedFourMomentum , neutralFourMomentum , parentHadronMass , +1 );
-	recoNeutrinoFourMomentumNeg = getNeutrinoFourMomentum( flightDirection , leptonFourMomentum , chargedFourMomentum , neutralFourMomentum , parentHadronMass , -1 );
-*/
+//	recoNeutrinoFourMomentumPos = getNeutrinoFourMomentum( flightDirection , leptonFourMomentum , chargedFourMomentum , neutralFourMomentum , parentHadronMass , +1 );
+//	recoNeutrinoFourMomentumNeg = getNeutrinoFourMomentum( flightDirection , leptonFourMomentum , chargedFourMomentum , neutralFourMomentum , parentHadronMass , -1 );
+
 
 	if ( m_displayEvent )
 	{
@@ -1627,10 +1871,9 @@ TLorentzVector SLDCorrection::getNeutrinoFourMomentum( TVector3 flightDirection 
 	return Neutrino_tlv;
 }
 
-MCParticle* SLDCorrection::getTrueNeutrino( MCParticle *SLDLepton , TLorentzVector& InisibleFourMomentum )
+MCParticle* SLDCorrection::getTrueNeutrino( MCParticle *SLDLepton )
 {
 	MCParticle* trueNeutrino{};
-//	TLorentzVector InisibleFourMomentum( 0.0 , 0.0 , 0.0 , 0.0 );
 	try
 	{
 		EVENT::MCParticle *MotherHadron = SLDLepton->getParents()[ 0 ];
@@ -1645,7 +1888,6 @@ MCParticle* SLDCorrection::getTrueNeutrino( MCParticle *SLDLepton , TLorentzVect
 				streamlog_out(DEBUG0) << "----------------------------------------------------------------------" << std::endl;
 				streamlog_out(DEBUG0) << *daughter << std::endl;
 				trueNeutrino = daughter;
-				InisibleFourMomentum = TLorentzVector( daughter->getMomentum()[ 0 ] , daughter->getMomentum()[ 1 ] , daughter->getMomentum()[ 2 ] , daughter->getEnergy() );
 			}
 		}
 		++nNeutrinos;
@@ -1655,6 +1897,104 @@ MCParticle* SLDCorrection::getTrueNeutrino( MCParticle *SLDLepton , TLorentzVect
         	streamlog_out(MESSAGE) << "	True Neutrino for semi-leptonic decay not found in MCParticles" << std::endl;
         }
 	return trueNeutrino;
+}
+
+void SLDCorrection::evaluatePFOsAngle(	std::vector<EVENT::ReconstructedParticle*> aloneChargedPFOsInJetFromSLD ,
+					std::vector<EVENT::ReconstructedParticle*> aloneChargedPFOsInJetNotFromSLD ,
+					std::vector<EVENT::ReconstructedParticle*> chargedPFOsInJetFromSLD ,
+					std::vector<EVENT::ReconstructedParticle*> chargedPFOsInJetNotFromSLD ,
+					std::vector<EVENT::ReconstructedParticle*> neutralPFOsInJetFromSLD ,
+					std::vector<EVENT::ReconstructedParticle*> neutralPFOsInJetNotFromSLD ,
+					TVector3 leptonDirection , TVector3 jetAxis , TVector3 recoFlightDirection , int SLDStatus )
+{
+	leptonDirection.SetMag( 1.0 );
+	jetAxis.SetMag( 1.0 );
+	if ( SLDStatus == 4 || SLDStatus == 5 )recoFlightDirection.SetMag( 1.0 );
+	for ( unsigned int i_par = 0 ; i_par < aloneChargedPFOsInJetFromSLD.size() ; ++i_par )
+	{
+		TVector3 pfoMomentum( ( aloneChargedPFOsInJetFromSLD[ i_par ] )->getMomentum() ); pfoMomentum.SetMag( 1.0 );
+		m_alphaAloneChargedPFOsFromSLDwrtLepton.push_back( acos( pfoMomentum.Dot( leptonDirection ) ) );
+		m_cosAlphaAloneChargedPFOsFromSLDwrtLepton.push_back( pfoMomentum.Dot( leptonDirection ) );
+		m_alphaAloneChargedPFOsFromSLDwrtJet.push_back( acos( pfoMomentum.Dot( jetAxis ) ) );
+		m_cosAlphaAloneChargedPFOsFromSLDwrtJet.push_back( pfoMomentum.Dot( jetAxis ) );
+		if ( SLDStatus == 4 || SLDStatus == 5 )
+		{
+			m_alphaAloneChargedPFOsFromSLDwrtFD.push_back( acos( pfoMomentum.Dot( recoFlightDirection ) ) );
+			m_cosAlphaAloneChargedPFOsFromSLDwrtFD.push_back( pfoMomentum.Dot( recoFlightDirection ) );
+		}
+
+	}
+	for ( unsigned int i_par = 0 ; i_par < aloneChargedPFOsInJetNotFromSLD.size() ; ++i_par )
+	{
+		TVector3 pfoMomentum( ( aloneChargedPFOsInJetNotFromSLD[ i_par ] )->getMomentum() ); pfoMomentum.SetMag( 1.0 );
+		m_alphaAloneChargedPFOsNotFromSLDwrtLepton.push_back( acos( pfoMomentum.Dot( leptonDirection ) ) );
+		m_cosAlphaAloneChargedPFOsNotFromSLDwrtLepton.push_back( pfoMomentum.Dot( leptonDirection ) );
+		m_alphaAloneChargedPFOsNotFromSLDwrtJet.push_back( acos( pfoMomentum.Dot( jetAxis ) ) );
+		m_cosAlphaAloneChargedPFOsNotFromSLDwrtJet.push_back( pfoMomentum.Dot( jetAxis ) );
+		if ( SLDStatus == 4 || SLDStatus == 5 )
+		{
+			m_alphaAloneChargedPFOsNotFromSLDwrtFD.push_back( acos( pfoMomentum.Dot( recoFlightDirection ) ) );
+			m_cosAlphaAloneChargedPFOsNotFromSLDwrtFD.push_back( pfoMomentum.Dot( recoFlightDirection ) );
+		}
+
+	}
+	for ( unsigned int i_par = 0 ; i_par < chargedPFOsInJetFromSLD.size() ; ++i_par )
+	{
+		TVector3 pfoMomentum( ( chargedPFOsInJetFromSLD[ i_par ] )->getMomentum() ); pfoMomentum.SetMag( 1.0 );
+		m_alphaChargedPFOsFromSLDwrtLepton.push_back( acos( pfoMomentum.Dot( leptonDirection ) ) );
+		m_cosAlphaChargedPFOsFromSLDwrtLepton.push_back( pfoMomentum.Dot( leptonDirection ) );
+		m_alphaChargedPFOsFromSLDwrtJet.push_back( acos( pfoMomentum.Dot( jetAxis ) ) );
+		m_cosAlphaChargedPFOsFromSLDwrtJet.push_back( pfoMomentum.Dot( jetAxis ) );
+		if ( SLDStatus == 4 || SLDStatus == 5 )
+		{
+			m_alphaChargedPFOsFromSLDwrtFD.push_back( acos( pfoMomentum.Dot( recoFlightDirection ) ) );
+			m_cosAlphaChargedPFOsFromSLDwrtFD.push_back( pfoMomentum.Dot( recoFlightDirection ) );
+		}
+
+	}
+	for ( unsigned int i_par = 0 ; i_par < chargedPFOsInJetNotFromSLD.size() ; ++i_par )
+	{
+		TVector3 pfoMomentum( ( chargedPFOsInJetNotFromSLD[ i_par ] )->getMomentum() ); pfoMomentum.SetMag( 1.0 );
+		m_alphaChargedPFOsNotFromSLDwrtLepton.push_back( acos( pfoMomentum.Dot( leptonDirection ) ) );
+		m_cosAlphaChargedPFOsNotFromSLDwrtLepton.push_back( pfoMomentum.Dot( leptonDirection ) );
+		m_alphaChargedPFOsNotFromSLDwrtJet.push_back( acos( pfoMomentum.Dot( jetAxis ) ) );
+		m_cosAlphaChargedPFOsNotFromSLDwrtJet.push_back( pfoMomentum.Dot( jetAxis ) );
+		if ( SLDStatus == 4 || SLDStatus == 5 )
+		{
+			m_alphaChargedPFOsNotFromSLDwrtFD.push_back( acos( pfoMomentum.Dot( recoFlightDirection ) ) );
+			m_cosAlphaChargedPFOsNotFromSLDwrtFD.push_back( pfoMomentum.Dot( recoFlightDirection ) );
+		}
+
+	}
+	for ( unsigned int i_par = 0 ; i_par < neutralPFOsInJetFromSLD.size() ; ++i_par )
+	{
+		TVector3 pfoMomentum( ( neutralPFOsInJetFromSLD[ i_par ] )->getMomentum() ); pfoMomentum.SetMag( 1.0 );
+		m_alphaNeutralPFOsFromSLDwrtLepton.push_back( acos( pfoMomentum.Dot( leptonDirection ) ) );
+		m_cosAlphaNeutralPFOsFromSLDwrtLepton.push_back( pfoMomentum.Dot( leptonDirection ) );
+		m_alphaNeutralPFOsFromSLDwrtJet.push_back( acos( pfoMomentum.Dot( jetAxis ) ) );
+		m_cosAlphaNeutralPFOsFromSLDwrtJet.push_back( pfoMomentum.Dot( jetAxis ) );
+		if ( SLDStatus == 4 || SLDStatus == 5 )
+		{
+			m_alphaNeutralPFOsFromSLDwrtFD.push_back( acos( pfoMomentum.Dot( recoFlightDirection ) ) );
+			m_cosAlphaNeutralPFOsFromSLDwrtFD.push_back( pfoMomentum.Dot( recoFlightDirection ) );
+		}
+
+	}
+	for ( unsigned int i_par = 0 ; i_par < neutralPFOsInJetNotFromSLD.size() ; ++i_par )
+	{
+		TVector3 pfoMomentum( ( neutralPFOsInJetNotFromSLD[ i_par ] )->getMomentum() ); pfoMomentum.SetMag( 1.0 );
+		m_alphaNeutralPFOsNotFromSLDwrtLepton.push_back( acos( pfoMomentum.Dot( leptonDirection ) ) );
+		m_cosAlphaNeutralPFOsNotFromSLDwrtLepton.push_back( pfoMomentum.Dot( leptonDirection ) );
+		m_alphaNeutralPFOsNotFromSLDwrtJet.push_back( acos( pfoMomentum.Dot( jetAxis ) ) );
+		m_cosAlphaNeutralPFOsNotFromSLDwrtJet.push_back( pfoMomentum.Dot( jetAxis ) );
+		if ( SLDStatus == 4 || SLDStatus == 5 )
+		{
+			m_alphaNeutralPFOsNotFromSLDwrtFD.push_back( acos( pfoMomentum.Dot( recoFlightDirection ) ) );
+			m_cosAlphaNeutralPFOsNotFromSLDwrtFD.push_back( pfoMomentum.Dot( recoFlightDirection ) );
+		}
+
+	}
+
 }
 
 void SLDCorrection::fillTrueRecoFourMomentum(	TLorentzVector trueNeutralFourMomentum , TLorentzVector trueChargedFourMomentum ,

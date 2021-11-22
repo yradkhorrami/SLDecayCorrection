@@ -17,11 +17,11 @@
 #include <math.h>
 #include <GeometryUtil.h>
 
+typedef std::vector<EVENT::ReconstructedParticle*>	pfoVector;
+
 std::vector<EVENT::ReconstructedParticle*> assignNeutralParticles( EVENT::ReconstructedParticle *assignedJet , TVector3 pointingVector , double InvMass , TLorentzVector chargedFourMomentum , TLorentzVector &neutralFourMomentum , double cosOpeningAngle );
 
 std::vector<EVENT::ReconstructedParticle*> assignChargedParticles( EVENT::LCEvent *pLCEvent , EVENT::ReconstructedParticle *assignedJet , std::string inputPrimaryVertex , std::string inputBuildUpVertex , EVENT::ReconstructedParticle *linkedRecoLepton , TVector3 pointingVector , double InvMass , TLorentzVector chargedFourMomentum , TLorentzVector &neutralFourMomentum , double cosOpeningAngle );
-
-std::vector<EVENT::ReconstructedParticle*> sortParticlesInCone( std::vector<EVENT::ReconstructedParticle*> sortedParticles , std::vector<EVENT::ReconstructedParticle*> remainedParticles , TVector3 pointingVector );
 
 bool isParticleInVertex( EVENT::ReconstructedParticle *particle , EVENT::Vertex *vertex );
 
@@ -33,6 +33,12 @@ EVENT::ReconstructedParticle *getJetAssignedToParticle( EVENT::ReconstructedPart
 
 EVENT::Track *makeTrackParameters( TVector3 momentum , TVector3 point , double charge );
 
+void sortParticles( pfoVector &sortedParticles , pfoVector &unSortedParticles , TVector3 direction );
+
 std::vector<EVENT::Vertex*> getVerticesInJet( EVENT::ReconstructedParticle * assignedJet , std::vector<EVENT::Vertex*> buildUpVertexVector );
+
+EVENT::ReconstructedParticle* getLeadingChargedParticle( EVENT::ReconstructedParticle* Jet );
+
+EVENT::ReconstructedParticle* getLeadingNeutralParticle( EVENT::ReconstructedParticle* Jet );
 
 #endif

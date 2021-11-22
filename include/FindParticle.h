@@ -29,4 +29,6 @@ float getWidestCosAlphaOfVertices( std::vector<EVENT::MCParticle*> mcpVec , TVec
 
 float getWidestCosAlphaOfChargedPFOs( std::vector<EVENT::ReconstructedParticle*> pfoVec , TVector3 direction );
 
+void isMCParticleFromSLD( EVENT::MCParticle* parentHadron , EVENT::MCParticle* testMCParticle , bool &MCPisFromSLD );
+
 #endif

@@ -26,7 +26,7 @@ std::vector<EVENT::ReconstructedParticle*> assignNeutralParticles( 	EVENT::Recon
 			}
 		}
 	}
-	sortedParticles = sortParticlesInCone( sortedParticles , remainedParticles , pointingVector );
+	sortParticles( sortedParticles , remainedParticles , pointingVector );
 	streamlog_out(DEBUG1) << "		" << sortedParticles.size() << " neutral particles sorted wrt the angular distance to the pointing vector" << std::endl;
 
 	TLorentzVector totalFourMomentum = chargedFourMomentum + neutralFourMomentum;
@@ -108,7 +108,7 @@ std::vector<EVENT::ReconstructedParticle*> assignChargedParticles( 	EVENT::LCEve
 			}
 		}
 	}
-	sortedParticles = sortParticlesInCone( sortedParticles , remainedParticles , pointingVector );
+	sortParticles( sortedParticles , remainedParticles , pointingVector );
 	streamlog_out(DEBUG1) << "		" << sortedParticles.size() << " charged particles sorted wrt the angular distance to the pointing vector" << std::endl;
 
 	TLorentzVector totalFourMomentum = chargedFourMomentum + neutralFourMomentum;
@@ -127,40 +127,38 @@ std::vector<EVENT::ReconstructedParticle*> assignChargedParticles( 	EVENT::LCEve
 	return assignedChargedParticles;
 }
 
-std::vector<EVENT::ReconstructedParticle*> sortParticlesInCone( std::vector<EVENT::ReconstructedParticle*> sortedParticles , std::vector<EVENT::ReconstructedParticle*> remainedParticles , TVector3 pointingVector )
+void sortParticles( pfoVector &sortedParticles , pfoVector &unSortedParticles , TVector3 direction )
 {
-	std::vector<EVENT::ReconstructedParticle*> newSortedParticles;
-	std::vector<EVENT::ReconstructedParticle*> newRemainedParticles;
-	for ( unsigned int i_particle = 0 ; i_particle < remainedParticles.size() ; ++i_particle )
-	{
-		newSortedParticles.push_back( sortedParticles[ i_particle ] );
-	}
 	double closestAngleCos = -1.0;
-	unsigned int closestParticleIndex = 0;
-	for ( unsigned int i_particle = 0 ; i_particle < remainedParticles.size() ; ++i_particle )
+	ReconstructedParticle* closestParticle = NULL;
+	streamlog_out(DEBUG0) << "	" << sortedParticles.size() << " of " << unSortedParticles.size() + sortedParticles.size() << " particles have been sorted wrt ( " << direction.X() << " , " << direction.Y() << " , " << direction.Z() <<" )" << std::endl;
+	for ( unsigned int i_par = 0 ; i_par < unSortedParticles.size() ; ++i_par )
 	{
-		EVENT::ReconstructedParticle* particle = remainedParticles[ i_particle ];
-		TVector3 Momentum( particle->getMomentum()[ 0 ] , particle->getMomentum()[ 1 ] , particle->getMomentum()[ 2 ] );
-		Momentum.SetMag( 1.0 );
-		if ( Momentum.Dot( pointingVector ) > closestAngleCos )
+		ReconstructedParticle* testParticle = unSortedParticles[ i_par ];
+		TVector3 momentum = TVector3( testParticle->getMomentum() );
+		momentum.SetMag( 1.0 );
+		if ( momentum.Dot( direction ) >= closestAngleCos )
 		{
-			closestAngleCos = Momentum.Dot( pointingVector );
-			closestParticleIndex = i_particle;
+			closestAngleCos = momentum.Dot( direction );
+			closestParticle = testParticle;
+
 		}
 	}
-	for ( unsigned int i_particle = 0 ; i_particle < remainedParticles.size() ; ++i_particle )
+	pfoVector remainingUnSortedParticles{};
+	for ( unsigned int i_par = 0 ; i_par < unSortedParticles.size() ; ++i_par )
 	{
-		if ( i_particle == closestParticleIndex )
+		ReconstructedParticle* testParticle = unSortedParticles[ i_par ];
+		if ( testParticle == closestParticle )
 		{
-			newSortedParticles.push_back( remainedParticles[ i_particle ] );
+			sortedParticles.push_back( testParticle );
 		}
 		else
 		{
-			newRemainedParticles.push_back( remainedParticles[ i_particle ] );
+			remainingUnSortedParticles.push_back( testParticle );
 		}
 	}
-	newSortedParticles = sortParticlesInCone( newSortedParticles , newRemainedParticles , pointingVector );
-	return newSortedParticles;
+	streamlog_out(DEBUG0) << "	" << sortedParticles.size() << " particles sorted and " << remainingUnSortedParticles.size() << " particles have not been sorted wrt ( " << direction.X() << " , " << direction.Y() << " , " << direction.Z() <<" )" << std::endl;
+	if ( remainingUnSortedParticles.size() != 0 ) sortParticles( sortedParticles , remainingUnSortedParticles , direction );
 }
 
 bool isParticleInVertex( EVENT::ReconstructedParticle *particle , EVENT::Vertex *vertex )
@@ -168,7 +166,7 @@ bool isParticleInVertex( EVENT::ReconstructedParticle *particle , EVENT::Vertex 
 	bool particleIsInVertex = false;
 	streamlog_out(DEBUG0) << "" << std::endl;
 	streamlog_out(DEBUG1) << "----------------------------------------------------------------------" << std::endl;
-	streamlog_out(DEBUG1) << "------------ Looking for particle (" << particle << ") in vertex -------------" << std::endl;
+	streamlog_out(DEBUG1) << "------------ Looking for particle (" << particle->id() << ") in vertex -------------" << std::endl;
 	streamlog_out(DEBUG1) << "----------------------------------------------------------------------" << std::endl;
 	streamlog_out(DEBUG0) << "	Looking for particle:" << std::endl;
 	streamlog_out(DEBUG0) << *particle << std::endl;
@@ -181,7 +179,7 @@ bool isParticleInVertex( EVENT::ReconstructedParticle *particle , EVENT::Vertex 
 	for ( int i_par = 0 ; i_par < nPar ; ++i_par )
 	{
 		ReconstructedParticle* testParticle = associatedParticle->getParticles()[ i_par ];
-		streamlog_out(DEBUG0) << "	Checking particle " << i_par << " (" << testParticle << ") in vertex" << std::endl;
+		streamlog_out(DEBUG0) << "	Checking particle " << i_par << " (" << testParticle->id() << ") in vertex" << std::endl;
 		if ( particle == testParticle )
 		{
 			particleIsInVertex = true;
@@ -256,7 +254,7 @@ EVENT::ReconstructedParticle *getJetAssignedToParticle( EVENT::ReconstructedPart
 	EVENT::ReconstructedParticle *assignedJet = NULL;
 	streamlog_out(DEBUG1) << "" << std::endl;
 	streamlog_out(DEBUG1) << "----------------------------------------------------------------------" << std::endl;
-	streamlog_out(DEBUG1) << "------------- Looking for particle (" << particle << ") in jets --------------" << std::endl;
+	streamlog_out(DEBUG1) << "------------- Looking for particle (" << particle->id() << ") in jets --------------" << std::endl;
 	streamlog_out(DEBUG1) << "----------------------------------------------------------------------" << std::endl;
 	streamlog_out(DEBUG1) << *particle << std::endl;
 	for ( unsigned int i_jet = 0 ; i_jet < jetVector.size() ; ++i_jet )
@@ -268,7 +266,7 @@ EVENT::ReconstructedParticle *getJetAssignedToParticle( EVENT::ReconstructedPart
 		for ( int i_particle = 0 ; i_particle < nParticles ; ++i_particle )
 		{
 			ReconstructedParticle* testParticle = jet->getParticles()[ i_particle ];
-			streamlog_out(DEBUG0) << "	Checking particle " << i_particle << " (" << testParticle << ") in jet" << std::endl;
+			streamlog_out(DEBUG0) << "	Checking particle " << i_particle << " (" << testParticle->id() << ") in jet" << std::endl;
 			if ( testParticle == particle )
 			{
 				streamlog_out(DEBUG2) << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
@@ -286,11 +284,15 @@ EVENT::ReconstructedParticle *getJetAssignedToParticle( EVENT::ReconstructedPart
 
 std::vector<EVENT::Vertex*> getVerticesInJet( EVENT::ReconstructedParticle* jet , std::vector<EVENT::Vertex*> vertexVector )
 {
-	std::vector<EVENT::Vertex*> jetVertices{};
+	std::vector<EVENT::Vertex*> jetVertices;
 	for ( unsigned int i_vtx = 0 ; i_vtx < vertexVector.size() ; ++i_vtx )
 	{
 		Vertex *vertex = vertexVector[ i_vtx ];
+		streamlog_out(DEBUG0) << "	Checking Vertex ( " << i_vtx << " ) " << vertex->id() << std::endl;
+		streamlog_out(DEBUG0) << *vertex << std::endl;
 		ReconstructedParticle* associatedParticle = vertex->getAssociatedParticle();
+		streamlog_out(DEBUG0) << "	with associated particle " << associatedParticle->id() << std::endl;
+		streamlog_out(DEBUG0) << *associatedParticle << std::endl;
 		for ( unsigned int i_par = 0 ; i_par < associatedParticle->getParticles().size() ; ++i_par )
 		{
 			ReconstructedParticle* vertexParticle = associatedParticle->getParticles()[ i_par ];
@@ -298,7 +300,7 @@ std::vector<EVENT::Vertex*> getVerticesInJet( EVENT::ReconstructedParticle* jet 
 			for ( int i_particle = 0 ; i_particle < nParticles ; ++i_particle )
 			{
 				ReconstructedParticle* jetParticle = jet->getParticles()[ i_particle ];
-				streamlog_out(DEBUG0) << "	Checking particle " << i_particle << " (" << jetParticle << ") in jet" << std::endl;
+				streamlog_out(DEBUG0) << "	Checking particle " << i_particle << " (" << jetParticle->id() << ") in jet" << std::endl;
 				if ( vertexParticle == jetParticle )
 				{
 					streamlog_out(DEBUG2) << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
@@ -385,4 +387,36 @@ EVENT::Track *makeTrackParameters( TVector3 momentum , TVector3 point , double c
 	track->setReferencePoint( refPoint );
 	return track;
 
+}
+
+EVENT::ReconstructedParticle* getLeadingChargedParticle( EVENT::ReconstructedParticle* Jet )
+{
+	ReconstructedParticle* leadingParticle = NULL;
+	double leadingEnergy = 0.0;
+	for ( unsigned int i_par = 0 ; i_par < Jet->getParticles().size() ; ++i_par )
+	{
+		ReconstructedParticle* testParticle = Jet->getParticles()[ i_par ];
+		if ( testParticle->getTracks().size() >= 1 && testParticle->getEnergy() > leadingEnergy )
+		{
+			leadingEnergy = testParticle->getEnergy();
+			leadingParticle = testParticle;
+		}
+	}
+	return leadingParticle;
+}
+
+EVENT::ReconstructedParticle* getLeadingNeutralParticle( EVENT::ReconstructedParticle* Jet )
+{
+	ReconstructedParticle* leadingParticle = NULL;
+	double leadingEnergy = 0.0;
+	for ( unsigned int i_par = 0 ; i_par < Jet->getParticles().size() ; ++i_par )
+	{
+		ReconstructedParticle* testParticle = Jet->getParticles()[ i_par ];
+		if ( testParticle->getTracks().size() == 0 && testParticle->getEnergy() > leadingEnergy )
+		{
+			leadingEnergy = testParticle->getEnergy();
+			leadingParticle = testParticle;
+		}
+	}
+	return leadingParticle;
 }

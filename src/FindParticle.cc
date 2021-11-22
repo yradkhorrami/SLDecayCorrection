@@ -30,7 +30,8 @@ int getChargedMCPs( EVENT::MCParticle *SLDLepton , EVENT::MCParticle *parentMCP 
 	{
 		EVENT::MCParticle *daughter = parentMCP->getDaughters()[ i_daughter ];
 		streamlog_out(DEBUG0) << "	Checking Daughter[ " << daughter->id() <<" ]: genStatus = " << daughter->getGeneratorStatus() << "	, PDG = " << daughter->getPDG() << "	, Charge = " << daughter->getCharge() << std::endl;
-		if ( daughter->getGeneratorStatus() == 1 && daughter != SLDLepton )
+		if ( daughter == SLDLepton ) continue;
+		if ( daughter->getGeneratorStatus() == 1 )
 		{
 			if ( fabs( daughter->getCharge() ) > 0.1 )
 			{
@@ -313,4 +314,19 @@ float getWidestCosAlphaOfVertices( std::vector<EVENT::MCParticle*> mcpVec , TVec
 		if ( mcpFlightDirection.Dot( direction ) < widestCosAlpha ) widestCosAlpha = mcpFlightDirection.Dot( direction );
 	}
 	return widestCosAlpha;
+}
+
+void isMCParticleFromSLD( EVENT::MCParticle* parentHadron , EVENT::MCParticle* testMCParticle , bool &isMCPFromSLD )
+{
+	for ( unsigned int i_parent = 0 ; i_parent < testMCParticle->getParents().size() ; ++i_parent )
+	{
+		if ( parentHadron == testMCParticle->getParents()[ i_parent ] )
+		{
+			isMCPFromSLD = true;
+		}
+		else
+		{
+			isMCParticleFromSLD( parentHadron , testMCParticle->getParents()[ i_parent ] , isMCPFromSLD );
+		}
+	}
 }
