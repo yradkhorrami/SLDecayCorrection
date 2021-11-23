@@ -1014,6 +1014,7 @@ int SLDCorrection::getVertexInJetsDistribution( Vertex* testVertex , pfoVector j
 void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDLepton )
 {
 	++n_SLDStatus;
+	showTrueParameters( SLDLepton );
 
 	vtxVector SLDVertices{};
 	pfoVector SLDVerticesRP{};
@@ -1039,6 +1040,10 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 	pfoVector recoDecayProducts{};
 	pfoVector recoNeutralDecayProducts{};
 	pfoVector recoChargedDecayProducts{};
+
+	pfoVector decayProducts{};
+	pfoVector neutralDecayProducts{};
+	pfoVector chargedDecayProducts{};
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -1081,7 +1086,7 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 		DDMarlinCED::drawDD4hepDetector( this->_theDetector , 0 , std::vector<std::string>{} ); // draw geometry
 		DDCEDPickingHandler& pHandler = DDCEDPickingHandler::getInstance();
 		pHandler.update(pLCEvent);
-		drawMCParticles( SLDLepton->getParents()[ 0 ] );
+//		drawMCParticles( SLDLepton->getParents()[ 0 ] );
 	}
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1162,7 +1167,7 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 		trueDecayProducts.push_back( trueChargedDecayProducts[ i_par ] );
 		trueChargedFourMomentum += TLorentzVector( ( trueChargedDecayProducts[ i_par ] )->getMomentum() , ( trueChargedDecayProducts[ i_par ] )->getEnergy() );
 	}
-	trueVisibleFourMomentum = trueNeutralFourMomentum + trueChargedFourMomentum;
+	trueVisibleFourMomentum = trueNeutralFourMomentum + trueChargedFourMomentum + trueLeptonFourMomentum;
 
 	std::vector<double> trueStartVertex{};
 	std::vector<double> trueSLDVertex{};
@@ -1196,6 +1201,7 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 		if ( m_fillRootTree ) h_SLDStatus->Fill( 1 );
 		return;
 	}
+	recoLeptonFourMomentum = TLorentzVector( linkedRecoLepton->getMomentum() , linkedRecoLepton->getEnergy() );
 
 	bool recoLeptonIsInJet = false;
 	ReconstructedParticle *assignedJet = NULL;
@@ -1242,31 +1248,37 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 		if ( jetParticle->getTracks().size() == 0 )
 		{
 			neutralPFOsInJet.push_back( jetParticle );
-			isMCParticleFromSLD( parentHadron , linkedNeutralMCP , MCPisFromSLD );
-			if ( MCPisFromSLD )
+			if ( linkedNeutralMCP != NULL )
 			{
-				neutralPFOsInJetFromSLD.push_back( jetParticle );
-				allPFOsInJetFromSLD.push_back( jetParticle );
-			}
-			else
-			{
-				neutralPFOsInJetNotFromSLD.push_back( jetParticle );
-				allPFOsInJetNotFromSLD.push_back( jetParticle );
+				isMCParticleFromSLD( parentHadron , linkedNeutralMCP , MCPisFromSLD );
+				if ( MCPisFromSLD )
+				{
+					neutralPFOsInJetFromSLD.push_back( jetParticle );
+					allPFOsInJetFromSLD.push_back( jetParticle );
+				}
+				else
+				{
+					neutralPFOsInJetNotFromSLD.push_back( jetParticle );
+					allPFOsInJetNotFromSLD.push_back( jetParticle );
+				}
 			}
 		}
 		else
 		{
 			chargedPFOsInJet.push_back( jetParticle );
-			isMCParticleFromSLD( parentHadron , linkedChargedMCP , MCPisFromSLD );
-			if ( MCPisFromSLD )
+			if ( linkedChargedMCP != NULL )
 			{
-				chargedPFOsInJetFromSLD.push_back( jetParticle );
-				allPFOsInJetFromSLD.push_back( jetParticle );
-			}
-			else
-			{
-				chargedPFOsInJetNotFromSLD.push_back( jetParticle );
-				allPFOsInJetNotFromSLD.push_back( jetParticle );
+				isMCParticleFromSLD( parentHadron , linkedChargedMCP , MCPisFromSLD );
+				if ( MCPisFromSLD )
+				{
+					chargedPFOsInJetFromSLD.push_back( jetParticle );
+					allPFOsInJetFromSLD.push_back( jetParticle );
+				}
+				else
+				{
+					chargedPFOsInJetNotFromSLD.push_back( jetParticle );
+					allPFOsInJetNotFromSLD.push_back( jetParticle );
+				}
 			}
 		}
 	}
@@ -1278,6 +1290,7 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 		weightMCPtoPFO = 0.0;
 		MCParticle* linkedChargedMCP = getLinkedMCP( testParticle , RecoMCParticleNav , MCParticleRecoNav , true , false , weightPFOtoMCP , weightMCPtoPFO );
 		bool MCPisFromSLD = false;
+		if ( linkedChargedMCP == NULL ) continue;
 		isMCParticleFromSLD( parentHadron , linkedChargedMCP , MCPisFromSLD );
 		if ( MCPisFromSLD )
 		{
@@ -1336,37 +1349,7 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 
 	evaluatePFOsAngle( aloneChargedPFOsInJetFromSLD , aloneChargedPFOsInJetNotFromSLD , chargedPFOsInJetFromSLD , chargedPFOsInJetNotFromSLD , neutralPFOsInJetFromSLD , neutralPFOsInJetNotFromSLD , leptonDirection , jetAxis , recoFlightDirection , SLDStatus );
 
-	if ( m_cheatPIDneutral )
-	{
-		for ( unsigned int i_par = 0 ; i_par < trueNeutralDecayProducts.size() ; ++i_par )
-		{
-			ReconstructedParticle* linkedPFO = getLinkedPFO( trueNeutralDecayProducts[ i_par ] , RecoMCParticleNav , MCParticleRecoNav , false , true , weightPFOtoMCP , weightMCPtoPFO );
-			if ( linkedPFO != NULL )
-			{
-				recoNeutralDecayProducts.push_back( linkedPFO );
-				recoDecayProducts.push_back( linkedPFO );
-				if ( m_displayEvent ) drawReconstructedParticle( linkedPFO , primaryVertex , 0x0075df , 0x2e8e04 );
-			}
-		}
-	}
-	else
-	{
-		streamlog_out(WARNING) << "Nothing TODO for associating neutral particles to semi-leptonic decay" << std::endl;
-	}
-	if ( m_cheatPIDcharged )
-	{
-		for ( unsigned int i_par = 0 ; i_par < trueChargedDecayProducts.size() ; ++i_par )
-		{
-			ReconstructedParticle* linkedPFO = getLinkedPFO( trueChargedDecayProducts[ i_par ] , RecoMCParticleNav , MCParticleRecoNav , true , false , weightPFOtoMCP , weightMCPtoPFO );
-			if ( linkedPFO != NULL )
-			{
-				recoChargedDecayProducts.push_back( linkedPFO );
-				recoDecayProducts.push_back( linkedPFO );
-				if ( m_displayEvent ) drawReconstructedParticle( linkedPFO , primaryVertex , 0x0075df , 0x000000 );
-			}
-		}
-	}
-	else if ( SLDStatus == 4 )
+	if ( SLDStatus == 4 )
 	{
 		for ( unsigned int i_vtx = 0 ; i_vtx < SLDVertices.size() ; ++i_vtx )
 		{
@@ -1378,7 +1361,7 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 				{
 					recoChargedDecayProducts.push_back( chargedDecayProduct );
 					recoDecayProducts.push_back( chargedDecayProduct );
-					if ( m_displayEvent ) drawReconstructedParticle( chargedDecayProduct , primaryVertex , 0x0075df , 0x000000 );
+//					if ( m_displayEvent ) drawReconstructedParticle( chargedDecayProduct , primaryVertex , 0x0075df , 0x000000 );
 				}
 			}
 		}
@@ -1393,19 +1376,173 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 				ReconstructedParticle* chargedDecayProduct = sldVertexRP->getParticles()[ i_par ];
 				recoChargedDecayProducts.push_back( chargedDecayProduct );
 				recoDecayProducts.push_back( chargedDecayProduct );
-				if ( m_displayEvent ) drawReconstructedParticle( chargedDecayProduct , primaryVertex , 0x0075df , 0x2e8e04 );
+//				if ( m_displayEvent ) drawReconstructedParticle( chargedDecayProduct , primaryVertex , 0x0075df , 0x2e8e04 );
+			}
+		}
+	}
+
+
+
+
+	if ( m_cheatPIDneutral )
+	{
+		for ( unsigned int i_par = 0 ; i_par < trueNeutralDecayProducts.size() ; ++i_par )
+		{
+			ReconstructedParticle* linkedPFO = getLinkedPFO( trueNeutralDecayProducts[ i_par ] , RecoMCParticleNav , MCParticleRecoNav , false , true , weightPFOtoMCP , weightMCPtoPFO );
+			if ( linkedPFO != NULL )
+			{
+				neutralDecayProducts.push_back( linkedPFO );
+				decayProducts.push_back( linkedPFO );
+//				if ( m_displayEvent ) drawReconstructedParticle( linkedPFO , primaryVertex , 0x0075df , 0x2e8e04 );
+			}
+		}
+	}
+	else
+	{
+		streamlog_out(WARNING) << "Nothing TODO for associating neutral particles to semi-leptonic decay" << std::endl;
+		for ( unsigned int i_par = 0 ; i_par < recoNeutralDecayProducts.size() ; ++i_par )
+		{
+			neutralDecayProducts.push_back( recoNeutralDecayProducts[ i_par ] );
+			decayProducts.push_back( recoNeutralDecayProducts[ i_par ] );
+		}
+	}
+	if ( m_cheatPIDcharged )
+	{
+		for ( unsigned int i_par = 0 ; i_par < trueChargedDecayProducts.size() ; ++i_par )
+		{
+			ReconstructedParticle* linkedPFO = getLinkedPFO( trueChargedDecayProducts[ i_par ] , RecoMCParticleNav , MCParticleRecoNav , true , false , weightPFOtoMCP , weightMCPtoPFO );
+			if ( linkedPFO != NULL )
+			{
+				chargedDecayProducts.push_back( linkedPFO );
+				decayProducts.push_back( linkedPFO );
+				recoChargedDecayProducts.push_back( linkedPFO );
+				recoDecayProducts.push_back( linkedPFO );
+//				if ( m_displayEvent ) drawReconstructedParticle( linkedPFO , primaryVertex , 0x0075df , 0x000000 );
 			}
 		}
 	}
 	else
 	{
 		streamlog_out(WARNING) << "Nothing TODO for associating charged particles to semi-leptonic decay in absence of a vertex in jet" << std::endl;
+		for ( unsigned int i_par = 0 ; i_par < recoChargedDecayProducts.size() ; ++i_par )
+		{
+			chargedDecayProducts.push_back( recoChargedDecayProducts[ i_par ] );
+			decayProducts.push_back( recoChargedDecayProducts[ i_par ] );
+		}
+	}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////									    ////
+////		Form visible four-momentum for neutrino correction	    ////
+////									    ////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+	for ( unsigned int i_par = 0 ; i_par < recoChargedDecayProducts.size() ; ++i_par )
+	{
+		recoChargedFourMomentum += TLorentzVector( recoChargedDecayProducts[ i_par ]->getMomentum() , recoChargedDecayProducts[ i_par ]->getEnergy() );
+	}
+	for ( unsigned int i_par = 0 ; i_par < recoNeutralDecayProducts.size() ; ++i_par )
+	{
+		recoNeutralFourMomentum += TLorentzVector( recoNeutralDecayProducts[ i_par ]->getMomentum() , recoNeutralDecayProducts[ i_par ]->getEnergy() );
 	}
 
 
+	if ( m_cheatLepton4momentum )
+	{
+		leptonFourMomentum = trueLeptonFourMomentum;
+	}
+	else
+	{
+		leptonFourMomentum = recoLeptonFourMomentum;
+	}
+	if ( m_cheatNeutral4momentum )
+	{
+		neutralFourMomentum = trueNeutralFourMomentum;
+	}
+	else
+	{
+		for ( unsigned int i_par = 0 ; i_par < neutralDecayProducts.size() ; ++i_par )
+		{
+			neutralFourMomentum += TLorentzVector( neutralDecayProducts[ i_par ]->getMomentum() , neutralDecayProducts[ i_par ]->getEnergy() );
+		}
+	}
+	if ( m_cheatCharged4momentum )
+	{
+		chargedFourMomentum = trueChargedFourMomentum;
+	}
+	else
+	{
+		for ( unsigned int i_par = 0 ; i_par < chargedDecayProducts.size() ; ++i_par )
+		{
+			chargedFourMomentum += TLorentzVector( chargedDecayProducts[ i_par ]->getMomentum() , chargedDecayProducts[ i_par ]->getEnergy() );
+		}
+	}
+	recoVisibleFourMomentum = recoLeptonFourMomentum + recoNeutralFourMomentum + recoChargedFourMomentum;
+	visibleFourMomentum = leptonFourMomentum + neutralFourMomentum + chargedFourMomentum;
 
+	streamlog_out(DEBUG8) << "			     (  PDG	, Mass		, Px		, Py		, Pz		, E		, Charge	)" << std::endl;
+	streamlog_out(DEBUG8) << "		Neutrino" << std::endl;
+	streamlog_out(DEBUG8) << "			True:(	" << trueNeutrino->getPDG() << "	, " << trueNeutrino->getMass() << "	, " << trueNeutrino->getMomentum()[ 0 ] << "	, " << trueNeutrino->getMomentum()[ 1 ] << "	, " << trueNeutrino->getMomentum()[ 2 ] << "	, " << trueNeutrino->getEnergy() << "	, " << trueNeutrino->getCharge() << "	)" << std::endl;
+	streamlog_out(DEBUG8) << "" << std::endl;
+	streamlog_out(DEBUG8) << "		Hadron" << std::endl;
+	streamlog_out(DEBUG8) << "			True:(	" << parentHadron->getPDG() << "	, " << parentHadron->getMass() << "	, " << parentHadron->getMomentum()[ 0 ] << "	, " << parentHadron->getMomentum()[ 1 ] << "	, " << parentHadron->getMomentum()[ 2 ] << "	, " << parentHadron->getEnergy() << "	, " << parentHadron->getCharge() << "	)" << std::endl;
+	streamlog_out(DEBUG8) << "" << std::endl;
+	streamlog_out(DEBUG8) << "		Lepton" << std::endl;
+	streamlog_out(DEBUG8) << "			True:(	" << SLDLepton->getPDG() << "	, " << SLDLepton->getMass() << "	, " << SLDLepton->getMomentum()[ 0 ] << "	, " << SLDLepton->getMomentum()[ 1 ] << "	, " << SLDLepton->getMomentum()[ 2 ] << "	, " << SLDLepton->getEnergy() << "	, " << SLDLepton->getCharge() << "	)" << std::endl;
+	streamlog_out(DEBUG8) << "			Reco:(	" << linkedRecoLepton->getType() << "	, " << linkedRecoLepton->getMass() << "	, " << linkedRecoLepton->getMomentum()[ 0 ] << "	, " << linkedRecoLepton->getMomentum()[ 1 ] << "	, " << linkedRecoLepton->getMomentum()[ 2 ] << "	, " << linkedRecoLepton->getEnergy() << "	, " << linkedRecoLepton->getCharge() << "	)" << std::endl;
+	streamlog_out(DEBUG8) << "			Used:(	" << "xxx" << "	, " << leptonFourMomentum.M() << "	, " << leptonFourMomentum.Px() << "	, " << leptonFourMomentum.Py() << "	, " << leptonFourMomentum.Pz() << "	, " << leptonFourMomentum.E() << "	, " << (int)SLDLepton->getCharge() << "		)" << std::endl;
+	streamlog_out(DEBUG8) << "" << std::endl;
+	streamlog_out(DEBUG8) << "		Charged" << std::endl;
+	streamlog_out(DEBUG8) << "			True:(	" << "qqq" << "	, " << trueChargedFourMomentum.M() << "	, " << trueChargedFourMomentum.Px() << "	, " << trueChargedFourMomentum.Py() << "	, " << trueChargedFourMomentum.Pz() << "	, " << trueChargedFourMomentum.E() << "	, " << "qqq" << "		)" << std::endl;
+	streamlog_out(DEBUG8) << "			Reco:(	" << "qqq" << "	, " << recoChargedFourMomentum.M() << "	, " << recoChargedFourMomentum.Px() << "	, " << recoChargedFourMomentum.Py() << "	, " << recoChargedFourMomentum.Pz() << "	, " << recoChargedFourMomentum.E() << "	, " << "qqq" << "		)" << std::endl;
+	streamlog_out(DEBUG8) << "			Used:(	" << "qqq" << "	, " << chargedFourMomentum.M() << "	, " << chargedFourMomentum.Px() << "	, " << chargedFourMomentum.Py() << "	, " << chargedFourMomentum.Pz() << "	, " << chargedFourMomentum.E() << "	, " << "nnn" << "		)" << std::endl;
+	streamlog_out(DEBUG8) << "" << std::endl;
+	streamlog_out(DEBUG8) << "		Neutral" << std::endl;
+	streamlog_out(DEBUG8) << "			True:(	" << "nnn" << "	, " << trueNeutralFourMomentum.M() << "	, " << trueNeutralFourMomentum.Px() << "	, " << trueNeutralFourMomentum.Py() << "	, " << trueNeutralFourMomentum.Pz() << "	, " << trueNeutralFourMomentum.E() << "	, " << "nnn" << "		)" << std::endl;
+	streamlog_out(DEBUG8) << "			Reco:(	" << "nnn" << "	, " << recoNeutralFourMomentum.M() << "	, " << recoNeutralFourMomentum.Px() << "	, " << recoNeutralFourMomentum.Py() << "	, " << recoNeutralFourMomentum.Pz() << "	, " << recoNeutralFourMomentum.E() << "	, " << "nnn" << "		)" << std::endl;
+	streamlog_out(DEBUG8) << "			Used:(	" << "nnn" << "	, " << neutralFourMomentum.M() << "	, " << neutralFourMomentum.Px() << "	, " << neutralFourMomentum.Py() << "	, " << neutralFourMomentum.Pz() << "	, " << neutralFourMomentum.E() << "	, " << "nnn" << "		)" << std::endl;
+	streamlog_out(DEBUG8) << "" << std::endl;
+	streamlog_out(DEBUG8) << "		Visible" << std::endl;
+	streamlog_out(DEBUG8) << "			True:(	" << "nnn" << "	, " << trueVisibleFourMomentum.M() << "	, " << trueVisibleFourMomentum.Px() << "	, " << trueVisibleFourMomentum.Py() << "	, " << trueVisibleFourMomentum.Pz() << "	, " << trueVisibleFourMomentum.E() << "	, " << "nnn" << "		)" << std::endl;
+	streamlog_out(DEBUG8) << "			Reco:(	" << "nnn" << "	, " << recoVisibleFourMomentum.M() << "	, " << recoVisibleFourMomentum.Px() << "	, " << recoVisibleFourMomentum.Py() << "	, " << recoVisibleFourMomentum.Pz() << "	, " << recoVisibleFourMomentum.E() << "	, " << "nnn" << "		)" << std::endl;
+	streamlog_out(DEBUG8) << "			Used:(	" << "nnn" << "	, " << visibleFourMomentum.M() << "	, " << visibleFourMomentum.Px() << "	, " << visibleFourMomentum.Py() << "	, " << visibleFourMomentum.Pz() << "	, " << visibleFourMomentum.E() << "	, " << "nnn" << "		)" << std::endl;
+	streamlog_out(DEBUG8) << "" << std::endl;
+	streamlog_out(DEBUG8) << "			     	(  X		, Y		, Z	)" << std::endl;
+	streamlog_out(DEBUG8) << "		Flight Direction" << std::endl;
+	streamlog_out(DEBUG8) << "			True:	(  " << trueFlightDirection.X() << "		, " << trueFlightDirection.Y() << "		, " << trueFlightDirection.Z() << "	)" << std::endl;
+	streamlog_out(DEBUG8) << "			Reco:	(  " << recoFlightDirection.X() << "		, " << recoFlightDirection.Y() << "		, " << recoFlightDirection.Z() << "	)" << std::endl;
+	streamlog_out(DEBUG8) << "			Used:	(  " << flightDirection.X() << "		, " << flightDirection.Y() << "		, " << flightDirection.Z() << "	)" << std::endl;
 
+	recoNeutrinoFourMomentumPos = getNeutrinoFourMomentum( flightDirection , visibleFourMomentum , parentHadronMass , +1.0 );
+	recoNeutrinoFourMomentumNeg = getNeutrinoFourMomentum( flightDirection , visibleFourMomentum , parentHadronMass , -1.0 );
 
+	recoNeutrinoFourMomentumClose = ( fabs( recoNeutrinoFourMomentumPos.E() - trueNeutrinoFourMomentum.E() ) < fabs( recoNeutrinoFourMomentumNeg.E() - trueNeutrinoFourMomentum.E() ) ? recoNeutrinoFourMomentumPos : recoNeutrinoFourMomentumNeg );
+	streamlog_out(DEBUG4) << "" << std::endl;
+	streamlog_out(DEBUG4) << "	Closest Neutrino 4-Momentum:			( " << recoNeutrinoFourMomentumClose.Px() << "	, " << recoNeutrinoFourMomentumClose.Py() << "	, " << recoNeutrinoFourMomentumClose.Pz() << "	, " << recoNeutrinoFourMomentumClose.E() << " )" << std::endl;
+	streamlog_out(DEBUG4) << "	True Neutrino 4-Momentum:			( " << trueNeutrinoFourMomentum.Px() << "	, " << trueNeutrinoFourMomentum.Py() << "	, " << trueNeutrinoFourMomentum.Pz() << "	, " << trueNeutrinoFourMomentum.E() << " )" << std::endl;
+	if ( fabs( recoNeutrinoFourMomentumClose.E() - trueNeutrinoFourMomentum.E() ) > 10.0 )
+	{
+		streamlog_out(DEBUG4) << "	!!! Big Difference between true and reco neutrino Energy : " << recoNeutrinoFourMomentumClose.E() - trueNeutrinoFourMomentum.E() << "  GeV" << std::endl;
+	}
+	if ( m_fillRootTree ) plotHistograms( trueNeutrinoFourMomentum , recoNeutrinoFourMomentumClose , NeutrinoCovMat );
+	m_trueNuPx.push_back( trueNeutrinoFourMomentum.Px() );
+	m_trueNuPy.push_back( trueNeutrinoFourMomentum.Py() );
+	m_trueNuPz.push_back( trueNeutrinoFourMomentum.Pz() );
+	m_trueNuE.push_back( trueNeutrinoFourMomentum.E() );
+	m_recoNuClosePx.push_back( recoNeutrinoFourMomentumClose.Px() );
+	m_recoNuClosePy.push_back( recoNeutrinoFourMomentumClose.Py() );
+	m_recoNuClosePz.push_back( recoNeutrinoFourMomentumClose.Pz() );
+	m_recoNuCloseE.push_back( recoNeutrinoFourMomentumClose.E() );
+	m_recoNuPosPx.push_back( recoNeutrinoFourMomentumPos.Px() );
+	m_recoNuPosPy.push_back( recoNeutrinoFourMomentumPos.Py() );
+	m_recoNuPosPz.push_back( recoNeutrinoFourMomentumPos.Pz() );
+	m_recoNuPosE.push_back( recoNeutrinoFourMomentumPos.E() );
+	m_recoNuNegPx.push_back( recoNeutrinoFourMomentumNeg.Px() );
+	m_recoNuNegPy.push_back( recoNeutrinoFourMomentumNeg.Py() );
+	m_recoNuNegPz.push_back( recoNeutrinoFourMomentumNeg.Pz() );
+	m_recoNuNegE.push_back( recoNeutrinoFourMomentumNeg.E() );
 
 
 
@@ -1636,35 +1773,7 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 	recoVisibleFourMomentum = recoChargedFourMomentum + recoNeutralFourMomentum + recoLeptonFourMomentum;
 	visibleFourMomentum = chargedFourMomentum + neutralFourMomentum + leptonFourMomentum;
 
-	showTrueParameters( SLDLepton );
-	recoNeutrinoFourMomentumPos = getNeutrinoFourMomentum( flightDirection , visibleFourMomentum , parentHadronMass , +1.0 );
-	recoNeutrinoFourMomentumNeg = getNeutrinoFourMomentum( flightDirection , visibleFourMomentum , parentHadronMass , -1.0 );
 
-	recoNeutrinoFourMomentumClose = ( fabs( recoNeutrinoFourMomentumPos.E() - trueNeutrinoFourMomentum.E() ) < fabs( recoNeutrinoFourMomentumNeg.E() - trueNeutrinoFourMomentum.E() ) ? recoNeutrinoFourMomentumPos : recoNeutrinoFourMomentumNeg );
-	streamlog_out(DEBUG4) << "" << std::endl;
-	streamlog_out(DEBUG4) << "	Closest Neutrino 4-Momentum:			( " << recoNeutrinoFourMomentumClose.Px() << "	, " << recoNeutrinoFourMomentumClose.Py() << "	, " << recoNeutrinoFourMomentumClose.Pz() << "	, " << recoNeutrinoFourMomentumClose.E() << " )" << std::endl;
-	streamlog_out(DEBUG4) << "	True Neutrino 4-Momentum:			( " << trueNeutrinoFourMomentum.Px() << "	, " << trueNeutrinoFourMomentum.Py() << "	, " << trueNeutrinoFourMomentum.Pz() << "	, " << trueNeutrinoFourMomentum.E() << " )" << std::endl;
-	if ( fabs( recoNeutrinoFourMomentumClose.E() - trueNeutrinoFourMomentum.E() ) > 10.0 )
-	{
-		streamlog_out(DEBUG4) << "	!!! Big Difference between true and reco neutrino Energy : " << recoNeutrinoFourMomentumClose.E() - trueNeutrinoFourMomentum.E() << "  GeV" << std::endl;
-	}
-	if ( m_fillRootTree ) plotHistograms( trueNeutrinoFourMomentum , recoNeutrinoFourMomentumClose , NeutrinoCovMat );
-	m_trueNuPx.push_back( trueNeutrinoFourMomentum.Px() );
-	m_trueNuPy.push_back( trueNeutrinoFourMomentum.Py() );
-	m_trueNuPz.push_back( trueNeutrinoFourMomentum.Pz() );
-	m_trueNuE.push_back( trueNeutrinoFourMomentum.E() );
-	m_recoNuClosePx.push_back( recoNeutrinoFourMomentumClose.Px() );
-	m_recoNuClosePy.push_back( recoNeutrinoFourMomentumClose.Py() );
-	m_recoNuClosePz.push_back( recoNeutrinoFourMomentumClose.Pz() );
-	m_recoNuCloseE.push_back( recoNeutrinoFourMomentumClose.E() );
-	m_recoNuPosPx.push_back( recoNeutrinoFourMomentumPos.Px() );
-	m_recoNuPosPy.push_back( recoNeutrinoFourMomentumPos.Py() );
-	m_recoNuPosPz.push_back( recoNeutrinoFourMomentumPos.Pz() );
-	m_recoNuPosE.push_back( recoNeutrinoFourMomentumPos.E() );
-	m_recoNuNegPx.push_back( recoNeutrinoFourMomentumNeg.Px() );
-	m_recoNuNegPy.push_back( recoNeutrinoFourMomentumNeg.Py() );
-	m_recoNuNegPz.push_back( recoNeutrinoFourMomentumNeg.Pz() );
-	m_recoNuNegE.push_back( recoNeutrinoFourMomentumNeg.E() );
 */
 
 

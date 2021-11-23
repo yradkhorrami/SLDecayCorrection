@@ -27,7 +27,7 @@ int getRecoFlightDirection( 	EVENT::ReconstructedParticle *linkedRecoLepton , TV
 				std::vector<EVENT::ReconstructedParticle*> PFOswithAloneTracks , float &helicesDistance , int vertexingScenario )
 {
 	int SLDStatus = -999;
-	drawReconstructedParticle( linkedRecoLepton , primaryVertex , 0xf00000 , 0xf00000 );
+//	drawReconstructedParticle( linkedRecoLepton , primaryVertex , 0xf00000 , 0xf00000 );
 
 	bool recoLeptonIsInVertex = false;
 	EVENT::Vertex* recoLeptonVertex = getParticleVertex( linkedRecoLepton , verticesInJet , recoLeptonIsInVertex );
@@ -242,10 +242,37 @@ double intersectTrackLine( 	EVENT::Track *track , EVENT::Vertex* primaryVertex ,
 //	double zDownStream	= point[ 2 ] + Momentum.Pz() * y;
 ////////////////////////////////////////////////////////////////////////////////
 
-	double xMin = trackPhi - 3.14159265359 / 8.0;
-	double xMax = trackPhi + 3.14159265359 / 8.0;
+	double xMin = trackPhi - 3.14159265359 / 40.0;
+	double xMax = trackPhi + 3.14159265359 / 40.0;
 	double yMin = vMin;
 	double yMax = vMax;
+
+	DDMarlinCED::drawHelix( m_Bfield , trackcharge , trackXs , trackYs , trackZs , trackPx , trackPy , trackPz , 2 , 1 , 0xff0000 , 0.0 , 1500.0 , 2000.0 , 0 );
+	double t = 20.0;
+	double endPointX = pointOnLine[ 0 ] + t * momentumOfLine.Px();
+	double endPointY = pointOnLine[ 1 ] + t * momentumOfLine.Py();
+	double endPointZ = pointOnLine[ 2 ] + t * momentumOfLine.Pz();
+	ced_line( endPointX , endPointY , endPointZ , pointOnLine[ 0 ] , pointOnLine[ 1 ] , pointOnLine[ 2 ] , 2 , 1 , 0x0061ff );
+
+	double dphi = ( xMax - xMin ) / 100.0;
+	double dv = ( yMax - yMin ) / 10.0;
+	for ( double phi = xMin ; phi <= xMax ; phi += dphi )
+	{
+		double trackx = xReference + ( 1.0 / trackOmega - trackD0 ) * std::sin( trackPhi ) - std::sin( phi ) / trackOmega;
+		double tracky = yReference - ( 1.0 / trackOmega - trackD0 ) * std::cos( trackPhi ) + std::cos( phi ) / trackOmega;
+		double trackz = zReference + trackZ0 - ( phi - trackPhi ) * trackTanLambda / trackOmega;
+		ced_hit( trackx , tracky , trackz , 2 , 3 , 0x000000 );
+	}
+	for ( double v = yMin ; v <= yMax ; v += dv )
+	{
+		double linex = pointOnLine[ 0 ] + v * momentumOfLine.Px();
+		double liney = pointOnLine[ 1 ] + v * momentumOfLine.Py();
+		double linez = pointOnLine[ 2 ] + v * momentumOfLine.Pz();
+		ced_hit( linex , liney , linez , 2 , 3 , 0x000000 );
+
+	}
+
+
 
 	TF2 *distance = new TF2( "distance" , "std::sqrt( std::pow( ( [ 0 ] + [ 1 ] * std::sin( x ) ) - ( [ 7 ] + [ 8 ] * y ) , 2 ) + std::pow( ( [ 2 ] + [ 3 ] * std::cos( x ) ) - ( [ 9 ] + [ 10 ] * y ) , 2 ) + std::pow( ( [ 4 ] + [ 5 ] * ( x - [ 6 ] ) ) - ( [ 11 ] + [ 12 ] * y ) , 2 ) )" , xMin , xMax , yMin , yMax );
 
@@ -277,9 +304,9 @@ double intersectTrackLine( 	EVENT::Track *track , EVENT::Vertex* primaryVertex ,
 	streamlog_out(DEBUG1) << "	parameter [ 12 ] = " << momentumOfLine.Pz() << std::endl;
 
 	distance->SetRange( xMin , yMin , xMax , yMax );
-	distance->SetNpx( 1000 );
-	distance->SetNpy( 1000 );
-	double minPhi = 0.0;
+//	distance->SetNpx( 1000 );
+//	distance->SetNpy( 1000 );
+	double minPhi = trackPhi;
 	double minV = 0.0;
 	double minDistance = distance->GetMinimumXY( minPhi , minV );
 
@@ -290,6 +317,7 @@ double intersectTrackLine( 	EVENT::Track *track , EVENT::Vertex* primaryVertex ,
 	double yTrackPCA	= yReference - ( 1.0 / trackOmega - trackD0 ) * std::cos( trackPhi ) + std::cos( minPhi ) / trackOmega;
 	double zTrackPCA	= zReference + trackZ0 - ( minPhi - trackPhi ) * trackTanLambda / trackOmega;
 	streamlog_out(DEBUG1) << "	Lepton PCA (x,y,z) = 	( " << xTrackPCA << "	,	" << yTrackPCA << "	,	" << zTrackPCA << "	)" << std::endl;
+	ced_hit( xTrackPCA , yTrackPCA , zTrackPCA , 5 , 5 , 0xff0000 );
 	PCAatTrack.push_back( xTrackPCA );
 	PCAatTrack.push_back( yTrackPCA );
 	PCAatTrack.push_back( zTrackPCA );
@@ -298,6 +326,7 @@ double intersectTrackLine( 	EVENT::Track *track , EVENT::Vertex* primaryVertex ,
 	double yLine	= pointOnLine[ 1 ] + momentumOfLine.Py() * minV;
 	double zLine	= pointOnLine[ 2 ] + momentumOfLine.Pz() * minV;
 	streamlog_out(DEBUG1) << "	DS PCA (x,y,z) = 	( " << xLine << "	,	" << yLine << "	,	" << zLine << "	)" << std::endl;
+	ced_hit( xLine , yLine , zLine , 5 , 5 , 0x0061ff );
 	PCAatLine.push_back( xLine );
 	PCAatLine.push_back( yLine );
 	PCAatLine.push_back( zLine );
@@ -394,20 +423,42 @@ double intersectTrackTrack(	EVENT::Track *track1 , EVENT::Track *track2 ,
 	//
 	//	double xTrack		= xReference + ( 1.0 / trackOmega - trackD0 ) * std::sin( trackPhi ) - std::sin( X ) / trackOmega;
 	//	double yTrack		= yReference - ( 1.0 / trackOmega - trackD0 ) * std::cos( trackPhi ) + std::cos( X ) / trackOmega;
-	//	double zTrack		= zReference + trackZ0 - ( X - trackPhi ) * trackTanLambda / std::fabs( trackOmega );
+	//	double zTrack		= zReference + trackZ0 - ( X - trackPhi ) * trackTanLambda / trackOmega;
 	////////////////////////////////////////////////////////////////////////////////
 
 //	double trackLengthToScan2D = 1000.0;
 //	double deltaPhi1 = trackLengthToScan2D * track1Omega;
 //	double deltaPhi2 = trackLengthToScan2D * track2Omega;
-	double xMin = track1Phi - 3.14159265359 / 40.0;
-	double xMax = track1Phi + 3.14159265359 / 40.0;
-	double yMin = track2Phi - 3.14159265359 / 40.0;
-	double yMax = track2Phi + 3.14159265359 / 40.0;
+	double xMin = track1Phi - 3.14159265359 / 100.0;
+	double xMax = track1Phi + 3.14159265359 / 100.0;
+	double yMin = track2Phi - 3.14159265359 / 100.0;
+	double yMax = track2Phi + 3.14159265359 / 100.0;
 
-//	std::sqrt( std::pow( ( [ 0 ] + [ 1 ] * std::sin( x ) ) - ( [ 7 ] + [ 8 ] * std::sin( x ) ) , 2 ) + std::pow( ( [ 2 ] + [ 3 ] * std::cos( x ) ) - ( [ 9 ] + [ 10 ] * std::cos( x ) ) , 2 ) + std::pow( ( [ 4 ] + [ 5 ] * ( x - [ 6 ] ) ) - ( [ 11 ] + [ 12 ] * ( y - [ 13 ] ) ) , 2 ) )
 
-	TF2 *distance = new TF2( "distance" , "std::sqrt( std::pow( ( [ 0 ] + [ 1 ] * std::sin( x ) ) - ( [ 7 ] + [ 8 ] * std::sin( x ) ) , 2 ) + std::pow( ( [ 2 ] + [ 3 ] * std::cos( x ) ) - ( [ 9 ] + [ 10 ] * std::cos( x ) ) , 2 ) + std::pow( ( [ 4 ] + [ 5 ] * ( x - [ 6 ] ) ) - ( [ 11 ] + [ 12 ] * ( y - [ 13 ] ) ) , 2 ) )" , xMin , xMax , yMin , yMax );
+	DDMarlinCED::drawHelix( m_Bfield , track1charge , track1Xs , track1Ys , track1Zs , track1Px , track1Py , track1Pz , 2 , 1 , 0xff0000 , 0.0 , 1500.0 , 2000.0 , 0 );
+	DDMarlinCED::drawHelix( m_Bfield , track2charge , track2Xs , track2Ys , track2Zs , track2Px , track2Py , track2Pz , 2 , 1 , 0x0061ff , 0.0 , 1500.0 , 2000.0 , 0 );
+
+	double dphi1 = ( xMax - xMin ) / 100.0;
+	double dphi2 = ( yMax - yMin ) / 100.0;
+	for ( double phi1 = xMin ; phi1 <= xMax ; phi1 += dphi1 )
+	{
+		double track1x = xReference1 + ( 1.0 / track1Omega - track1D0 ) * std::sin( track1Phi ) - std::sin( phi1 ) / track1Omega;
+		double track1y = yReference1 - ( 1.0 / track1Omega - track1D0 ) * std::cos( track1Phi ) + std::cos( phi1 ) / track1Omega;
+		double track1z = zReference1 + track1Z0 - ( phi1 - track1Phi ) * track1TanLambda / track1Omega;
+		ced_hit( track1x , track1y , track1z , 2 , 5 , 0x000000 );
+	}
+	for ( double phi2 = yMin ; phi2 <= yMax ; phi2 += dphi2 )
+	{
+		double track2x = xReference2 + ( 1.0 / track2Omega - track2D0 ) * std::sin( track2Phi ) - std::sin( phi2 ) / track2Omega;
+		double track2y = yReference2 - ( 1.0 / track2Omega - track2D0 ) * std::cos( track2Phi ) + std::cos( phi2 ) / track2Omega;
+		double track2z = zReference2 + track2Z0 - ( phi2 - track2Phi ) * track2TanLambda / track2Omega;
+		ced_hit( track2x , track2y , track2z , 2 , 5 , 0x000000 );
+
+	}
+
+//	dist = std::sqrt( std::pow( ( [ 0 ] + [ 1 ] * std::sin( x ) ) - ( [ 7 ] + [ 8 ] * std::sin( x ) ) , 2 ) + std::pow( ( [ 2 ] + [ 3 ] * std::cos( x ) ) - ( [ 9 ] + [ 10 ] * std::cos( x ) ) , 2 ) + std::pow( ( [ 4 ] + [ 5 ] * x ) - ( [ 11 ] + [ 12 ] * y ) , 2 ) )
+
+	TF2 *distance = new TF2( "distance" , "std::sqrt( std::pow( ( [ 0 ] + [ 1 ] * std::sin( x ) ) - ( [ 6 ] + [ 7 ] * std::sin( y ) ) , 2 ) + std::pow( ( [ 2 ] + [ 3 ] * std::cos( x ) ) - ( [ 8 ] + [ 9 ] * std::cos( y ) ) , 2 ) + std::pow( ( [ 4 ] + [ 5 ] * x ) - ( [ 10 ] + [ 11 ] * y ) , 2 ) )" , xMin , xMax , yMin , yMax );
 
 	distance->SetParameter( 0 , xReference1 + ( 1.0 / track1Omega - track1D0 ) * std::sin( track1Phi ) );
 	streamlog_out(DEBUG1) << "	parameter [ 0 ] =  " << xReference1 + ( 1.0 / track1Omega - track1D0 ) * std::sin( track1Phi ) << std::endl;
@@ -417,26 +468,22 @@ double intersectTrackTrack(	EVENT::Track *track1 , EVENT::Track *track2 ,
 	streamlog_out(DEBUG1) << "	parameter [ 2 ] =  " << yReference1 - ( 1.0 / track1Omega - track1D0 ) * std::cos( track1Phi ) << std::endl;
 	distance->SetParameter( 3 , 1.0 / track1Omega );
 	streamlog_out(DEBUG1) << "	parameter [ 3 ] =  " << 1.0 / track1Omega << std::endl;
-	distance->SetParameter( 4 , zReference1 + track1Z0 );
-	streamlog_out(DEBUG1) << "	parameter [ 4 ] =  " << zReference1 + track1Z0 << std::endl;
+	distance->SetParameter( 4 , zReference1 + track1Z0 + track1Phi * track1TanLambda / track1Omega );
+	streamlog_out(DEBUG1) << "	parameter [ 4 ] =  " << zReference1 + track1Z0 + track1Phi * track1TanLambda / track1Omega;
 	distance->SetParameter( 5 , -1.0 * track1TanLambda / track1Omega );
 	streamlog_out(DEBUG1) << "	parameter [ 5 ] =  " << -1.0 * track1TanLambda / ( track1Omega ) << std::endl;
-	distance->SetParameter( 6 , track1Phi );
-	streamlog_out(DEBUG1) << "	parameter [ 6 ] =  " << track1Phi << std::endl;
-	distance->SetParameter( 7 , xReference2 + ( 1.0 / track2Omega - track2D0 ) * std::sin( track2Phi ) );
-	streamlog_out(DEBUG1) << "	parameter [ 7 ] =  " << xReference2 + ( 1.0 / track2Omega - track2D0 ) * std::sin( track2Phi ) << std::endl;
-	distance->SetParameter( 8 , -1.0 / track2Omega );
-	streamlog_out(DEBUG1) << "	parameter [ 8 ] =  " << -1.0 / track2Omega << std::endl;
-	distance->SetParameter( 9 , yReference2 - ( 1.0 / track2Omega - track2D0 ) * std::cos( track2Phi ) );
-	streamlog_out(DEBUG1) << "	parameter [ 9 ] =  " << yReference1 - ( 1.0 / track2Omega - track2D0 ) * std::cos( track2Phi ) << std::endl;
-	distance->SetParameter( 10 , 1.0 / track2Omega );
-	streamlog_out(DEBUG1) << "	parameter [ 10 ] =  " << 1.0 / track2Omega << std::endl;
-	distance->SetParameter( 11 , zReference2 + track2Z0 );
-	streamlog_out(DEBUG1) << "	parameter [ 11 ] =  " << zReference2 + track2Z0 << std::endl;
-	distance->SetParameter( 12 , -1.0 * track2TanLambda / track2Omega );
-	streamlog_out(DEBUG1) << "	parameter [ 12 ] =  " << -1.0 * track2TanLambda / ( track2Omega ) << std::endl;
-	distance->SetParameter( 13 , track2Phi );
-	streamlog_out(DEBUG1) << "	parameter [ 13 ] =  " << track2Phi << std::endl;
+	distance->SetParameter( 6 , xReference2 + ( 1.0 / track2Omega - track2D0 ) * std::sin( track2Phi ) );
+	streamlog_out(DEBUG1) << "	parameter [ 6 ] =  " << xReference2 + ( 1.0 / track2Omega - track2D0 ) * std::sin( track2Phi ) << std::endl;
+	distance->SetParameter( 7 , -1.0 / track2Omega );
+	streamlog_out(DEBUG1) << "	parameter [ 7 ] =  " << -1.0 / track2Omega << std::endl;
+	distance->SetParameter( 8 , yReference2 - ( 1.0 / track2Omega - track2D0 ) * std::cos( track2Phi ) );
+	streamlog_out(DEBUG1) << "	parameter [ 8 ] =  " << yReference1 - ( 1.0 / track2Omega - track2D0 ) * std::cos( track2Phi ) << std::endl;
+	distance->SetParameter( 9 , 1.0 / track2Omega );
+	streamlog_out(DEBUG1) << "	parameter [ 9 ] =  " << 1.0 / track2Omega << std::endl;
+	distance->SetParameter( 10 , zReference2 + track2Z0 + track2Phi * track2TanLambda / track2Omega );
+	streamlog_out(DEBUG1) << "	parameter [ 10 ] =  " << zReference2 + track2Z0 + track2Phi * track2TanLambda / track2Omega;
+	distance->SetParameter( 11 , -1.0 * track2TanLambda / track2Omega );
+	streamlog_out(DEBUG1) << "	parameter [ 11 ] =  " << -1.0 * track2TanLambda / ( track2Omega ) << std::endl;
 
 	distance->SetRange( xMin , yMin , xMax , yMax );
 //	distance->SetNpx( 1000 );
@@ -452,6 +499,7 @@ double intersectTrackTrack(	EVENT::Track *track1 , EVENT::Track *track2 ,
 	double yTrack1PCA	= yReference1 - ( 1.0 / track1Omega - track1D0 ) * std::cos( track1Phi ) + std::cos( minPhi1 ) / track1Omega;
 	double zTrack1PCA	= zReference1 + track1Z0 - ( minPhi1 - track1Phi ) * track1TanLambda / track1Omega;
 	streamlog_out(DEBUG1) << "	Track 1 PCA (x,y,z) = 	( " << xTrack1PCA << "	,	" << yTrack1PCA << "	,	" << zTrack1PCA << "	)" << std::endl;
+	ced_hit( xTrack1PCA , yTrack1PCA , zTrack1PCA , 5 , 5 , 0xff0000 );
 	PCAatTrack1.push_back( xTrack1PCA );
 	PCAatTrack1.push_back( yTrack1PCA );
 	PCAatTrack1.push_back( zTrack1PCA );
@@ -460,6 +508,7 @@ double intersectTrackTrack(	EVENT::Track *track1 , EVENT::Track *track2 ,
 	double yTrack2PCA	= yReference2 - ( 1.0 / track2Omega - track2D0 ) * std::cos( track2Phi ) + std::cos( minPhi2 ) / track2Omega;
 	double zTrack2PCA	= zReference2 + track2Z0 - ( minPhi2 - track2Phi ) * track2TanLambda / track2Omega;
 	streamlog_out(DEBUG1) << "	Track 2 PCA (x,y,z) = 	( " << xTrack2PCA << "	,	" << yTrack2PCA << "	,	" << zTrack2PCA << "	)" << std::endl;
+	ced_hit( xTrack2PCA , yTrack2PCA , zTrack2PCA , 5 , 5 , 0x0061ff );
 	PCAatTrack2.push_back( xTrack2PCA );
 	PCAatTrack2.push_back( yTrack2PCA );
 	PCAatTrack2.push_back( zTrack2PCA );
