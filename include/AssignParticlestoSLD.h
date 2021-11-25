@@ -19,9 +19,7 @@
 
 typedef std::vector<EVENT::ReconstructedParticle*>	pfoVector;
 
-std::vector<EVENT::ReconstructedParticle*> assignNeutralParticles( EVENT::ReconstructedParticle *assignedJet , TVector3 pointingVector , double InvMass , TLorentzVector chargedFourMomentum , TLorentzVector &neutralFourMomentum , double cosOpeningAngle );
-
-std::vector<EVENT::ReconstructedParticle*> assignChargedParticles( EVENT::LCEvent *pLCEvent , EVENT::ReconstructedParticle *assignedJet , std::string inputPrimaryVertex , std::string inputBuildUpVertex , EVENT::ReconstructedParticle *linkedRecoLepton , TVector3 pointingVector , double InvMass , TLorentzVector chargedFourMomentum , TLorentzVector &neutralFourMomentum , double cosOpeningAngle );
+void assignParticlesToSemiLeptonicDecay( pfoVector &assignedParticles , pfoVector &availableParticles , double invariantMass , TVector3 direction );
 
 bool isParticleInVertex( EVENT::ReconstructedParticle *particle , EVENT::Vertex *vertex );
 

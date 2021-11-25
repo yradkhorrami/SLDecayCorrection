@@ -29,11 +29,11 @@ typedef std::vector<EVENT::Vertex*>			vtxVector;
 
 
 void getTrueFlightDirection( EVENT::MCParticle *SLDLepton , TVector3 &trueFlightDirection , std::vector<double> &trueStartVertex , std::vector<double> &trueSLDVertex );
-int getRecoFlightDirection( EVENT::ReconstructedParticle *linkedRecoLepton , TVector3 &recoFlightDirection , EVENT::Vertex *primaryVertex , EVENT::Vertex *startVertex , vtxVector &SLDVertices , pfoVector &SLDVerticesRP , EVENT::ReconstructedParticle *assignedJet , vtxVector verticesInJet , pfoVector PFOswithAloneTracks , float &helicesDistance , int vertexingScenario );
+int getRecoFlightDirection( EVENT::ReconstructedParticle *linkedRecoLepton , TVector3 &recoFlightDirection , double & hadronFlightLength , EVENT::Vertex *primaryVertex , EVENT::Vertex *startVertex , vtxVector &SLDVertices , pfoVector &SLDVerticesRP , EVENT::ReconstructedParticle *assignedJet , vtxVector verticesInJet , pfoVector PFOswithAloneTracks , float &helicesDistance , int vertexingScenario );
 
-double intersectTrackLine( EVENT::Track *track , EVENT::Vertex* primaryVertex , TVector3 momentumOfLine , std::vector<double> pointOnLine , std::vector<double> &PCAatTrack , std::vector<double> &PCAatLine );
+double intersectTrackLine( EVENT::Track *track , EVENT::Vertex* primaryVertex , TVector3 momentumOfLine , std::vector<double> pointOnLine , TVector3 &PCAatTrack , TVector3 &PCAatLine );
 
-double intersectTrackTrack( EVENT::Track *track1 , EVENT::Track *track2 , std::vector<double> &PCAatTrack1 , std::vector<double> &PCAatTrack2 );
+double intersectTrackTrack( EVENT::Track *track1 , EVENT::Track *track2 , TVector3 &PCAatTrack1 , TVector3 &PCAatTrack2 );
 
 /*
 
