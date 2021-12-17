@@ -18,8 +18,15 @@
 #include <GeometryUtil.h>
 
 typedef std::vector<EVENT::ReconstructedParticle*>	pfoVector;
+typedef std::vector<EVENT::Vertex*>			vtxVector;
 
 void assignParticlesToSemiLeptonicDecay( pfoVector &assignedParticles , pfoVector &availableParticles , double invariantMass , TVector3 direction );
+
+void assignVerticesToSemiLeptonicDecay( pfoVector &assignedParticles , vtxVector &availableVertices , double invariantMass , TVector3 direction , EVENT::Vertex* startVertex );
+
+void sortParticles( pfoVector &sortedParticles , pfoVector &unSortedParticles , TVector3 direction );
+
+void sortVertices( vtxVector &sortedVertices , vtxVector &availableVertices , TVector3 direction , EVENT::Vertex* startVertex );
 
 bool isParticleInVertex( EVENT::ReconstructedParticle *particle , EVENT::Vertex *vertex );
 
@@ -30,8 +37,6 @@ EVENT::Vertex *getParticleVertex( EVENT::ReconstructedParticle *particle , std::
 EVENT::ReconstructedParticle *getJetAssignedToParticle( EVENT::ReconstructedParticle *particle , std::vector<EVENT::ReconstructedParticle*> jetVector , bool &foundParticleInJet );
 
 EVENT::Track *makeTrackParameters( TVector3 momentum , TVector3 point , double charge );
-
-void sortParticles( pfoVector &sortedParticles , pfoVector &unSortedParticles , TVector3 direction );
 
 std::vector<EVENT::Vertex*> getVerticesInJet( EVENT::ReconstructedParticle * assignedJet , std::vector<EVENT::Vertex*> buildUpVertexVector );
 

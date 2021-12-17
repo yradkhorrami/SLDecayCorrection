@@ -23,6 +23,45 @@ void assignParticlesToSemiLeptonicDecay( pfoVector &assignedParticles , pfoVecto
 			assignedParticles.push_back( particle );
 			streamlog_out(DEBUG1) << "		added one particle to the semi-leptonic decay" << std::endl;
 		}
+		else
+		{
+			return;
+		}
+	}
+}
+
+void assignVerticesToSemiLeptonicDecay( pfoVector &assignedParticles , vtxVector &availableVertices , double invariantMass , TVector3 direction , EVENT::Vertex* startVertex )
+{
+	direction.SetMag( 1.0 );
+	pfoVector sortedParticles{};
+	vtxVector sortedVertices{};
+	sortVertices( sortedVertices , availableVertices , direction , startVertex );
+	TLorentzVector totalFourMomentum( 0.0 , 0.0 , 0.0 , 0.0 );
+	for ( unsigned int i_par = 0 ; i_par < assignedParticles.size() ; ++i_par )
+	{
+		totalFourMomentum += TLorentzVector( assignedParticles[ i_par ]->getMomentum() , assignedParticles[ i_par ]->getEnergy() );
+	}
+	pfoVector availableParticles{};
+	for ( unsigned int i_vtx = 0 ; i_vtx < sortedVertices.size() ; ++i_vtx )
+	{
+		TLorentzVector vertexFourMomentum = TLorentzVector( 0.0 , 0.0 , 0.0 , 0.0 );
+		for ( unsigned int i_par = 0 ; i_par < ( sortedVertices[ i_vtx ]->getAssociatedParticle() )->getParticles().size() ; ++i_par )
+		{
+			vertexFourMomentum += TLorentzVector( ( sortedVertices[ i_vtx ]->getAssociatedParticle() )->getParticles()[ i_par ]->getMomentum() , ( sortedVertices[ i_vtx ]->getAssociatedParticle() )->getParticles()[ i_par ]->getEnergy() );
+		}
+		if ( ( totalFourMomentum + vertexFourMomentum ).M() <= invariantMass )
+		{
+			totalFourMomentum += vertexFourMomentum;
+			for ( unsigned int i_par = 0 ; i_par < ( sortedVertices[ i_vtx ]->getAssociatedParticle() )->getParticles().size() ; ++i_par )
+			{
+				assignedParticles.push_back( ( sortedVertices[ i_vtx ]->getAssociatedParticle() )->getParticles()[ i_par ] );
+			}
+			streamlog_out(DEBUG1) << "		added one vertex to the semi-leptonic decay" << std::endl;
+		}
+		else
+		{
+			return;
+		}
 	}
 }
 
@@ -58,6 +97,37 @@ void sortParticles( pfoVector &sortedParticles , pfoVector &unSortedParticles , 
 	}
 	streamlog_out(DEBUG0) << "	" << sortedParticles.size() << " particles sorted and " << remainingUnSortedParticles.size() << " particles have not been sorted wrt ( " << direction.X() << " , " << direction.Y() << " , " << direction.Z() <<" )" << std::endl;
 	if ( remainingUnSortedParticles.size() != 0 ) sortParticles( sortedParticles , remainingUnSortedParticles , direction );
+}
+
+void sortVertices( vtxVector &sortedVertices , vtxVector &unSortedVertices , TVector3 direction , EVENT::Vertex* startVertex )
+{
+	double closestAngleCos = -1.0;
+	Vertex* closestVertex = NULL;
+	streamlog_out(DEBUG0) << "	" << sortedVertices.size() << " of " << unSortedVertices.size() + sortedVertices.size() << " vertices have been sorted wrt ( " << direction.X() << " , " << direction.Y() << " , " << direction.Z() <<" )" << std::endl;
+	for ( unsigned int i_vtx = 0 ; i_vtx < unSortedVertices.size() ; ++i_vtx )
+	{
+		TVector3 vertexPosition = TVector3( unSortedVertices[ i_vtx ]->getPosition()[ 0 ] - startVertex->getPosition()[ 0 ] , unSortedVertices[ i_vtx ]->getPosition()[ 1 ] - startVertex->getPosition()[ 1 ] , unSortedVertices[ i_vtx ]->getPosition()[ 2 ] - startVertex->getPosition()[ 2 ] );
+		vertexPosition.SetMag( 1.0 );
+		if ( vertexPosition.Dot( direction ) >= closestAngleCos )
+		{
+			closestAngleCos = vertexPosition.Dot( direction );
+			closestVertex = unSortedVertices[ i_vtx ];
+		}
+	}
+	vtxVector remainingUnSortedVertices{};
+	for ( unsigned int i_vtx = 0 ; i_vtx < unSortedVertices.size() ; ++i_vtx )
+	{
+		if ( unSortedVertices[ i_vtx ] == closestVertex )
+		{
+			sortedVertices.push_back( unSortedVertices[ i_vtx ] );
+		}
+		else
+		{
+			remainingUnSortedVertices.push_back( unSortedVertices[ i_vtx ] );
+		}
+	}
+	streamlog_out(DEBUG0) << "	" << sortedVertices.size() << " vertices sorted and " << remainingUnSortedVertices.size() << " vertices have not been sorted wrt ( " << direction.X() << " , " << direction.Y() << " , " << direction.Z() <<" )" << std::endl;
+	if ( remainingUnSortedVertices.size() != 0 ) sortVertices( sortedVertices , remainingUnSortedVertices , direction , startVertex );
 }
 
 bool isParticleInVertex( EVENT::ReconstructedParticle *particle , EVENT::Vertex *vertex )

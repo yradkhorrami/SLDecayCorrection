@@ -26,10 +26,11 @@
 typedef std::vector<EVENT::MCParticle*>			mcpVector;
 typedef std::vector<EVENT::ReconstructedParticle*>	pfoVector;
 typedef std::vector<EVENT::Vertex*>			vtxVector;
+typedef std::vector<float>				floatVector;
 
 
 void getTrueFlightDirection( EVENT::MCParticle *SLDLepton , TVector3 &trueFlightDirection , std::vector<double> &trueStartVertex , std::vector<double> &trueSLDVertex );
-int getRecoFlightDirection( EVENT::ReconstructedParticle *linkedRecoLepton , TVector3 &recoFlightDirection , double & hadronFlightLength , EVENT::Vertex *primaryVertex , EVENT::Vertex *startVertex , vtxVector &SLDVertices , pfoVector &SLDVerticesRP , EVENT::ReconstructedParticle *assignedJet , vtxVector verticesInJet , pfoVector PFOswithAloneTracks , float &helicesDistance , int vertexingScenario );
+int getRecoFlightDirection( EVENT::ReconstructedParticle *linkedRecoLepton , TVector3 &recoFlightDirection , double & hadronFlightLength , EVENT::Vertex *primaryVertex , EVENT::Vertex *startVertex , vtxVector &SLDVertices , pfoVector &SLDVerticesRP , EVENT::ReconstructedParticle *assignedJet , vtxVector verticesInJet , pfoVector PFOswithAloneTracks , float &helicesDistance , int vertexingScenario , TVector3 &daughterHadronFlightDirection , double &daughterHadronFlightDistance , floatVector& sldVertexPosition );
 
 double intersectTrackLine( EVENT::Track *track , EVENT::Vertex* primaryVertex , TVector3 momentumOfLine , std::vector<double> pointOnLine , TVector3 &PCAatTrack , TVector3 &PCAatLine );
 

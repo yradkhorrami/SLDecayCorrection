@@ -21,10 +21,12 @@ void getTrueFlightDirection( EVENT::MCParticle *SLDLepton , TVector3 &trueFlight
 	return;
 }
 
-int getRecoFlightDirection( 	EVENT::ReconstructedParticle *linkedRecoLepton , TVector3 &recoFlightDirection , double & hadronFlightLength ,
-				EVENT::Vertex *primaryVertex , EVENT::Vertex *startVertex , vtxVector &SLDVertices ,
-				pfoVector &SLDVerticesRP , EVENT::ReconstructedParticle *assignedJet , std::vector<EVENT::Vertex*> verticesInJet ,
-				std::vector<EVENT::ReconstructedParticle*> PFOswithAloneTracks , float &helicesDistance , int vertexingScenario )
+int getRecoFlightDirection( 	EVENT::ReconstructedParticle *linkedRecoLepton , TVector3 &recoFlightDirection ,
+				double &hadronFlightLength , EVENT::Vertex *primaryVertex , EVENT::Vertex *startVertex ,
+				vtxVector &SLDVertices , pfoVector &SLDVerticesRP , EVENT::ReconstructedParticle *assignedJet ,
+				std::vector<EVENT::Vertex*> verticesInJet , std::vector<EVENT::ReconstructedParticle*> PFOswithAloneTracks ,
+				float &helicesDistance , int vertexingScenario , TVector3 &daughterHadronFlightDirection ,
+				double &daughterHadronFlightDistance , floatVector& sldVertexPosition )
 {
 	int SLDStatus = -999;
 //	drawReconstructedParticle( linkedRecoLepton , primaryVertex , 0xf00000 , 0xf00000 );
@@ -32,6 +34,14 @@ int getRecoFlightDirection( 	EVENT::ReconstructedParticle *linkedRecoLepton , TV
 	bool recoLeptonIsInVertex = false;
 	TVector3 startVertexPosition( startVertex->getPosition()[ 0 ] , startVertex->getPosition()[ 1 ] , startVertex->getPosition()[ 2 ] );
 	EVENT::Vertex* recoLeptonVertex = getParticleVertex( linkedRecoLepton , verticesInJet , recoLeptonIsInVertex );
+	recoFlightDirection = TVector3( 0.0 , 0.0 , 0.0 );
+	hadronFlightLength = 0.0;
+	helicesDistance = 0.0;
+	daughterHadronFlightDistance = 0.0;
+	daughterHadronFlightDirection = TVector3( 0.0 , 0.0 , 0.0 );
+	SLDVertices.clear();
+	SLDVerticesRP.clear();
+	sldVertexPosition.clear();
 	if ( recoLeptonIsInVertex )
 	{
 		SLDStatus = 4;
@@ -40,7 +50,18 @@ int getRecoFlightDirection( 	EVENT::ReconstructedParticle *linkedRecoLepton , TV
 		recoFlightDirection = TVector3( recoLeptonVertex->getPosition()[ 0 ] - startVertex->getPosition()[ 0 ] , recoLeptonVertex->getPosition()[ 1 ] - startVertex->getPosition()[ 1 ] , recoLeptonVertex->getPosition()[ 2 ] - startVertex->getPosition()[ 2 ] );
 		hadronFlightLength = recoFlightDirection.Mag();
 		recoFlightDirection.SetMag( 1.0 );
+		ReconstructedParticle* recoLeptonVertexRP = recoLeptonVertex->getAssociatedParticle();
+		for ( unsigned int i_par = 0 ; i_par < recoLeptonVertexRP->getParticles().size() ; ++i_par )
+		{
+			if ( recoLeptonVertexRP->getParticles()[ i_par ] != linkedRecoLepton ) daughterHadronFlightDirection += TVector3( ( recoLeptonVertexRP->getParticles()[ i_par ] )->getMomentum() );
+		}
+		sldVertexPosition.push_back( recoLeptonVertex->getPosition()[ 0 ] );
+		sldVertexPosition.push_back( recoLeptonVertex->getPosition()[ 1 ] );
+		sldVertexPosition.push_back( recoLeptonVertex->getPosition()[ 2 ] );
+		daughterHadronFlightDistance = daughterHadronFlightDirection.Mag();
+		daughterHadronFlightDirection.SetMag( 1.0 );
 		streamlog_out(DEBUG1) << "	(" << SLDStatus << ") Lepton from semi-leptonic decay found in a BuildUp Vertex, BuildUp Vertex is used as vertex of semi-leptonic decay!" << std::endl;
+/*
 		for ( unsigned int i_vtx = 0 ; i_vtx < verticesInJet.size() ; ++i_vtx )
 		{
 			Vertex* testVertex = verticesInJet[ i_vtx ];
@@ -50,6 +71,7 @@ int getRecoFlightDirection( 	EVENT::ReconstructedParticle *linkedRecoLepton , TV
 				SLDVerticesRP.push_back( testVertex->getAssociatedParticle() );
 			}
 		}
+*/
 	}
 	else if ( verticesInJet.size() != 0 )
 	{
@@ -79,10 +101,14 @@ int getRecoFlightDirection( 	EVENT::ReconstructedParticle *linkedRecoLepton , TV
 			helicesDistance = intersectTrackLine( leptonTrack , primaryVertex , momentumOfLine , pointOnLine , PCAatTrack , PCAatLine );
 			recoFlightDirection = PCAatTrack - startVertexPosition;
 			hadronFlightLength = recoFlightDirection.Mag();
+			daughterHadronFlightDirection = TVector3( thirdVertex->getPosition()[ 0 ] - PCAatTrack[ 0 ] , thirdVertex->getPosition()[ 1 ] - PCAatTrack[ 1 ] , thirdVertex->getPosition()[ 2 ] - PCAatTrack[ 2 ] );
+			daughterHadronFlightDistance = daughterHadronFlightDirection.Mag();
+			daughterHadronFlightDirection.SetMag( 1.0 );
 //			recoFlightDirection = TVector3( PCAatTrack[ 0 ] - startVertex->getPosition()[ 0 ] , PCAatTrack[ 1 ] - startVertex->getPosition()[ 1 ] , PCAatTrack[ 2 ] - startVertex->getPosition()[ 2 ] );
 			recoFlightDirection.SetMag( 1.0 );
 			SLDVertices.push_back( thirdVertex );
 			SLDVerticesRP.push_back( thirdVertex->getAssociatedParticle() );
+/*
 			for ( unsigned int i_vtx = 0 ; i_vtx < verticesInJet.size() ; ++i_vtx )
 			{
 				Vertex* testVertex = verticesInJet[ i_vtx ];
@@ -92,6 +118,10 @@ int getRecoFlightDirection( 	EVENT::ReconstructedParticle *linkedRecoLepton , TV
 					SLDVerticesRP.push_back( testVertex->getAssociatedParticle() );
 				}
 			}
+*/
+			sldVertexPosition.push_back( PCAatTrack.X() );
+			sldVertexPosition.push_back( PCAatTrack.Y() );
+			sldVertexPosition.push_back( PCAatTrack.Z() );
 		}
 	}
 	else
@@ -129,6 +159,9 @@ int getRecoFlightDirection( 	EVENT::ReconstructedParticle *linkedRecoLepton , TV
 			}
 			recoFlightDirection = PCAatLepton - startVertexPosition;
 			hadronFlightLength = recoFlightDirection.Mag();
+			sldVertexPosition.push_back( PCAatLepton.X() );
+			sldVertexPosition.push_back( PCAatLepton.Y() );
+			sldVertexPosition.push_back( PCAatLepton.Z() );
 //			recoFlightDirection = TVector3( PCAatLepton[ 0 ] - startVertex->getPosition()[ 0 ] , PCAatLepton[ 1 ] - startVertex->getPosition()[ 1 ] , PCAatLepton[ 2 ] - startVertex->getPosition()[ 2 ] );
 		}
 		else if ( vertexingScenario == 3 )
@@ -137,6 +170,9 @@ int getRecoFlightDirection( 	EVENT::ReconstructedParticle *linkedRecoLepton , TV
 			helicesDistance = intersectTrackLine( linkedRecoLepton->getTracks()[ 0 ] , primaryVertex , neutralParticleMomentum , neutralParticlePosition , PCAatLepton , PCAatOtherParticle );
 			recoFlightDirection = PCAatLepton - startVertexPosition;
 			hadronFlightLength = recoFlightDirection.Mag();
+			sldVertexPosition.push_back( PCAatLepton.X() );
+			sldVertexPosition.push_back( PCAatLepton.Y() );
+			sldVertexPosition.push_back( PCAatLepton.Z() );
 //			recoFlightDirection = TVector3( PCAatLepton[ 0 ] - startVertex->getPosition()[ 0 ] , PCAatLepton[ 1 ] - startVertex->getPosition()[ 1 ] , PCAatLepton[ 2 ] - startVertex->getPosition()[ 2 ] );
 		}
 		else if ( vertexingScenario == 4  )
@@ -171,10 +207,15 @@ int getRecoFlightDirection( 	EVENT::ReconstructedParticle *linkedRecoLepton , TV
 			}
 			recoFlightDirection = PCAatLepton - startVertexPosition;
 			hadronFlightLength = recoFlightDirection.Mag();
+			sldVertexPosition.push_back( PCAatLepton.X() );
+			sldVertexPosition.push_back( PCAatLepton.Y() );
+			sldVertexPosition.push_back( PCAatLepton.Z() );
 //			recoFlightDirection = TVector3( PCAatLepton[ 0 ] - startVertex->getPosition()[ 0 ] , PCAatLepton[ 1 ] - startVertex->getPosition()[ 1 ] , PCAatLepton[ 2 ] - startVertex->getPosition()[ 2 ] );
 		}
-
+		daughterHadronFlightDirection = recoFlightDirection;
+		daughterHadronFlightDistance = daughterHadronFlightDirection.Mag();
 		recoFlightDirection.SetMag( 1.0 );
+		daughterHadronFlightDirection.SetMag( 1.0 );
 	}
 	if ( SLDVertices.size() != 0 )
 	{
@@ -1710,7 +1751,7 @@ void drawMCParticles( EVENT::MCParticle *MotherHadron )
 		{
 			if ( std::fabs( duaughter->getPDG() ) == 12 || std::fabs( duaughter->getPDG() ) == 14 || std::fabs( duaughter->getPDG() ) == 16 ) //DRAW Neutrinos in GRAY
 			{
-				ced_line( duaughter->getEndpoint()[ 0 ] , duaughter->getEndpoint()[ 1 ] , duaughter->getEndpoint()[ 2 ] , duaughter->getVertex()[ 0 ] , duaughter->getVertex()[ 1 ] , duaughter->getVertex()[ 2 ] , 1 , 1 , 0x949494 );
+				ced_line( duaughter->getEndpoint()[ 0 ] , duaughter->getEndpoint()[ 1 ] , duaughter->getEndpoint()[ 2 ] , duaughter->getVertex()[ 0 ] , duaughter->getVertex()[ 1 ] , duaughter->getVertex()[ 2 ] , 2 , 2 , 0x949494 );
 				streamlog_out(DEBUG0) << " True Neutrino: " << std::endl;
 				streamlog_out(DEBUG0) << *duaughter << std::endl;
 			}

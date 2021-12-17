@@ -8,6 +8,8 @@
 #include "IMPL/LCCollectionVec.h"
 #include "UTIL/LCRelationNavigator.h"
 #include <IMPL/ReconstructedParticleImpl.h>
+#include "IMPL/ParticleIDImpl.h"
+#include <IMPL/VertexImpl.h>
 #include "lcio.h"
 #include <string>
 #include <vector>
@@ -46,22 +48,31 @@ public:
 	virtual void processRunHeader();
 	virtual void processEvent( EVENT::LCEvent *pLCEvent );
 
+	typedef std::vector<int>				IntVector;
+	typedef std::vector<double>				DoubleVector;
+	typedef std::vector<float>				FloatVector;
+	typedef std::vector<EVENT::MCParticle*>			mcpVector;
+	typedef std::vector<EVENT::ReconstructedParticle*>	pfoVector;
+	typedef std::vector<EVENT::Vertex*>			vtxVector;
 	bool hasPrimarySLDecay( MCParticle *parentHadron );
 	bool hasDownStreamSLDecay( MCParticle *parentHadron );
 	bool hasUpStreamSLDecay( MCParticle *parentHadron );
 	bool checkBHadronSLDecay( MCParticle *SLDLepton );
 	bool checkCHadronSLDecay( MCParticle *SLDLepton );
 	bool checkTauLeptonSLDecay( MCParticle *SLDLepton );
-	virtual void doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDLepton );
+	virtual void doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDLepton , vtxVector& semiLeptonicVertices , pfoVector& semiLeptonicVertexRecoParticles , pfoVector& jetsOfSemiLeptonicDecays , pfoVector& neutrinos );
 	void showTrueParameters( MCParticle *SLDLepton );
 	TLorentzVector getNeutrinoFourMomentum( TVector3 flightDirection , TLorentzVector visibleFourMomentum , double parentHadronMass , float solutionSign );
+	TLorentzVector getNeutrinoFourMomentumModified( TVector3 flightDirection , TLorentzVector visibleFourMomentum , double parentHadronMass , float solutionSign );
+	TLorentzVector getNeutrinoFourMomentumStandardMethod( TVector3 flightDirection , TLorentzVector visibleFourMomentum , double parentHadronMass , float solutionSign );
 	MCParticle* getTrueNeutrino( MCParticle *SLDLepton );
-	void fillTrueRecoFourMomentum( TLorentzVector trueNeutralFourMomentum , TLorentzVector trueChargedFourMomentum , TLorentzVector trueLeptonFourMomentum , TLorentzVector trueVisibleFourMomentum , TLorentzVector trueNeutrinoFourMomentum , TLorentzVector trueHadronFourMomentum ,  TLorentzVector recoNeutralFourMomentum , TLorentzVector recoChargedFourMomentum , TLorentzVector recoLeptonFourMomentum , TLorentzVector recoVisibleFourMomentum , TLorentzVector recoNeutrinoFourMomentum , TLorentzVector recoHadronFourMomentum , TLorentzVector usedNeutralFourMomentum , TLorentzVector usedChargedFourMomentum , TLorentzVector usedLeptonFourMomentum , TLorentzVector usedVisibleFourMomentum );
+	void fillTrueRecoFourMomentum( TLorentzVector trueNeutralFourMomentum , TLorentzVector trueChargedFourMomentum , TLorentzVector trueLeptonFourMomentum , TLorentzVector trueVisibleFourMomentum , TLorentzVector trueNeutrinoFourMomentum , TLorentzVector trueHadronFourMomentum ,  TLorentzVector recoNeutralFourMomentum , TLorentzVector recoChargedFourMomentum , TLorentzVector recoLeptonFourMomentum , TLorentzVector recoVisibleFourMomentum , TLorentzVector recoNeutrinoFourMomentum , TLorentzVector recoHadronFourMomentum , TLorentzVector usedNeutralFourMomentum , TLorentzVector usedChargedFourMomentum , TLorentzVector usedLeptonFourMomentum , TLorentzVector usedVisibleFourMomentum , TLorentzVector cheatedPVARecoChargedFourMomentum , TLorentzVector cheatedPVARecoNeutralFourMomentum );
 	virtual void plotHistograms( TLorentzVector trueFourMomentumNeutrino , TLorentzVector FourMomentumNuClose , std::vector<float> NeutrinoCovMat );
 	virtual void InitializeHistogram( TH1F *histogram , int scale , int color , int lineWidth , int markerSize , int markerStyle );
 	virtual void doProperGaussianFit( TH1F *histogram , float fitMin , float fitMax , float fitRange );
 	int getVertexInJetsDistribution( Vertex* testVertex , std::vector<EVENT::ReconstructedParticle*> jetVector );
 	void evaluatePFOsAngle( std::vector<EVENT::ReconstructedParticle*> aloneChargedPFOsInJetFromSLD , std::vector<EVENT::ReconstructedParticle*> aloneChargedPFOsInJetNotFromSLD , std::vector<EVENT::ReconstructedParticle*> chargedPFOsInJetFromSLD , std::vector<EVENT::ReconstructedParticle*> chargedPFOsInJetNotFromSLD , std::vector<EVENT::ReconstructedParticle*> neutralPFOsInJetFromSLD , std::vector<EVENT::ReconstructedParticle*> neutralPFOsInJetNotFromSLD , TVector3 leptonDirection , TVector3 jetAxis , TVector3 recoFlightDirection , int SLDStatus );
+	void investigateJetEnergyContent( EVENT::ReconstructedParticle *assignedJet );
 
 	virtual void check( EVENT::LCEvent *pLCEvent );
 	virtual void end();
@@ -69,49 +80,48 @@ public:
 
 private:
 
-	typedef std::vector<int>				IntVector;
-	typedef std::vector<double>				DoubleVector;
-	typedef std::vector<float>				FloatVector;
-	typedef std::vector<EVENT::MCParticle*>			mcpVector;
-	typedef std::vector<EVENT::ReconstructedParticle*>	pfoVector;
-	typedef std::vector<EVENT::Vertex*>			vtxVector;
 
 
 	std::string				m_mcParticleCollection{};
 	std::string				m_inputPfoCollection{};
 	std::string				m_inputJetCollection{};
-	std::string				m_jetFlavour{};
 	std::string				m_inputPrimaryVertex{};
 	std::string				m_inputBuildUpVertex{};
 	std::string				m_RecoMCTruthLinkCollection{};
 	std::string				m_MCTruthRecoLinkCollection{};
-	std::string				m_TrackMCTruthLinkCollection{};
-	std::string				m_MCTruthTrackLinkCollection{};
 	std::string				m_ClusterMCTruthLinkCollection{};
 	std::string				m_MCTruthClusterLinkCollection{};
-	std::string				m_SLDNuCollection{};
+	std::string				m_SLDVertex{};
+	std::string				m_SLDVertexRP{};
+	std::string				m_reconstructedNeutrino{};
+	std::string				m_JetSLDLinkName{};
+	std::string				m_SLDJetLinkName{};
+	std::string				m_mcNurecoNuLinkName{};
+	std::string				m_recoNumcNuLinkName{};
 	std::string				m_rootFile{};
 
-	bool					m_includbJets = true;
-	bool					m_includcJets = true;
-	bool					m_includgJets = true;
-	bool					m_includOthers = true;
 	bool					m_includeBSLD = true;
 	bool					m_includeCSLD = true;
 	bool					m_includeTSLD = true;
 	bool					m_cheatSLDLeptons = true;
 	bool					m_cheatFlightDirection = true;
 	int					m_vertexingScenario = 1;
-	bool					m_useJetAxisAsFlightDirection = true;
-	bool					m_considerParentCharge = true;
-	bool					m_cheatVertices = true;
 	bool					m_cheatLepton4momentum = true;
 	bool					m_cheatCharged4momentum = true;
 	bool					m_cheatNeutral4momentum = true;
-	bool					m_cheatPIDcharged = true;
-	float					m_chargedCosAcceptanceAngle = 0.0;
-	bool					m_cheatPIDneutral = true;
+	bool					m_cheatPVAcharged = true;
+	float					m_chargedCosAcceptanceAngleSLD4 = 0.0;
+	float					m_chargedCosAcceptanceAngleSLD5 = 0.0;
+	bool					m_cheatPVAneutral = true;
 	float					m_neutralCosAcceptanceAngle = 0.0;
+	float					m_BSLDChargedSLD4InvMassCut = 0.0;
+	float					m_BSLDChargedSLD5InvMassCut = 0.0;
+	float					m_BSLDNeutralSLD4InvMassCut = 0.0;
+	float					m_BSLDNeutralSLD5InvMassCut = 0.0;
+	float					m_CSLDChargedSLD4InvMassCut = 0.0;
+	float					m_CSLDChargedSLD5InvMassCut = 0.0;
+	float					m_CSLDNeutralSLD4InvMassCut = 0.0;
+	float					m_CSLDNeutralSLD5InvMassCut = 0.0;
 	int					m_nIterFlightDirCorrection = 0;
 	int					m_recoFourMomentumOfVisibles = 0;
 	bool					m_displayEvent = true;
@@ -131,7 +141,8 @@ private:
 	int					m_nTauNeutrino;
 	int					m_nNeutrino;
 	int					m_nChargedPFOwoTrack;
-	IntVector				m_jetFlavourPDG{};
+	IntVector				BHadPDGs{};
+	IntVector				CHadPDGs{};
 	IntVector				m_nSLD_chargedMCPwoTrack{};
 	IntVector				m_GenStatParentHadron{};
 	IntVector				m_ChargeParentHadron{};
@@ -151,6 +162,11 @@ private:
 	DoubleVector				m_lostChargedMCP_CosTheta{};
 	DoubleVector				m_lostChargedMCP_Energy{};
 	DoubleVector				m_lostChargedMCP_Pt{};
+	DoubleVector				m_jetEnergy{};
+	DoubleVector				m_jetEnergyFractionCharged{};
+	DoubleVector				m_jetEnergyFractionNeutralHadron{};
+	DoubleVector				m_jetEnergyFractionPhoton{};
+	DoubleVector				m_jetEnergyFractionNeutrals{};
 	int					n_SLDStatus;
 	int					n_NuPxResidual;
 	int					n_NuPyResidual;
@@ -198,6 +214,11 @@ private:
 	DoubleVector				m_NuPzNormalizedResidual{};
 	DoubleVector				m_NuENormalizedResidual{};
 	IntVector				m_solutionSign{};
+	DoubleVector				m_true_E_vis{};
+	DoubleVector				m_true_E_vis_prime{};
+	DoubleVector				m_true_P_vis_par{};
+	DoubleVector				m_true_P_vis_par_prime{};
+	DoubleVector				m_true_P_vis_nor{};
 	DoubleVector				m_E_vis{};
 	DoubleVector				m_E_vis_prime{};
 	DoubleVector				m_P_vis_par{};
@@ -216,9 +237,14 @@ private:
 	DoubleVector				m_SecVertexResidualY{};
 	DoubleVector				m_SecVertexResidualZ{};
 	DoubleVector				m_parentHadronMass{};
+	IntVector				m_parentHadronPDG{};
 	DoubleVector				m_trueParentHadronFlightDistance{};
 	DoubleVector				m_recoParentHadronFlightDistance{};
 	DoubleVector				m_daughterHadronMass{};
+	IntVector				m_daughterHadronPDG{};
+	DoubleVector				m_daughterHadronFlightDistance{};
+	FloatVector				m_visibleChargedInvMassCut{};
+	FloatVector				m_visibleNeutralInvMassCut{};
 	DoubleVector				m_alphaTrueNeutrals{};
 	DoubleVector				m_alphaTrueCharged{};
 	DoubleVector				m_cosAlphaNeutrals{};
@@ -336,6 +362,16 @@ private:
 	DoubleVector				m_usedVisiblePz{};
 	DoubleVector				m_usedVisibleE{};
 	DoubleVector				m_usedVisibleM{};
+	DoubleVector				m_cheatedPVARecoNeutralPx{};
+	DoubleVector				m_cheatedPVARecoNeutralPy{};
+	DoubleVector				m_cheatedPVARecoNeutralPz{};
+	DoubleVector				m_cheatedPVARecoNeutralE{};
+	DoubleVector				m_cheatedPVARecoNeutralM{};
+	DoubleVector				m_cheatedPVARecoChargedPx{};
+	DoubleVector				m_cheatedPVARecoChargedPy{};
+	DoubleVector				m_cheatedPVARecoChargedPz{};
+	DoubleVector				m_cheatedPVARecoChargedE{};
+	DoubleVector				m_cheatedPVARecoChargedM{};
 
 	IntVector				m_SLDStatus{};
 	FloatVector				m_weightPFOtoMCP_Lepton{};
@@ -345,6 +381,8 @@ private:
 	FloatVector				m_weightPFOtoMCP_Charged{};
 	FloatVector				m_weightMCPtoPFO_Charged{};
 	TH1F					*h_SLDStatus{};
+	TH1F					*h_BHadronType{};
+	TH1F					*h_CHadronType{};
 	TH1F					*h_NuPxResidual{};
 	TH1F					*h_NuPyResidual{};
 	TH1F					*h_NuPzResidual{};
