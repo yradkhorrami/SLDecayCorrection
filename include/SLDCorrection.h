@@ -67,6 +67,12 @@ public:
 	TLorentzVector getNeutrinoFourMomentumStandardMethod( TVector3 flightDirection , TLorentzVector visibleFourMomentum , double parentHadronMass , float solutionSign );
 	MCParticle* getTrueNeutrino( MCParticle *SLDLepton );
 	void fillTrueRecoFourMomentum( TLorentzVector trueNeutralFourMomentum , TLorentzVector trueChargedFourMomentum , TLorentzVector trueLeptonFourMomentum , TLorentzVector trueVisibleFourMomentum , TLorentzVector trueNeutrinoFourMomentum , TLorentzVector trueHadronFourMomentum ,  TLorentzVector recoNeutralFourMomentum , TLorentzVector recoChargedFourMomentum , TLorentzVector recoLeptonFourMomentum , TLorentzVector recoVisibleFourMomentum , TLorentzVector recoNeutrinoFourMomentum , TLorentzVector recoHadronFourMomentum , TLorentzVector usedNeutralFourMomentum , TLorentzVector usedChargedFourMomentum , TLorentzVector usedLeptonFourMomentum , TLorentzVector usedVisibleFourMomentum , TLorentzVector cheatedPVARecoChargedFourMomentum , TLorentzVector cheatedPVARecoNeutralFourMomentum );
+	virtual void getCovMatPVA( std::vector<EVENT::ReconstructedParticle*> decayProducts , std::vector<EVENT::ReconstructedParticle*> associatedParticles , int SLDStatus , std::vector< float > &CovMatrixPVA );
+	virtual void getCovMatDetFlightDirection( std::vector<EVENT::ReconstructedParticle*> decayProducts , TVector3 flightDirection , std::vector< float > CovMatrixFlightDirection , std::vector< float > &CovMatrixDetector , EVENT::ReconstructedParticle* linkedRecoLepton , std::vector< float > &CovMatrixDetPar , std::vector< float > &CovMatrixDetNor );
+	virtual void getCovMatFlightDirection( TVector3 flightDirection , float sigmaTheta , float sigmaPhi , std::vector< float > &CovMatrixFlightDirection );
+	virtual void getCovMatrixDetPar( TVector3 flightDirection , TLorentzVector visibleFourMomentum , std::vector< float > CovMatrixFlightDirection , std::vector< float > initialCovMatrixDetector , std::vector< float > &CovMatrixDetPar );
+	virtual void getCovMatrixDetNor( TVector3 flightDirection , TLorentzVector visibleFourMomentum , std::vector< float > CovMatrixFlightDirection , std::vector< float > initialCovMatrixDetector , std::vector< float > &CovMatrixDetNor );
+	virtual void getNeutrinoCovMat( TLorentzVector recoNeutrinoFourMomentum , TLorentzVector visibleFourMomentum , TVector3 flightDirection , double parentHadronMass , std::vector< float > CovMatrixPVA , std::vector< float > CovMatrixDetector , std::vector< float > CovMatrixDetPar , std::vector< float > CovMatrixDetNor , std::vector< float > &NeutrinoCovMatrix );
 	virtual void plotHistograms( TLorentzVector trueFourMomentumNeutrino , TLorentzVector FourMomentumNuClose , std::vector<float> NeutrinoCovMat );
 	virtual void InitializeHistogram( TH1F *histogram , int scale , int color , int lineWidth , int markerSize , int markerStyle );
 	virtual void doProperGaussianFit( TH1F *histogram , float fitMin , float fitMax , float fitRange );
@@ -229,6 +235,8 @@ private:
 	DoubleVector				m_FlightDirectionErrorSinAlpha{};
 	DoubleVector				m_FlightDirectionErrorCosAlpha{};
 	DoubleVector				m_FlightDirectionErrorAlpha{};
+	DoubleVector				m_FlightDirectionErrorDeltaTheta{};
+	DoubleVector				m_FlightDirectionErrorDeltaPhi{};
 	DoubleVector				m_distRecoLeptonToDownStreamVertex{};
 	DoubleVector				m_dsVertexResidualX{};
 	DoubleVector				m_dsVertexResidualY{};
@@ -372,6 +380,31 @@ private:
 	DoubleVector				m_cheatedPVARecoChargedPz{};
 	DoubleVector				m_cheatedPVARecoChargedE{};
 	DoubleVector				m_cheatedPVARecoChargedM{};
+	DoubleVector				m_neutralEnergy{};
+	DoubleVector				m_neutralEnergyFromVertexing{};
+	DoubleVector				m_neutralEnergyFromPVA{};
+	DoubleVector				m_neutralMomentum{};
+	DoubleVector				m_neutralMomentumFromVertexing{};
+	DoubleVector				m_neutralMomentumFromPVA{};
+	DoubleVector				m_chargedEnergy{};
+	DoubleVector				m_chargedEnergyFromVertexing{};
+	DoubleVector				m_chargedEnergyFromPVA{};
+	DoubleVector				m_chargedMomentum{};
+	DoubleVector				m_chargedMomentumFromVertexing{};
+	DoubleVector				m_chargedMomentumFromPVA{};
+	DoubleVector				m_expectedNeutralEnergy{};
+	DoubleVector				m_expectedNeutralEnergyFromVertexing{};
+	DoubleVector				m_expectedNeutralEnergyFromPVA{};
+	DoubleVector				m_expectedNeutralMomentum{};
+	DoubleVector				m_expectedNeutralMomentumFromVertexing{};
+	DoubleVector				m_expectedNeutralMomentumFromPVA{};
+	DoubleVector				m_expectedChargedEnergy{};
+	DoubleVector				m_expectedChargedEnergyFromVertexing{};
+	DoubleVector				m_expectedChargedEnergyFromPVA{};
+	DoubleVector				m_expectedChargedMomentum{};
+	DoubleVector				m_expectedChargedMomentumFromVertexing{};
+	DoubleVector				m_expectedChargedMomentumFromPVA{};
+
 
 	IntVector				m_SLDStatus{};
 	FloatVector				m_weightPFOtoMCP_Lepton{};

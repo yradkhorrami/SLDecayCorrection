@@ -432,6 +432,8 @@ void SLDCorrection::init()
 		m_pTTree1->Branch("flightDirectionErrorCosAlpha", &m_FlightDirectionErrorCosAlpha);
 		m_pTTree1->Branch("flightDirectionErrorSinAlpha", &m_FlightDirectionErrorSinAlpha);
 		m_pTTree1->Branch("flightDirectionErrorAlpha", &m_FlightDirectionErrorAlpha);
+		m_pTTree1->Branch("flightDirectionErrorDeltaTheta" , &m_FlightDirectionErrorDeltaTheta);
+		m_pTTree1->Branch("flightDirectionErrorDeltaPhi" , &m_FlightDirectionErrorDeltaPhi);
 		m_pTTree1->Branch("distRecoLeptonToDownStreamVertex", &m_distRecoLeptonToDownStreamVertex);
 		m_pTTree1->Branch("dsVertexResidualX", &m_dsVertexResidualX);
 		m_pTTree1->Branch("dsVertexResidualY", &m_dsVertexResidualY);
@@ -597,6 +599,30 @@ void SLDCorrection::init()
 		m_pTTree2->Branch("cheatedPVARecoChargedPz", &m_cheatedPVARecoChargedPz );
 		m_pTTree2->Branch("cheatedPVARecoChargedE", &m_cheatedPVARecoChargedE );
 		m_pTTree2->Branch("cheatedPVARecoChargedM", &m_cheatedPVARecoChargedM );
+		m_pTTree2->Branch("neutralEnergy", &m_neutralEnergy );
+		m_pTTree2->Branch("neutralEnergyFromVertexing", &m_neutralEnergyFromVertexing );
+		m_pTTree2->Branch("neutralEnergyFromPVA", &m_neutralEnergyFromPVA );
+		m_pTTree2->Branch("neutralMomentum", &m_neutralMomentum );
+		m_pTTree2->Branch("neutralMomentumFromVertexing", &m_neutralMomentumFromVertexing );
+		m_pTTree2->Branch("neutralMomentumFromPVA", &m_neutralMomentumFromPVA );
+		m_pTTree2->Branch("chargedEnergy", &m_chargedEnergy );
+		m_pTTree2->Branch("chargedEnergyFromVertexing", &m_chargedEnergyFromVertexing );
+		m_pTTree2->Branch("chargedEnergyFromPVA", &m_chargedEnergyFromPVA );
+		m_pTTree2->Branch("chargedMomentum", &m_chargedMomentum );
+		m_pTTree2->Branch("chargedMomentumFromVertexing", &m_chargedMomentumFromVertexing );
+		m_pTTree2->Branch("chargedMomentumFromPVA", &m_chargedMomentumFromPVA );
+		m_pTTree2->Branch("expectedNeutralEnergy", &m_expectedNeutralEnergy );
+		m_pTTree2->Branch("expectedNeutralEnergyFromVertexing", &m_expectedNeutralEnergyFromVertexing );
+		m_pTTree2->Branch("expectedNeutralEnergyFromPVA", &m_expectedNeutralEnergyFromPVA );
+		m_pTTree2->Branch("expectedNeutralMomentum", &m_expectedNeutralMomentum );
+		m_pTTree2->Branch("expectedNeutralMomentumFromVertexing", &m_expectedNeutralMomentumFromVertexing );
+		m_pTTree2->Branch("expectedNeutralMomentumFromPVA", &m_expectedNeutralMomentumFromPVA );
+		m_pTTree2->Branch("expectedChargedEnergy", &m_expectedChargedEnergy );
+		m_pTTree2->Branch("expectedChargedEnergyFromVertexing", &m_expectedChargedEnergyFromVertexing );
+		m_pTTree2->Branch("expectedChargedEnergyFromPVA", &m_expectedChargedEnergyFromPVA );
+		m_pTTree2->Branch("expectedChargedMomentum", &m_expectedChargedMomentum );
+		m_pTTree2->Branch("expectedChargedMomentumFromVertexing", &m_expectedChargedMomentumFromVertexing );
+		m_pTTree2->Branch("expectedChargedMomentumFromPVA", &m_expectedChargedMomentumFromPVA );
 		m_pTTree2->Branch("NuPxResidual", &m_NuPxResidual);
 		m_pTTree2->Branch("NuPyResidual", &m_NuPyResidual);
 		m_pTTree2->Branch("NuPzResidual", &m_NuPzResidual);
@@ -797,6 +823,8 @@ void SLDCorrection::Clear()
 	m_FlightDirectionErrorCosAlpha.clear();
 	m_FlightDirectionErrorSinAlpha.clear();
 	m_FlightDirectionErrorAlpha.clear();
+	m_FlightDirectionErrorDeltaTheta.clear();
+	m_FlightDirectionErrorDeltaPhi.clear();
 	m_dsVertexResidualX.clear();
 	m_dsVertexResidualY.clear();
 	m_dsVertexResidualZ.clear();
@@ -951,7 +979,30 @@ void SLDCorrection::Clear()
 	m_cheatedPVARecoChargedPz.clear();
 	m_cheatedPVARecoChargedE.clear();
 	m_cheatedPVARecoChargedM.clear();
-
+	m_neutralEnergy.clear();
+	m_neutralEnergyFromVertexing.clear();
+	m_neutralEnergyFromPVA.clear();
+	m_neutralMomentum.clear();
+	m_neutralMomentumFromVertexing.clear();
+	m_neutralMomentumFromPVA.clear();
+	m_chargedEnergy.clear();
+	m_chargedEnergyFromVertexing.clear();
+	m_chargedEnergyFromPVA.clear();
+	m_chargedMomentum.clear();
+	m_chargedMomentumFromVertexing.clear();
+	m_chargedMomentumFromPVA.clear();
+	m_expectedNeutralEnergy.clear();
+	m_expectedNeutralEnergyFromVertexing.clear();
+	m_expectedNeutralEnergyFromPVA.clear();
+	m_expectedNeutralMomentum.clear();
+	m_expectedNeutralMomentumFromVertexing.clear();
+	m_expectedNeutralMomentumFromPVA.clear();
+	m_expectedChargedEnergy.clear();
+	m_expectedChargedEnergyFromVertexing.clear();
+	m_expectedChargedEnergyFromPVA.clear();
+	m_expectedChargedMomentum.clear();
+	m_expectedChargedMomentumFromVertexing.clear();
+	m_expectedChargedMomentumFromPVA.clear();
 }
 
 void SLDCorrection::processRunHeader()
@@ -1003,6 +1054,10 @@ void SLDCorrection::processEvent( EVENT::LCEvent *pLCEvent )
 		pfoVector jetsOfSemiLeptonicDecays{};
 		mcpVector mcNeutrinos{};
 
+		int nBSLD = 0;
+		int nCSLD = 0;
+		int nTSLD = 0;
+
 		MCParticleCollection = pLCEvent->getCollection( m_mcParticleCollection );
 		int nMCP = MCParticleCollection->getNumberOfElements();
 		for ( int i_mcp = 0 ; i_mcp < nMCP ; ++i_mcp )
@@ -1031,6 +1086,9 @@ void SLDCorrection::processEvent( EVENT::LCEvent *pLCEvent )
 					isBHadronSLDecay = checkBHadronSLDecay( testLepton );
 					isCHadronSLDecay = checkCHadronSLDecay( testLepton );
 					isTauLeptonSLDecay = checkTauLeptonSLDecay( testLepton );
+					nBSLD += ( isBHadronSLDecay ? 1 : 0 );
+					nCSLD += ( isCHadronSLDecay ? 1 : 0 );
+					nTSLD += ( isTauLeptonSLDecay ? 1 : 0 );
 					if ( isBHadronSLDecay && !m_includeBSLD ) continue;
 					if ( isCHadronSLDecay && !m_includeCSLD ) continue;
 					if ( isTauLeptonSLDecay && !m_includeTSLD ) continue;
@@ -1088,6 +1146,10 @@ void SLDCorrection::processEvent( EVENT::LCEvent *pLCEvent )
 			m_pTTree1->Fill();
 			m_pTTree2->Fill();
 		}
+		semiLeptonicVertex->parameters().setValue( "nBHadronSLD_found" , ( int )nBSLD );
+		semiLeptonicVertex->parameters().setValue( "nCHadronSLD_found" , ( int )nCSLD );
+		semiLeptonicVertex->parameters().setValue( "nTauLeptonSLD_found" , ( int )nTSLD );
+		semiLeptonicVertex->parameters().setValue( "nTotalSLD_found" , ( int )nBSLD + ( int )nCSLD );
 		for ( unsigned int i_sld = 0 ; i_sld < semiLeptonicVertices.size() ; ++i_sld )
 		{
 			semiLeptonicVertex->addElement( semiLeptonicVertices[ i_sld ] );
@@ -1293,7 +1355,7 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 	pfoVector aloneChargedPFOsInJetFromSLD{};
 	pfoVector aloneChargedPFOsInJetNotFromSLD{};
 
-	pfoVector associatedParticle{};
+	pfoVector associatedParticles{};
 	pfoVector associatedNeutralParticle{};
 	pfoVector associatedChargedParticle{};
 
@@ -1382,7 +1444,15 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 	TLorentzVector recoNeutrinoFourMomentumNeg( 0.0 , 0.0 , 0.0 , 0.0 );
 	TLorentzVector recoNeutrinoFourMomentumClose( 0.0 , 0.0 , 0.0 , 0.0 );
 	TLorentzVector recoHadronFourMomentum( 0.0 , 0.0 , 0.0 , 0.0 );
+
 	std::vector< float > NeutrinoCovMat( 10 , 0.0 );
+	std::vector< float > NeutrinoCovMatPos( 10 , 0.0 );
+	std::vector< float > NeutrinoCovMatNeg( 10 , 0.0 );
+	std::vector< float > CovMatrixPVA( 10, 0.0 );
+	std::vector< float > CovMatrixFlightDirection( 6, 0.0 );
+	std::vector< float > CovMatrixDetPar( 10 , 0.0 );
+	std::vector< float > CovMatrixDetNor( 10 , 0.0 );
+	std::vector< float > CovMatrixDetector( 10 , 0.0 );
 
 	TLorentzVector leptonFourMomentum( 0.0 , 0.0 , 0.0 , 0.0 );
 	TLorentzVector chargedFourMomentum( 0.0 , 0.0 , 0.0 , 0.0 );
@@ -1399,7 +1469,28 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 	TVector3 flightDirection( 0.0 , 0.0 , 0.0 );
 	double parentHadronMass = parentHadron->getMass();// Cheated for the time being
 	float helicesDistance = 0.0;
+/*
+	float expectedNeutralEnergy = 0.0;
+	float expectedNeutralEnergyFromVertexing = 0.0;
+	float expectedNeutralEnergyFromPVA = 0.0;
+	float expectedChargedEnergy = 0.0;
+	float expectedChargedEnergyFromVertexing = 0.0;
+	float expectedChargedEnergyFromPVA = 0.0;
 
+	float assignedNeutralEnergy = 0.0;
+	float assignedChargedEnergy = 0.0;
+	float correctAssignedNeutralEnergy = 0.0;
+	float correctAssignedChargedEnergy = 0.0;
+	float wrongAssignedNeutralEnergy = 0.0;
+	float wrongAssignedChargedEnergy = 0.0;
+
+	float neutralEnergy = 0.0;
+	float chargedEnergy = 0.0;
+	float associatedNeutralEnergy = 0.0;
+	float associatedChargedEnergy = 0.0;
+	float missedNeutralEnergy = 0.0;
+	float missedChargedEnergy = 0.0;
+*/
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////									    ////
@@ -1572,6 +1663,8 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 	m_FlightDirectionErrorCosAlpha.push_back( trueFlightDirection.Dot( recoFlightDirection ) );
 	m_FlightDirectionErrorSinAlpha.push_back( std::sin( acos( trueFlightDirection.Dot( recoFlightDirection ) ) ) );
 	m_FlightDirectionErrorAlpha.push_back( acos( trueFlightDirection.Dot( recoFlightDirection ) ) * 180.0 / 3.14159265 );
+	m_FlightDirectionErrorDeltaTheta.push_back( recoFlightDirection.Theta() - trueFlightDirection.Theta() );
+	m_FlightDirectionErrorDeltaPhi.push_back( recoFlightDirection.Phi() - trueFlightDirection.Phi() );
 
 	m_SLDStatus.push_back( SLDStatus );
 	if ( m_fillRootTree ) h_SLDStatus->Fill( SLDStatus );
@@ -1681,7 +1774,7 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 
 	evaluatePFOsAngle( aloneChargedPFOsInJetFromSLD , aloneChargedPFOsInJetNotFromSLD , chargedPFOsInJetFromSLD , chargedPFOsInJetNotFromSLD , neutralPFOsInJetFromSLD , neutralPFOsInJetNotFromSLD , leptonDirection , jetAxis , recoFlightDirection , SLDStatus );
 
-//	associatedParticle.push_back( linkedRecoLepton );
+//	associatedParticles.push_back( linkedRecoLepton );
 //	double InvMassCut = daughterHadron->getMass();
 //	double InvMassCut = 2.1;
 	double InvMassCutCharged = 0.0;
@@ -1697,7 +1790,7 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 			if ( chargedDecayProduct != linkedRecoLepton )
 			{
 				associatedChargedParticle.push_back( chargedDecayProduct );
-				associatedParticle.push_back( chargedDecayProduct );
+				associatedParticles.push_back( chargedDecayProduct );
 //				if ( m_displayEvent ) drawReconstructedParticle( chargedDecayProduct , primaryVertex , 0x0075df , 0x000000 );
 			}
 		}
@@ -1711,7 +1804,7 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 		{
 			ReconstructedParticle* chargedDecayProduct = sldVertexRP->getParticles()[ i_par ];
 			associatedChargedParticle.push_back( chargedDecayProduct );
-			associatedParticle.push_back( chargedDecayProduct );
+			associatedParticles.push_back( chargedDecayProduct );
 //			if ( m_displayEvent ) drawReconstructedParticle( chargedDecayProduct , primaryVertex , 0x0075df , 0x2e8e04 );
 		}
 	}
@@ -1739,11 +1832,11 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 		}
 		else
 		{
-			for ( unsigned int i_par = 0 ; i_par < associatedParticle.size() ; ++i_par )
+			for ( unsigned int i_par = 0 ; i_par < associatedParticles.size() ; ++i_par )
 			{
-				if ( associatedParticle[ i_par ]->getTracks().size() != 0 && associatedParticle[ i_par ] != linkedRecoLepton )
+				if ( associatedParticles[ i_par ]->getTracks().size() != 0 && associatedParticles[ i_par ] != linkedRecoLepton )
 				{
-					decayProducts.push_back( associatedParticle[ i_par ] );
+					decayProducts.push_back( associatedParticles[ i_par ] );
 				}
 			}
 			assignVerticesToSemiLeptonicDecay( decayProducts , availableVerticesInJet , InvMassCutCharged , daughterHadronFlightDirection , startVertex );
@@ -1762,11 +1855,11 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 		}
 		else
 		{
-			for ( unsigned int i_par = 0 ; i_par < associatedParticle.size() ; ++i_par )
+			for ( unsigned int i_par = 0 ; i_par < associatedParticles.size() ; ++i_par )
 			{
-				if ( associatedParticle[ i_par ]->getTracks().size() != 0 && associatedParticle[ i_par ] != linkedRecoLepton )
+				if ( associatedParticles[ i_par ]->getTracks().size() != 0 && associatedParticles[ i_par ] != linkedRecoLepton )
 				{
-					decayProducts.push_back( associatedParticle[ i_par ] );
+					decayProducts.push_back( associatedParticles[ i_par ] );
 				}
 			}
 			assignVerticesToSemiLeptonicDecay( decayProducts , availableVerticesInJet , InvMassCutCharged , daughterHadronFlightDirection , startVertex );
@@ -1790,7 +1883,6 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 
 	m_visibleChargedInvMassCut.push_back( InvMassCutCharged );
 	m_visibleNeutralInvMassCut.push_back( InvMassCutNeutral );
-
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1890,9 +1982,256 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 //	recoNeutrinoFourMomentumPos = getNeutrinoFourMomentumStandardMethod( flightDirection , visibleFourMomentum , parentHadronMass , +1.0 );
 //	recoNeutrinoFourMomentumNeg = getNeutrinoFourMomentumStandardMethod( flightDirection , visibleFourMomentum , parentHadronMass , -1.0 );
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////									    ////
+////		Estimate Errors due to Particle to Vertex Association	    ////
+////									    ////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+	getCovMatPVA( decayProducts , associatedParticles , SLDStatus , CovMatrixPVA );
+	float sigmaTheta = 0.0;
+	float sigmaPhi = 0.0;
+	if ( m_cheatFlightDirection )
+	{
+		sigmaTheta = 0.0;
+		sigmaPhi = 0.0;
+	}
+	else
+	{
+		if ( SLDStatus == 4 )
+		{
+			sigmaTheta = 0.015;
+			sigmaPhi = 0.018;
+		}
+		else if ( SLDStatus == 5 )
+		{
+			sigmaTheta = 0.030;
+			sigmaPhi = 0.030;
+		}
+	}
+	getCovMatFlightDirection( flightDirection , sigmaTheta , sigmaPhi , CovMatrixFlightDirection );
+	getCovMatDetFlightDirection( decayProducts , flightDirection , CovMatrixFlightDirection , CovMatrixDetector , linkedRecoLepton , CovMatrixDetPar , CovMatrixDetNor );
+	getNeutrinoCovMat( recoNeutrinoFourMomentumPos , visibleFourMomentum , flightDirection , parentHadronMass , CovMatrixPVA , CovMatrixDetector , CovMatrixDetPar , CovMatrixDetNor , NeutrinoCovMatPos );
+	getNeutrinoCovMat( recoNeutrinoFourMomentumNeg , visibleFourMomentum , flightDirection , parentHadronMass , CovMatrixPVA , CovMatrixDetector , CovMatrixDetPar , CovMatrixDetNor , NeutrinoCovMatNeg );
+	streamlog_out(DEBUG9) << "	CovMatNeutrino(+) :	" << NeutrinoCovMatPos[ 0 ] << std::endl;
+	streamlog_out(DEBUG9) << "				" << NeutrinoCovMatPos[ 1 ] << "	,	" << NeutrinoCovMatPos[ 2 ] << std::endl;
+	streamlog_out(DEBUG9) << "				" << NeutrinoCovMatPos[ 3 ] << "	,	" << NeutrinoCovMatPos[ 4 ] << "	,	" << NeutrinoCovMatPos[ 5 ] << std::endl;
+	streamlog_out(DEBUG9) << "				" << NeutrinoCovMatPos[ 6 ] << "	,	" << NeutrinoCovMatPos[ 7 ] << "	,	" << NeutrinoCovMatPos[ 8 ] << "	,	" << NeutrinoCovMatPos[ 9 ] << std::endl;
+	streamlog_out(DEBUG9) << "" << std::endl;
+	streamlog_out(DEBUG9) << "	CovMatNeutrino(-) :	" << NeutrinoCovMatNeg[ 0 ] << std::endl;
+	streamlog_out(DEBUG9) << "				" << NeutrinoCovMatNeg[ 1 ] << "	,	" << NeutrinoCovMatNeg[ 2 ] << std::endl;
+	streamlog_out(DEBUG9) << "				" << NeutrinoCovMatNeg[ 3 ] << "	,	" << NeutrinoCovMatNeg[ 4 ] << "	,	" << NeutrinoCovMatNeg[ 5 ] << std::endl;
+	streamlog_out(DEBUG9) << "				" << NeutrinoCovMatNeg[ 6 ] << "	,	" << NeutrinoCovMatNeg[ 7 ] << "	,	" << NeutrinoCovMatNeg[ 8 ] << "	,	" << NeutrinoCovMatNeg[ 9 ] << std::endl;
+	streamlog_out(DEBUG9) << "" << std::endl;
+
+	TLorentzVector expectedNeutralFourMomentum( 0.0 , 0.0 , 0.0 , 0.0 );
+	TLorentzVector expectedNeutralFourMomentumFromVertexing( 0.0 , 0.0 , 0.0 , 0.0 );
+	TLorentzVector expectedNeutralFourMomentumFromPVA( 0.0 , 0.0 , 0.0 , 0.0 );
+	TLorentzVector expectedChargedFourMomentum( 0.0 , 0.0 , 0.0 , 0.0 );
+	TLorentzVector expectedChargedFourMomentumFromVertexing( 0.0 , 0.0 , 0.0 , 0.0 );
+	TLorentzVector expectedChargedFourMomentumFromPVA( 0.0 , 0.0 , 0.0 , 0.0 );
+	for ( unsigned int i_par = 0 ; i_par < recoNeutralDecayProducts.size() ; ++i_par )
+	{
+		bool perfectAssociation = false;
+		TLorentzVector particleFourMomentum( ( recoNeutralDecayProducts[ i_par ] )->getMomentum() , ( recoNeutralDecayProducts[ i_par ] )->getEnergy() );
+		expectedNeutralFourMomentum += particleFourMomentum;
+		for ( unsigned int i_p = 0 ; i_p < associatedParticles.size() ; ++i_p )
+		{
+			if ( recoNeutralDecayProducts[ i_par ] == associatedParticles[ i_p ] ) perfectAssociation = true;
+		}
+		if ( perfectAssociation )
+		{
+			expectedNeutralFourMomentumFromVertexing += particleFourMomentum;
+		}
+		else
+		{
+			expectedNeutralFourMomentumFromPVA += particleFourMomentum;
+		}
+	}
+	for ( unsigned int i_par = 0 ; i_par < recoChargedDecayProducts.size() ; ++i_par )
+	{
+		bool perfectAssociation = false;
+		TLorentzVector particleFourMomentum( ( recoChargedDecayProducts[ i_par ] )->getMomentum() , ( recoChargedDecayProducts[ i_par ] )->getEnergy() );
+		expectedChargedFourMomentum += particleFourMomentum;
+		for ( unsigned int i_p = 0 ; i_p < associatedParticles.size() ; ++i_p )
+		{
+			if ( recoChargedDecayProducts[ i_par ] == associatedParticles[ i_p ] ) perfectAssociation = true;
+		}
+		if ( perfectAssociation )
+		{
+			expectedChargedFourMomentumFromVertexing += particleFourMomentum;
+		}
+		else
+		{
+			expectedChargedFourMomentumFromPVA += particleFourMomentum;
+		}
+	}
+	m_expectedNeutralEnergy.push_back( expectedNeutralFourMomentum.E() );
+	m_expectedNeutralEnergyFromVertexing.push_back( expectedNeutralFourMomentumFromVertexing.E() );
+	m_expectedNeutralEnergyFromPVA.push_back( expectedNeutralFourMomentumFromPVA.E() );
+	m_expectedChargedEnergy.push_back( expectedChargedFourMomentum.E() );
+	m_expectedChargedEnergyFromVertexing.push_back( expectedChargedFourMomentumFromVertexing.E() );
+	m_expectedChargedEnergyFromPVA.push_back( expectedChargedFourMomentumFromPVA.E() );
+	m_expectedNeutralMomentum.push_back( ( expectedNeutralFourMomentum.Vect() ).Mag() );
+	m_expectedNeutralMomentumFromVertexing.push_back( ( expectedNeutralFourMomentumFromVertexing.Vect() ).Mag() );
+	m_expectedNeutralMomentumFromPVA.push_back( ( expectedNeutralFourMomentumFromPVA.Vect() ).Mag() );
+	m_expectedChargedMomentum.push_back( ( expectedChargedFourMomentum.Vect() ).Mag() );
+	m_expectedChargedMomentumFromVertexing.push_back( ( expectedChargedFourMomentumFromVertexing.Vect() ).Mag() );
+	m_expectedChargedMomentumFromPVA.push_back( ( expectedChargedFourMomentumFromPVA.Vect() ).Mag() );
+/*
+	TVector3 assignedNeutralP( 0.0 , 0.0 , 0.0 );
+	TVector3 correctAssignedNeutralP( 0.0 , 0.0 , 0.0 );
+	TVector3 wrongAssignedNeutralP( 0.0 , 0.0 , 0.0 );
+	TVector3 assignedChargedP( 0.0 , 0.0 , 0.0 );
+	TVector3 correctAssignedChargedP( 0.0 , 0.0 , 0.0 );
+	TVector3 wrongAssignedChargedP( 0.0 , 0.0 , 0.0 );
+	TVector3 neutralP( 0.0 , 0.0 , 0.0 );
+	TVector3 associatedNeutralP( 0.0 , 0.0 , 0.0 );
+	TVector3 missedNeutralP( 0.0 , 0.0 , 0.0 );
+	TVector3 chargedP( 0.0 , 0.0 , 0.0 );
+	TVector3 associatedChargedP( 0.0 , 0.0 , 0.0 );
+	TVector3 missedChargedP( 0.0 , 0.0 , 0.0 );
+	for ( unsigned int i_par = 0 ; i_par < decayProducts.size() ; ++i_par )
+	{
+		bool perfectAssociation = false;
+		TVector3 assignedP = TVector3( decayProducts[ i_par ]->getMomentum() );
+		if ( decayProducts[ i_par ]->getTracks().size() == 0 )
+		{
+			assignedNeutralEnergy += decayProducts[ i_par ]->getEnergy();
+			assignedNeutralP += assignedP;
+			for ( unsigned int i_p = 0 ; i_p < recoNeutralDecayProducts.size() ; ++i_p )
+			{
+				if ( decayProducts[ i_par ] == recoNeutralDecayProducts[ i_p ] ) perfectAssociation = true;
+			}
+			if ( perfectAssociation )
+			{
+				correctAssignedNeutralEnergy += decayProducts[ i_par ]->getEnergy();
+				correctAssignedNeutralP += assignedP;
+			}
+			else
+			{
+				wrongAssignedNeutralEnergy += decayProducts[ i_par ]->getEnergy();
+				wrongAssignedNeutralP += assignedP;
+			}
+		}
+		else
+		{
+			assignedChargedEnergy += decayProducts[ i_par ]->getEnergy();
+			assignedChargedP += assignedP;
+			for ( unsigned int i_p = 0 ; i_p < recoChargedDecayProducts.size() ; ++i_p )
+			{
+				if ( decayProducts[ i_par ] == recoChargedDecayProducts[ i_p ] ) perfectAssociation = true;
+			}
+			if ( perfectAssociation )
+			{
+				correctAssignedChargedEnergy += decayProducts[ i_par ]->getEnergy();
+				correctAssignedChargedP += assignedP;
+			}
+			else
+			{
+				wrongAssignedChargedEnergy += decayProducts[ i_par ]->getEnergy();
+				wrongAssignedChargedP += assignedP;
+			}
+		}
+	}
+	for ( unsigned int i_p = 0 ; i_p < recoNeutralDecayProducts.size() ; ++i_p )
+	{
+		bool particleAssigned = false;
+		TVector3 assignedP = TVector3( recoNeutralDecayProducts[ i_p ]->getMomentum() );
+		neutralEnergy += recoNeutralDecayProducts[ i_p ]->getEnergy();
+		neutralP += assignedP;
+		for ( unsigned int i_par = 0 ; i_par < decayProducts.size() ; ++i_par )
+		{
+			if ( decayProducts[ i_par ] == recoNeutralDecayProducts[ i_p ] ) particleAssigned = true;
+		}
+		if ( particleAssigned )
+		{
+			associatedNeutralEnergy += recoNeutralDecayProducts[ i_p ]->getEnergy();
+			associatedNeutralP += assignedP;
+		}
+		else
+		{
+			missedNeutralEnergy += recoNeutralDecayProducts[ i_p ]->getEnergy();
+			missedNeutralP += assignedP;
+		}
+	}
+	for ( unsigned int i_p = 0 ; i_p < recoChargedDecayProducts.size() ; ++i_p )
+	{
+		bool particleAssigned = false;
+		TVector3 assignedP = TVector3( recoChargedDecayProducts[ i_p ]->getMomentum() );
+		chargedEnergy += recoChargedDecayProducts[ i_p ]->getEnergy();
+		chargedP += assignedP;
+		for ( unsigned int i_par = 0 ; i_par < decayProducts.size() ; ++i_par )
+		{
+			if ( decayProducts[ i_par ] == recoChargedDecayProducts[ i_p ] ) particleAssigned = true;
+		}
+		if ( particleAssigned )
+		{
+			associatedChargedEnergy += recoChargedDecayProducts[ i_p ]->getEnergy();
+			associatedChargedP += assignedP;
+		}
+		else
+		{
+			missedChargedEnergy += recoChargedDecayProducts[ i_p ]->getEnergy();
+			missedChargedP += assignedP;
+		}
+	}
+
+	m_assignedNeutralEnergy.push_back( assignedNeutralEnergy );
+	m_assignedNeutralMomentum.push_back( assignedNeutralP.Mag() );
+	m_assignedChargedEnergy.push_back( assignedChargedEnergy );
+	m_assignedChargedMomentum.push_back( assignedChargedP.Mag() );
+	m_correctAssignedNeutralEnergy.push_back( correctAssignedNeutralEnergy );
+	m_correctAssignedNeutralMomentum.push_back( correctAssignedNeutralP.Mag() );
+	m_correctAssignedChargedEnergy.push_back( correctAssignedChargedEnergy );
+	m_correctAssignedChargedMomentum.push_back( correctAssignedChargedP.Mag() );
+	m_wrongAssignedNeutralEnergy.push_back( wrongAssignedNeutralEnergy );
+	m_wrongAssignedNeutralMomentum.push_back( wrongAssignedNeutralP.Mag() );
+	m_wrongAssignedChargedEnergy.push_back( correctAssignedChargedEnergy );
+	m_wrongAssignedChargedMomentum.push_back( wrongAssignedChargedP.Mag() );
+
+	m_neutralEnergy.push_back( neutralEnergy );
+	m_neutralMomentum.push_back( neutralP.Mag() );
+	m_chargedEnergy.push_back( chargedEnergy );
+	m_chargedMomentum.push_back( chargedP.Mag() );
+	m_associatedNeutralEnergy.push_back( associatedNeutralEnergy );
+	m_associatedNeutralMomentum.push_back( associatedNeutralP.Mag() );
+	m_associatedChargedEnergy.push_back( associatedChargedEnergy );
+	m_associatedChargedMomentum.push_back( associatedChargedP.Mag() );
+	m_missedNeutralEnergy.push_back( missedNeutralEnergy );
+	m_missedNeutralMomentum.push_back( missedNeutralP.Mag() );
+	m_missedChargedEnergy.push_back( missedChargedEnergy );
+	m_missedChargedMomentum.push_back( missedChargedP.Mag() );
+*/
 
 
-	recoNeutrinoFourMomentumClose = ( fabs( recoNeutrinoFourMomentumPos.E() - trueNeutrinoFourMomentum.E() ) < fabs( recoNeutrinoFourMomentumNeg.E() - trueNeutrinoFourMomentum.E() ) ? recoNeutrinoFourMomentumPos : recoNeutrinoFourMomentumNeg );
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////									    ////
+////		Checking results and preparing solutions in LCIO format	    ////
+////									    ////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+
+	if ( fabs( recoNeutrinoFourMomentumPos.E() - trueNeutrinoFourMomentum.E() ) < fabs( recoNeutrinoFourMomentumNeg.E() - trueNeutrinoFourMomentum.E() ) )
+	{
+		recoNeutrinoFourMomentumClose = recoNeutrinoFourMomentumPos;
+		for ( int i_Element = 0 ; i_Element < 10 ; ++i_Element )
+		{
+			NeutrinoCovMat[ i_Element ] = NeutrinoCovMatPos[ i_Element ];
+		}
+	}
+	else
+	{
+		recoNeutrinoFourMomentumClose = recoNeutrinoFourMomentumNeg;
+		for ( int i_Element = 0 ; i_Element < 10 ; ++i_Element )
+		{
+			NeutrinoCovMat[ i_Element ] = NeutrinoCovMatNeg[ i_Element ];
+		}
+	}
 	streamlog_out(DEBUG4) << "" << std::endl;
 	streamlog_out(DEBUG4) << "	Closest Neutrino 4-Momentum:			( " << recoNeutrinoFourMomentumClose.Px() << "	, " << recoNeutrinoFourMomentumClose.Py() << "	, " << recoNeutrinoFourMomentumClose.Pz() << "	, " << recoNeutrinoFourMomentumClose.E() << " )" << std::endl;
 	streamlog_out(DEBUG4) << "	True Neutrino 4-Momentum:			( " << trueNeutrinoFourMomentum.Px() << "	, " << trueNeutrinoFourMomentum.Py() << "	, " << trueNeutrinoFourMomentum.Pz() << "	, " << trueNeutrinoFourMomentum.E() << " )" << std::endl;
@@ -1938,7 +2277,7 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 	recoNeutrinoPos->setType( -1 * SLDLepton->getPDG() + SLDLepton->getCharge() );
 	recoNeutrinoPos->setMomentum( MomentumPos );
 	recoNeutrinoPos->setEnergy( recoNeutrinoFourMomentumPos.E() );
-	recoNeutrinoPos->setCovMatrix( NeutrinoCovMat );
+	recoNeutrinoPos->setCovMatrix( NeutrinoCovMatPos );
 	recoNeutrinoPos->setMass( 0.0 );
 	recoNeutrinoPos->setCharge( 0.0 );
 	recoNeutrinoPos->setReferencePoint( linkedRecoLepton->getReferencePoint() );
@@ -1961,7 +2300,7 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 	recoNeutrinoNeg->setType( -1 * SLDLepton->getPDG() + SLDLepton->getCharge() );
 	recoNeutrinoNeg->setMomentum( MomentumNeg );
 	recoNeutrinoNeg->setEnergy( recoNeutrinoFourMomentumNeg.E() );
-	recoNeutrinoNeg->setCovMatrix( NeutrinoCovMat );
+	recoNeutrinoNeg->setCovMatrix( NeutrinoCovMatNeg );
 	recoNeutrinoNeg->setMass( 0.0 );
 	recoNeutrinoNeg->setCharge( 0.0 );
 	recoNeutrinoNeg->setReferencePoint( linkedRecoLepton->getReferencePoint() );
@@ -2078,6 +2417,547 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 	neutrinos.push_back( recoNeutrinoNeg );
 }
 
+void SLDCorrection::getCovMatPVA(	std::vector<EVENT::ReconstructedParticle*> decayProducts ,
+						std::vector<EVENT::ReconstructedParticle*> associatedParticles ,
+						int SLDStatus , std::vector< float > &CovMatrixPVA )
+{
+	float sigmaE_NeutralPVA = 0.0;
+	float sigmaE_ChargedPVA = 0.0;
+	std::vector< float > CovMatrixChargedPVA( 10, 0.0 );
+	std::vector< float > CovMatrixNeutralPVA( 10, 0.0 );
+	TLorentzVector chargedTLV( 0.0 , 0.0 , 0.0 , 0.0 );
+	TLorentzVector chargedTLVFromVertexing( 0.0 , 0.0 , 0.0 , 0.0 );
+	TLorentzVector chargedTLVFromPVA( 0.0 , 0.0 , 0.0 , 0.0 );
+	TLorentzVector neutralTLV( 0.0 , 0.0 , 0.0 , 0.0 );
+	TLorentzVector neutralTLVFromVertexing( 0.0 , 0.0 , 0.0 , 0.0 );
+	TLorentzVector neutralTLVFromPVA( 0.0 , 0.0 , 0.0 , 0.0 );
+
+	float chargedEnergyFromPVA = 0.0;
+	float chargedMomentumFromPVA = 0.0;
+	float neutralEnergyFromPVA = 0.0;
+	float neutralMomentumFromPVA = 0.0;
+	TVector3 neutralPfromPVA = TVector3( 0.0 , 0.0 , 0.0 );
+	TVector3 neutralPfromVertexing = TVector3( 0.0 , 0.0 , 0.0 );
+	TVector3 chargedPfromPVA = TVector3( 0.0 , 0.0 , 0.0 );
+	TVector3 chargedPfromVertexing = TVector3( 0.0 , 0.0 , 0.0 );
+
+	for ( unsigned int i_par = 0 ; i_par < decayProducts.size() ; ++i_par )
+	{
+		bool perfectAssociation = false;
+		TLorentzVector particleTLV( decayProducts[ i_par ]->getMomentum() , decayProducts[ i_par ]->getEnergy() );
+		if ( decayProducts[ i_par ]->getTracks().size() == 0 )
+		{
+			neutralTLV += particleTLV;
+			for ( unsigned int i_p = 0 ; i_p < associatedParticles.size() ; ++i_p )
+			{
+				if ( decayProducts[ i_par ] == associatedParticles[ i_p ] ) perfectAssociation = true;
+			}
+			if ( perfectAssociation )
+			{
+				neutralTLVFromVertexing += particleTLV;
+			}
+			else
+			{
+				neutralTLVFromPVA += particleTLV;
+			}
+		}
+		else
+		{
+			chargedTLV += particleTLV;
+			for ( unsigned int i_p = 0 ; i_p < associatedParticles.size() ; ++i_p )
+			{
+				if ( decayProducts[ i_par ] == associatedParticles[ i_p ] ) perfectAssociation = true;
+			}
+			if ( perfectAssociation )
+			{
+				chargedTLVFromVertexing += particleTLV;
+			}
+			else
+			{
+				chargedTLVFromPVA += particleTLV;
+			}
+		}
+	}
+	m_neutralEnergy.push_back( neutralTLV.E() );
+	m_neutralEnergyFromVertexing.push_back( neutralTLVFromVertexing.E() );
+	m_neutralEnergyFromPVA.push_back( neutralTLVFromPVA.E() );
+	m_neutralMomentum.push_back( ( neutralTLV.Vect() ).Mag() );
+	m_neutralMomentumFromVertexing.push_back( ( neutralTLVFromVertexing.Vect() ).Mag() );
+	m_neutralMomentumFromPVA.push_back( ( neutralTLVFromPVA.Vect() ).Mag() );
+
+	m_chargedEnergy.push_back( chargedTLV.E() );
+	m_chargedEnergyFromVertexing.push_back( chargedTLVFromVertexing.E() );
+	m_chargedEnergyFromPVA.push_back( chargedTLVFromPVA.E() );
+	m_chargedMomentum.push_back( ( chargedTLV.Vect() ).Mag() );
+	m_chargedMomentumFromVertexing.push_back( ( chargedTLVFromVertexing.Vect() ).Mag() );
+	m_chargedMomentumFromPVA.push_back( ( chargedTLVFromPVA.Vect() ).Mag() );
+
+	float chargedTheta = chargedPfromPVA.Theta();
+	float chargedPhi = chargedPfromPVA.Phi();
+	float neutralTheta = neutralPfromPVA.Theta();
+	float neutralPhi = neutralPfromPVA.Phi();
+	if ( SLDStatus == 4 )
+	{
+		sigmaE_NeutralPVA = ( m_cheatPVAneutral ? 0.0 : 6.7 );
+		sigmaE_ChargedPVA = ( m_cheatPVAcharged ? 0.0 : 9.2 );
+	}
+	else if ( SLDStatus == 5 )
+	{
+		sigmaE_NeutralPVA = ( m_cheatPVAneutral ? 0.0 : 6.5 );
+		sigmaE_ChargedPVA = ( m_cheatPVAcharged ? 0.0 : 9.5 );
+	}
+	CovMatrixChargedPVA[ 0 ] = pow( sin( chargedTheta ) , 2 ) * pow( cos( chargedPhi ) , 2 );
+	CovMatrixChargedPVA[ 1 ] = pow( sin( chargedTheta ) , 2 ) * sin( chargedPhi ) * cos( chargedPhi );
+	CovMatrixChargedPVA[ 2 ] = pow( sin( chargedTheta ) , 2 ) * pow( sin( chargedPhi ) , 2 );
+	CovMatrixChargedPVA[ 3 ] = sin( chargedTheta ) * cos( chargedTheta ) * cos( chargedPhi );
+	CovMatrixChargedPVA[ 4 ] = sin( chargedTheta ) * cos( chargedTheta ) * sin( chargedPhi );
+	CovMatrixChargedPVA[ 5 ] = pow( cos( chargedTheta ) , 2 );
+	CovMatrixChargedPVA[ 6 ] = ( chargedMomentumFromPVA / chargedEnergyFromPVA ) * sin( chargedTheta ) * cos( chargedPhi );
+	CovMatrixChargedPVA[ 7 ] = ( chargedMomentumFromPVA / chargedEnergyFromPVA ) * sin( chargedTheta ) * sin( chargedPhi );
+	CovMatrixChargedPVA[ 8 ] = ( chargedMomentumFromPVA / chargedEnergyFromPVA ) * cos( chargedTheta );
+	CovMatrixChargedPVA[ 9 ] = pow( chargedMomentumFromPVA , 2 ) / pow( chargedEnergyFromPVA , 2 );
+	CovMatrixNeutralPVA[ 0 ] = pow( sin( neutralTheta ) , 2 ) * pow( cos( neutralPhi ) , 2 );
+	CovMatrixNeutralPVA[ 1 ] = pow( sin( neutralTheta ) , 2 ) * sin( neutralPhi ) * cos( neutralPhi );
+	CovMatrixNeutralPVA[ 2 ] = pow( sin( neutralTheta ) , 2 ) * pow( sin( neutralPhi ) , 2 );
+	CovMatrixNeutralPVA[ 3 ] = sin( neutralTheta ) * cos( neutralTheta ) * cos( neutralPhi );
+	CovMatrixNeutralPVA[ 4 ] = sin( neutralTheta ) * cos( neutralTheta ) * sin( neutralPhi );
+	CovMatrixNeutralPVA[ 5 ] = pow( cos( neutralTheta ) , 2 );
+	CovMatrixNeutralPVA[ 6 ] = ( neutralMomentumFromPVA / neutralEnergyFromPVA ) * sin( neutralTheta ) * cos( neutralPhi );
+	CovMatrixNeutralPVA[ 7 ] = ( neutralMomentumFromPVA / neutralEnergyFromPVA ) * sin( neutralTheta ) * sin( neutralPhi );
+	CovMatrixNeutralPVA[ 8 ] = ( neutralMomentumFromPVA / neutralEnergyFromPVA ) * cos( neutralTheta );
+	CovMatrixNeutralPVA[ 9 ] = pow( neutralMomentumFromPVA , 2 ) / pow( neutralEnergyFromPVA , 2 );
+	streamlog_out(DEBUG9) << "	sigmaE_NeutralPVA = " << sigmaE_NeutralPVA << std::endl;
+	streamlog_out(DEBUG9) << "	neutralMomentumFromPVA = " << neutralMomentumFromPVA << std::endl;
+	streamlog_out(DEBUG9) << "	neutralEnergyFromPVA = " << neutralEnergyFromPVA << std::endl;
+	streamlog_out(DEBUG9) << "	sigmaE_ChargedPVA = " << sigmaE_ChargedPVA << std::endl;
+	streamlog_out(DEBUG9) << "	chargedMomentumFromPVA = " << chargedMomentumFromPVA << std::endl;
+	streamlog_out(DEBUG9) << "	chargedEnergyFromPVA = " << chargedEnergyFromPVA << std::endl;
+	for ( int i_Element = 0 ; i_Element < 10 ; ++i_Element )
+	{
+		CovMatrixPVA.push_back( pow( neutralEnergyFromPVA / neutralMomentumFromPVA , 2 ) * sigmaE_NeutralPVA * CovMatrixNeutralPVA[ i_Element ] + pow( chargedEnergyFromPVA / chargedMomentumFromPVA , 2 ) * sigmaE_ChargedPVA * CovMatrixChargedPVA[ i_Element ] );
+	}
+	streamlog_out(DEBUG9) << "	CovMatPVA :	" << CovMatrixPVA[ 0 ] << std::endl;
+	streamlog_out(DEBUG9) << "			" << CovMatrixPVA[ 1 ] << "	,	" << CovMatrixPVA[ 2 ] << std::endl;
+	streamlog_out(DEBUG9) << "			" << CovMatrixPVA[ 3 ] << "	,	" << CovMatrixPVA[ 4 ] << "	,	" << CovMatrixPVA[ 5 ] << std::endl;
+	streamlog_out(DEBUG9) << "			" << CovMatrixPVA[ 6 ] << "	,	" << CovMatrixPVA[ 7 ] << "	,	" << CovMatrixPVA[ 8 ] << "	,	" << CovMatrixPVA[ 9 ] << std::endl;
+	streamlog_out(DEBUG9) << "" << std::endl;
+
+}
+
+void SLDCorrection::getCovMatFlightDirection(	TVector3 flightDirection , float sigmaTheta , float sigmaPhi , std::vector< float > &CovMatrixFlightDirection )
+{
+	//	Obtain covariance matrix on flight direction (ux,uy,uz) from the
+	//	flight direction errors (angular errors: sigmaTheta and sigmaPhi).
+	//
+	//	define the jacobian as the 2x3 matrix:
+	//
+	//
+	//
+	//			Dux/DTheta		Duy/DTheta		Duz/DTheta
+	//	 J =
+	//			Dux/DPhi		Duy/DPhi		Duz/DPhi
+	//
+	//
+	//
+	//			cosTheta.cosPhi		cosTheta.sinPhi		-sinPhi
+	//	 J =
+	//			-sinTheta.sinPhi	sinTheta.cosPhi		0
+	//
+	//
+	//
+	//	Order in the covariance matrix on helix parameters:
+	//
+	//			Theta.Theta		Theta.phi
+	//	Cov =
+	//			phi.Theta		phi.phi
+	//
+	//
+	//
+	CovMatrixFlightDirection.clear();
+	const int rows			= 2; // n rows jacobian
+	const int columns		= 3; // n columns jacobian
+	const int kspace_dim		= 3;
+
+	TMatrixD covMatrixFlightDir( kspace_dim , kspace_dim );
+	double jacobian_by_rows[rows*columns] =
+	{
+		cos( flightDirection.Theta() ) * cos( flightDirection.Phi() )		,	cos( flightDirection.Theta() ) * sin( flightDirection.Phi() )	,	-1.0 * sin( flightDirection.Phi() )	,
+		-1.0 * sin( flightDirection.Theta() ) * sin( flightDirection.Phi() )	,	sin( flightDirection.Theta() ) * cos( flightDirection.Phi() )	,	0.0
+	};
+	TMatrixD jacobian(rows,columns, jacobian_by_rows, "C");
+	streamlog_out(DEBUG9) << "	JacobianFlightDir :	" << jacobian( 0 , 0 ) << "	,	" << jacobian( 0 , 1 ) << "	,	" << jacobian( 0 , 2 ) << std::endl;
+	streamlog_out(DEBUG9) << "				" << jacobian( 1 , 0 ) << "	,	" << jacobian( 1 , 1 ) << "	,	" << jacobian( 1 , 2 ) << std::endl;
+	double angular_cov_matrix_by_rows[rows*rows] =
+	{
+		pow( sigmaTheta , 2 )	,	0.0			,
+		0.0			,	pow( sigmaPhi , 2 )
+	};
+	streamlog_out(DEBUG9) << "	angular_cov_matrix_by_rows :	" << angular_cov_matrix_by_rows[ 0 ] << "	,	" << angular_cov_matrix_by_rows[ 1 ] << std::endl;
+	streamlog_out(DEBUG9) << "					" << angular_cov_matrix_by_rows[ 2 ] << "	,	" << angular_cov_matrix_by_rows[ 3 ] << std::endl;
+	TMatrixD covMatrix_FD(rows,rows, angular_cov_matrix_by_rows, "C");
+	streamlog_out(DEBUG9) << "	covMatrix_FD :	" << covMatrix_FD( 0 , 0 ) << "	,	" << covMatrix_FD( 0 , 1 ) << std::endl;
+	streamlog_out(DEBUG9) << "			" << covMatrix_FD( 1 , 0 ) << "	,	" << covMatrix_FD( 1 , 1 ) << std::endl;
+	covMatrixFlightDir.Mult( TMatrixD( jacobian , TMatrixD::kTransposeMult , covMatrix_FD ) , jacobian );
+	CovMatrixFlightDirection.push_back( covMatrixFlightDir( 0 , 0 ) );
+	CovMatrixFlightDirection.push_back( covMatrixFlightDir( 1 , 0 ) );
+	CovMatrixFlightDirection.push_back( covMatrixFlightDir( 1 , 1 ) );
+	CovMatrixFlightDirection.push_back( covMatrixFlightDir( 2 , 0 ) );
+	CovMatrixFlightDirection.push_back( covMatrixFlightDir( 2 , 1 ) );
+	CovMatrixFlightDirection.push_back( covMatrixFlightDir( 2 , 2 ) );
+	streamlog_out(DEBUG9) << "	Theta		= " << flightDirection.Theta() << std::endl;
+	streamlog_out(DEBUG9) << "	Phi		= " << flightDirection.Phi() << std::endl;
+	streamlog_out(DEBUG9) << "	sigmaTheta	= " << sigmaTheta << std::endl;
+	streamlog_out(DEBUG9) << "	sigmaPhi	= " << sigmaPhi << std::endl;
+	streamlog_out(DEBUG9) << "	CovMatFlightDir :	" << CovMatrixFlightDirection[ 0 ] << std::endl;
+	streamlog_out(DEBUG9) << "				" << CovMatrixFlightDirection[ 1 ] << "	,	" << CovMatrixFlightDirection[ 2 ] << std::endl;
+	streamlog_out(DEBUG9) << "				" << CovMatrixFlightDirection[ 3 ] << "	,	" << CovMatrixFlightDirection[ 4 ] << "	,	" << CovMatrixFlightDirection[ 5 ] << std::endl;
+	streamlog_out(DEBUG9) << "" << std::endl;
+}
+
+void SLDCorrection::getCovMatDetFlightDirection(	std::vector<EVENT::ReconstructedParticle*> decayProducts ,
+							TVector3 flightDirection , std::vector< float > CovMatrixFlightDirection ,
+							std::vector< float > &CovMatrixDetector , EVENT::ReconstructedParticle* linkedRecoLepton ,
+							std::vector< float > &CovMatrixDetPar , std::vector< float > &CovMatrixDetNor )
+{
+	std::vector< float > initialCovMatrixDetector( 10 , 0.0 );
+	TLorentzVector visibleFourMomentum( 0.0 , 0.0 , 0.0 , 0.0 );
+	CovMatrixDetector.clear();
+	CovMatrixDetPar.clear();
+	CovMatrixDetNor.clear();
+	float takeCovMat = ( m_cheatLepton4momentum ? 0.0 : 1.0 );
+	for ( int i_Element = 0 ; i_Element < 10 ; ++i_Element )
+	{
+		initialCovMatrixDetector[ i_Element ] = takeCovMat * linkedRecoLepton->getCovMatrix()[ i_Element ];
+	}
+
+	for ( unsigned int i_par = 0 ; i_par < decayProducts.size() ; ++i_par )
+	{
+		if ( decayProducts[ i_par ]->getTracks().size() == 0 )
+		{
+			takeCovMat = ( m_cheatCharged4momentum ? 0.0 : 1.0 );
+		}
+		else
+		{
+			takeCovMat = ( m_cheatNeutral4momentum ? 0.0 : 1.0 );
+		}
+		visibleFourMomentum += TLorentzVector( decayProducts[ i_par ]->getMomentum() , decayProducts[ i_par ]->getEnergy() );
+		for ( int i_Element = 0 ; i_Element < 10 ; ++i_Element )
+		{
+			initialCovMatrixDetector[ i_Element ] += takeCovMat * decayProducts[ i_par ]->getCovMatrix()[ i_Element ];
+		}
+	}
+	for ( int i_Element = 0 ; i_Element < 10 ; ++i_Element )
+	{
+		CovMatrixDetector.push_back( initialCovMatrixDetector[ i_Element ] );
+	}
+	streamlog_out(DEBUG9) << "	CovMatDetector :	" << CovMatrixDetector[ 0 ] << std::endl;
+	streamlog_out(DEBUG9) << "				" << CovMatrixDetector[ 1 ] << "	,	" << CovMatrixDetector[ 2 ] << std::endl;
+	streamlog_out(DEBUG9) << "				" << CovMatrixDetector[ 3 ] << "	,	" << CovMatrixDetector[ 4 ] << "	,	" << CovMatrixDetector[ 5 ] << std::endl;
+	streamlog_out(DEBUG9) << "				" << CovMatrixDetector[ 6 ] << "	,	" << CovMatrixDetector[ 7 ] << "	,	" << CovMatrixDetector[ 8 ] << "	,	" << CovMatrixDetector[ 9 ] << std::endl;
+	streamlog_out(DEBUG9) << "" << std::endl;
+	getCovMatrixDetPar( flightDirection , visibleFourMomentum , CovMatrixFlightDirection , CovMatrixDetector , CovMatrixDetPar );
+	getCovMatrixDetNor( flightDirection , visibleFourMomentum , CovMatrixFlightDirection , CovMatrixDetector , CovMatrixDetNor );
+}
+
+void SLDCorrection::getCovMatrixDetPar(		TVector3 flightDirection , TLorentzVector visibleFourMomentum , std::vector< float > CovMatrixFlightDirection ,
+						std::vector< float > initialCovMatrixDetector , std::vector< float > &CovMatrixDetPar )
+{
+	//	Obtain covariance matrix of visible decay products parallel to flight direction from the
+	//	flight direction covariance matrix and detector resolution.
+	//
+	//	P_x_par = ( Px * ux + Py * uy + Pz * uz ) * ux
+	//
+	//	P_y_par = ( Px * ux + Py * uy + Pz * uz ) * uy
+	//
+	//	P_z_par = ( Px * ux + Py * uy + Pz * uz ) * uz
+	//
+	//	M_transverse^2 = E^2 - p_z^2	=> E_transverse^2 = 2 * E^2 - 2 * P_par^2 - M^2
+	//
+	//	E_par = E - sqrt( 2 * E^2 - 2 * P_par^2 - M^2 )
+	//
+	//	define the jacobian as the 7x4 matrix:
+	//
+	//
+	//
+	//			DPxpar/DPx		DPypar/DPx		DPzpar/DPx		DEpar/DPx
+	//
+	//			DPxpar/DPy		DPypar/DPy		DPzpar/DPy		DEpar/DPy
+	//
+	//			DPxpar/DPz		DPypar/DPz		DPzpar/DPz		DEpar/DPz
+	//
+	//	J = 		DPxpar/DE		DPypar/DE		DPzpar/DE		DEpar/DE
+	//
+	//			DPxpar/Dux		DPypar/Dux		DPzpar/Dux		DEpar/Dux
+	//
+	//			DPxpar/Duy		DPypar/Duy		DPzpar/Duy		DEpar/Duy
+	//
+	//			DPxpar/Duz		DPypar/Duz		DPzpar/Duz		DEpar/Duz
+	//
+	//
+	//
+	//	Order in the covariance matrix on detector resolution and flight direction error:
+	//
+	//			Px.Px		Px.Py		Px.Pz		Px.E		Px.ux		Px.uy		Px.uz
+	//
+	//			Py.Px		Py.Py		Py.Pz		Py.E		Py.ux		Py.uy		Py.uz
+	//
+	//			Pz.Px		Pz.Py		Pz.Pz		Pz.E		Pz.ux		Pz.uy		Pz.uz
+	//
+	//	Cov =		E.Px		E.Py		E.Pz		E.E		E.ux		E.uy		E.uz
+	//
+	//			ux.Px		ux.Py		ux.Pz		ux.E		ux.ux		ux.uy		ux.uz
+	//
+	//			uy.Px		uy.Py		uy.Pz		uy.E		uy.ux		uy.uy		uy.uz
+	//
+	//			uz.Px		uz.Py		uz.Pz		uz.E		uz.ux		uz.uy		uz.uz
+	//
+	//
+	//
+	//
+	CovMatrixDetPar.clear();
+	const int rows			= 7; // n rows jacobian
+	const int columns		= 4; // n columns jacobian
+	const int SpaceTime_dim		= 4;
+
+	TVector3 Momentum = visibleFourMomentum.Vect();
+	double Energy = visibleFourMomentum.E();
+	double mass = visibleFourMomentum.M();
+	double P_par = Momentum.Dot( flightDirection );
+	double P_nor = sqrt( Momentum.Mag2() - pow( P_par , 2 ) );
+	double Px = visibleFourMomentum.Px();
+	double Py = visibleFourMomentum.Py();
+	double Pz = visibleFourMomentum.Pz();
+
+	double uX = flightDirection.X();
+	double uY = flightDirection.Y();
+	double uZ = flightDirection.Z();
+	streamlog_out(DEBUG9) << "	E_vis 	:	" << Energy << std::endl;
+	streamlog_out(DEBUG9) << "	mass 	:	" << mass << std::endl;
+	streamlog_out(DEBUG9) << "	P_par 	:	" << P_par << std::endl;
+	streamlog_out(DEBUG9) << "	P_nor 	:	" << P_nor << std::endl;
+	streamlog_out(DEBUG9) << "	Px 	:	" << Px << std::endl;
+	streamlog_out(DEBUG9) << "	Py 	:	" << Py << std::endl;
+	streamlog_out(DEBUG9) << "	Pz 	:	" << Pz << std::endl;
+	streamlog_out(DEBUG9) << "	uX 	:	" << uX << std::endl;
+	streamlog_out(DEBUG9) << "	uY 	:	" << uY << std::endl;
+	streamlog_out(DEBUG9) << "	uZ 	:	" << uZ << std::endl;
+
+	TMatrixD covMatrixFlightDirDet( SpaceTime_dim , SpaceTime_dim );
+	double jacobian_by_rows[rows*columns] =
+	{
+		uX * uX			,	uX * uY			,	uX * uZ			,	2.0 * uX * P_par / sqrt( pow( mass , 2 ) + 2.0 * pow( P_nor , 2 ) )	,
+		uY * uX			,	uY * uY			,	uY * uZ			,	2.0 * uY * P_par / sqrt( pow( mass , 2 ) + 2.0 * pow( P_nor , 2 ) )	,
+		uZ * uX			,	uZ * uY			,	uZ * uZ			,	2.0 * uZ * P_par / sqrt( pow( mass , 2 ) + 2.0 * pow( P_nor , 2 ) )	,
+		0.0			,	0.0			,	0.0			,	1.0 - 2.0 * Energy / sqrt( pow( mass , 2 ) + 2.0 * pow( P_nor , 2 ) )	,
+		P_par + Px * uX		,	Px * uY			,	Px * uZ			,	2.0 * Px * P_par / sqrt( pow( mass , 2 ) + 2.0 * pow( P_nor , 2 ) )	,
+		Py * uX			,	P_par + Py * uY		,	Py * uZ			,	2.0 * Py * P_par / sqrt( pow( mass , 2 ) + 2.0 * pow( P_nor , 2 ) )	,
+		Pz * uX			,	Pz * uY			,	P_par + Pz * uZ		,	2.0 * Pz * P_par / sqrt( pow( mass , 2 ) + 2.0 * pow( P_nor , 2 ) )
+	};
+	TMatrixD jacobian(rows,columns, jacobian_by_rows, "C");
+	streamlog_out(DEBUG9) << "	Jacobian (FD)->(p,E) :	" << jacobian( 0 , 0 ) << "	,	" << jacobian( 0 , 1 ) << "	,	" << jacobian( 0 , 2 ) << "	,	" << jacobian( 0 , 3 ) << std::endl;
+	streamlog_out(DEBUG9) << "				" << jacobian( 1 , 0 ) << "	,	" << jacobian( 1 , 1 ) << "	,	" << jacobian( 1 , 2 ) << "	,	" << jacobian( 1 , 3 ) << std::endl;
+	streamlog_out(DEBUG9) << "				" << jacobian( 2 , 0 ) << "	,	" << jacobian( 2 , 1 ) << "	,	" << jacobian( 2 , 2 ) << "	,	" << jacobian( 2 , 3 ) << std::endl;
+	streamlog_out(DEBUG9) << "				" << jacobian( 3 , 0 ) << "	,	" << jacobian( 3 , 1 ) << "	,	" << jacobian( 3 , 2 ) << "	,	" << jacobian( 3 , 3 ) << std::endl;
+	streamlog_out(DEBUG9) << "				" << jacobian( 4 , 0 ) << "	,	" << jacobian( 4 , 1 ) << "	,	" << jacobian( 4 , 2 ) << "	,	" << jacobian( 4 , 3 ) << std::endl;
+	streamlog_out(DEBUG9) << "				" << jacobian( 5 , 0 ) << "	,	" << jacobian( 5 , 1 ) << "	,	" << jacobian( 5 , 2 ) << "	,	" << jacobian( 5 , 3 ) << std::endl;
+	streamlog_out(DEBUG9) << "				" << jacobian( 6 , 0 ) << "	,	" << jacobian( 6 , 1 ) << "	,	" << jacobian( 6 , 2 ) << "	,	" << jacobian( 6 , 3 ) << std::endl;
+	double input_cov_matrix_by_rows[rows*rows] =
+	{
+		initialCovMatrixDetector[ 0 ]	,	initialCovMatrixDetector[ 1 ]	,	initialCovMatrixDetector[ 3 ]	,	initialCovMatrixDetector[ 6 ]	,	0.0				,	0.0				,	0.0				,
+		initialCovMatrixDetector[ 1 ]	,	initialCovMatrixDetector[ 2 ]	,	initialCovMatrixDetector[ 4 ]	,	initialCovMatrixDetector[ 7 ]	,	0.0				,	0.0				,	0.0				,
+		initialCovMatrixDetector[ 3 ]	,	initialCovMatrixDetector[ 4 ]	,	initialCovMatrixDetector[ 5 ]	,	initialCovMatrixDetector[ 8 ]	,	0.0				,	0.0				,	0.0				,
+		initialCovMatrixDetector[ 6 ]	,	initialCovMatrixDetector[ 7 ]	,	initialCovMatrixDetector[ 8 ]	,	initialCovMatrixDetector[ 9 ]	,	0.0				,	0.0				,	0.0				,
+		0.0				,	0.0				,	0.0				,	0.0				,	CovMatrixFlightDirection[ 0 ]	,	CovMatrixFlightDirection[ 1 ]	,	CovMatrixFlightDirection[ 3 ]	,
+		0.0				,	0.0				,	0.0				,	0.0				,	CovMatrixFlightDirection[ 1 ]	,	CovMatrixFlightDirection[ 2 ]	,	CovMatrixFlightDirection[ 4 ]	,
+		0.0				,	0.0				,	0.0				,	0.0				,	CovMatrixFlightDirection[ 3 ]	,	CovMatrixFlightDirection[ 4 ]	,	CovMatrixFlightDirection[ 5 ]	,
+	};
+	TMatrixD covMatrix_DetFD(rows,rows, input_cov_matrix_by_rows, "C");
+	streamlog_out(DEBUG9) << "	CovMat (p,E,ux,uy,uz) :	" << covMatrix_DetFD( 0 , 0 ) << "	, " << covMatrix_DetFD( 0 , 1 ) << "	, " << covMatrix_DetFD( 0 , 2 ) << "	, " << covMatrix_DetFD( 0 , 3 ) << "	, " << covMatrix_DetFD( 0 , 4 ) << "	, " << covMatrix_DetFD( 0 , 5 ) << "	, " << covMatrix_DetFD( 0 , 6 ) << std::endl;
+	streamlog_out(DEBUG9) << "					" << covMatrix_DetFD( 1 , 0 ) << "	, " << covMatrix_DetFD( 1 , 1 ) << "	, " << covMatrix_DetFD( 1 , 2 ) << "	, " << covMatrix_DetFD( 1 , 3 ) << "	, " << covMatrix_DetFD( 1 , 4 ) << "	, " << covMatrix_DetFD( 1 , 5 ) << "	, " << covMatrix_DetFD( 1 , 6 ) << std::endl;
+	streamlog_out(DEBUG9) << "					" << covMatrix_DetFD( 2 , 0 ) << "	, " << covMatrix_DetFD( 2 , 1 ) << "	, " << covMatrix_DetFD( 2 , 2 ) << "	, " << covMatrix_DetFD( 2 , 3 ) << "	, " << covMatrix_DetFD( 2 , 4 ) << "	, " << covMatrix_DetFD( 2 , 5 ) << "	, " << covMatrix_DetFD( 2 , 6 ) << std::endl;
+	streamlog_out(DEBUG9) << "					" << covMatrix_DetFD( 3 , 0 ) << "	, " << covMatrix_DetFD( 3 , 1 ) << "	, " << covMatrix_DetFD( 3 , 2 ) << "	, " << covMatrix_DetFD( 3 , 3 ) << "	, " << covMatrix_DetFD( 3 , 4 ) << "	, " << covMatrix_DetFD( 3 , 5 ) << "	, " << covMatrix_DetFD( 3 , 6 ) << std::endl;
+	streamlog_out(DEBUG9) << "					" << covMatrix_DetFD( 4 , 0 ) << "	, " << covMatrix_DetFD( 4 , 1 ) << "	, " << covMatrix_DetFD( 4 , 2 ) << "	, " << covMatrix_DetFD( 4 , 3 ) << "	, " << covMatrix_DetFD( 4 , 4 ) << "	, " << covMatrix_DetFD( 4 , 5 ) << "	, " << covMatrix_DetFD( 4 , 6 ) << std::endl;
+	streamlog_out(DEBUG9) << "					" << covMatrix_DetFD( 5 , 0 ) << "	, " << covMatrix_DetFD( 5 , 1 ) << "	, " << covMatrix_DetFD( 5 , 2 ) << "	, " << covMatrix_DetFD( 5 , 3 ) << "	, " << covMatrix_DetFD( 5 , 4 ) << "	, " << covMatrix_DetFD( 5 , 5 ) << "	, " << covMatrix_DetFD( 5 , 6 ) << std::endl;
+	streamlog_out(DEBUG9) << "					" << covMatrix_DetFD( 6 , 0 ) << "	, " << covMatrix_DetFD( 6 , 1 ) << "	, " << covMatrix_DetFD( 6 , 2 ) << "	, " << covMatrix_DetFD( 6 , 3 ) << "	, " << covMatrix_DetFD( 6 , 4 ) << "	, " << covMatrix_DetFD( 6 , 5 ) << "	, " << covMatrix_DetFD( 6 , 6 ) << std::endl;
+	covMatrixFlightDirDet.Mult( TMatrixD( jacobian , TMatrixD::kTransposeMult , covMatrix_DetFD) , jacobian );
+	CovMatrixDetPar.push_back( covMatrixFlightDirDet( 0 , 0 ) );
+	CovMatrixDetPar.push_back( covMatrixFlightDirDet( 1 , 0 ) );
+	CovMatrixDetPar.push_back( covMatrixFlightDirDet( 1 , 1 ) );
+	CovMatrixDetPar.push_back( covMatrixFlightDirDet( 2 , 0 ) );
+	CovMatrixDetPar.push_back( covMatrixFlightDirDet( 2 , 1 ) );
+	CovMatrixDetPar.push_back( covMatrixFlightDirDet( 2 , 2 ) );
+	CovMatrixDetPar.push_back( covMatrixFlightDirDet( 3 , 0 ) );
+	CovMatrixDetPar.push_back( covMatrixFlightDirDet( 3 , 1 ) );
+	CovMatrixDetPar.push_back( covMatrixFlightDirDet( 3 , 2 ) );
+	CovMatrixDetPar.push_back( covMatrixFlightDirDet( 3 , 3 ) );
+	streamlog_out(DEBUG9) << "	CovMatDetFlightPar :	" << CovMatrixDetPar[ 0 ] << std::endl;
+	streamlog_out(DEBUG9) << "				" << CovMatrixDetPar[ 1 ] << "	,	" << CovMatrixDetPar[ 2 ] << std::endl;
+	streamlog_out(DEBUG9) << "				" << CovMatrixDetPar[ 3 ] << "	,	" << CovMatrixDetPar[ 4 ] << "	,	" << CovMatrixDetPar[ 5 ] << std::endl;
+	streamlog_out(DEBUG9) << "				" << CovMatrixDetPar[ 6 ] << "	,	" << CovMatrixDetPar[ 7 ] << "	,	" << CovMatrixDetPar[ 8 ] << "	,	" << CovMatrixDetPar[ 9 ] << std::endl;
+	streamlog_out(DEBUG9) << "" << std::endl;
+}
+
+void SLDCorrection::getCovMatrixDetNor(		TVector3 flightDirection , TLorentzVector visibleFourMomentum , std::vector< float > CovMatrixFlightDirection ,
+						std::vector< float > initialCovMatrixDetector , std::vector< float > &CovMatrixDetNor )
+{
+	//	Obtain covariance matrix of visible decay products parallel to flight direction from the
+	//	flight direction covariance matrix and detector resolution.
+	//
+	//	P_x_nor = Px - ( Px * ux + Py * uy + Pz * uz ) * ux
+	//
+	//	P_y_nor = Py - ( Px * ux + Py * uy + Pz * uz ) * uy
+	//
+	//	P_z_nor = Pz - ( Px * ux + Py * uy + Pz * uz ) * uz
+	//
+	//	M_transverse^2 = E^2 - p_z^2	=> E_transverse^2 = 2 * E^2 - 2 * P_par^2 - M^2
+	//
+	//	define the jacobian as the 7x4 matrix:
+	//
+	//
+	//
+	//			DPxnor/DPx		DPynor/DPx		DPznor/DPx		DEnor/DPx
+	//
+	//			DPxnor/DPy		DPynor/DPy		DPznor/DPy		DEnor/DPy
+	//
+	//			DPxnor/DPz		DPynor/DPz		DPznor/DPz		DEnor/DPz
+	//
+	//	J = 		DPxnor/DE		DPynor/DE		DPznor/DE		DEnor/DE
+	//
+	//			DPxnor/Dux		DPynor/Dux		DPznor/Dux		DEnor/Dux
+	//
+	//			DPxnor/Duy		DPynor/Duy		DPznor/Duy		DEnor/Duy
+	//
+	//			DPxnor/Duz		DPynor/Duz		DPznor/Duz		DEnor/Duz
+	//
+	//
+	//
+	//	Order in the covariance matrix on detector resolution and flight direction error:
+	//
+	//			Px.Px		Px.Py		Px.Pz		Px.E		Px.ux		Px.uy		Px.uz
+	//
+	//			Py.Px		Py.Py		Py.Pz		Py.E		Py.ux		Py.uy		Py.uz
+	//
+	//			Pz.Px		Pz.Py		Pz.Pz		Pz.E		Pz.ux		Pz.uy		Pz.uz
+	//
+	//	Cov =		E.Px		E.Py		E.Pz		E.E		E.ux		E.uy		E.uz
+	//
+	//			ux.Px		ux.Py		ux.Pz		ux.E		ux.ux		ux.uy		ux.uz
+	//
+	//			uy.Px		uy.Py		uy.Pz		uy.E		uy.ux		uy.uy		uy.uz
+	//
+	//			uz.Px		uz.Py		uz.Pz		uz.E		uz.ux		uz.uy		uz.uz
+	//
+	//
+	//
+	//
+	CovMatrixDetNor.clear();
+	const int rows			= 7; // n rows jacobian
+	const int columns		= 4; // n columns jacobian
+	const int SpaceTime_dim		= 4;
+
+	TVector3 Momentum = visibleFourMomentum.Vect();
+	double Energy = visibleFourMomentum.E();
+	double mass = visibleFourMomentum.M();
+	double P_par = Momentum.Dot( flightDirection );
+	double P_nor = sqrt( Momentum.Mag2() - pow( P_par , 2 ) );
+	double Px = visibleFourMomentum.Px();
+	double Py = visibleFourMomentum.Py();
+	double Pz = visibleFourMomentum.Pz();
+
+	double uX = flightDirection.X();
+	double uY = flightDirection.Y();
+	double uZ = flightDirection.Z();
+
+	TMatrixD covMatrixFlightDirDet( SpaceTime_dim , SpaceTime_dim );
+	double jacobian_by_rows[rows*columns] =
+	{
+		1.0 - uX * uX		,	-1.0 * uX * uY		,	-1.0 * uX * uZ		,	-2.0 * uX * P_par / sqrt( pow( mass , 2 ) + 2.0 * pow( P_nor , 2 ) )	,
+		-1.0 * uY * uX		,	1.0 - uY * uY		,	-1.0 * uY * uZ		,	-2.0 * uY * P_par / sqrt( pow( mass , 2 ) + 2.0 * pow( P_nor , 2 ) )	,
+		-1.0 * uZ * uX		,	-1.0 * uZ * uY		,	1.0 - uZ * uZ		,	-2.0 * uZ * P_par / sqrt( pow( mass , 2 ) + 2.0 * pow( P_nor , 2 ) )	,
+		0.0			,	0.0			,	0.0			,	2.0 * Energy / sqrt( pow( mass , 2 ) + 2.0 * pow( P_nor , 2 ) )	,
+		-1.0 * P_par - Px * uX	,	-1.0 * Px * uY		,	-1.0 * Px * uZ		,	-2.0 * Px * P_par / sqrt( pow( mass , 2 ) + 2.0 * pow( P_nor , 2 ) )	,
+		-1.0 * Py * uX		,	-1.0 * P_par - Py * uY	,	-1.0 * Py * uZ		,	-2.0 * Py * P_par / sqrt( pow( mass , 2 ) + 2.0 * pow( P_nor , 2 ) )	,
+		-1.0 * Pz * uX		,	-1.0 * Pz * uY		,	-1.0 * P_par - Pz * uZ		,	-2.0 * Pz * P_par / sqrt( pow( mass , 2 ) + 2.0 * pow( P_nor , 2 ) )
+	};
+	TMatrixD jacobian(rows,columns, jacobian_by_rows, "C");
+	double input_cov_matrix_by_rows[rows*rows] =
+	{
+		initialCovMatrixDetector[ 0 ]	,	initialCovMatrixDetector[ 1 ]	,	initialCovMatrixDetector[ 3 ]	,	initialCovMatrixDetector[ 6 ]	,	0.0				,	0.0				,	0.0				,
+		initialCovMatrixDetector[ 1 ]	,	initialCovMatrixDetector[ 2 ]	,	initialCovMatrixDetector[ 4 ]	,	initialCovMatrixDetector[ 7 ]	,	0.0				,	0.0				,	0.0				,
+		initialCovMatrixDetector[ 3 ]	,	initialCovMatrixDetector[ 4 ]	,	initialCovMatrixDetector[ 5 ]	,	initialCovMatrixDetector[ 8 ]	,	0.0				,	0.0				,	0.0				,
+		initialCovMatrixDetector[ 6 ]	,	initialCovMatrixDetector[ 7 ]	,	initialCovMatrixDetector[ 8 ]	,	initialCovMatrixDetector[ 9 ]	,	0.0				,	0.0				,	0.0				,
+		0.0				,	0.0				,	0.0				,	0.0				,	CovMatrixFlightDirection[ 0 ]	,	CovMatrixFlightDirection[ 1 ]	,	CovMatrixFlightDirection[ 3 ]	,
+		0.0				,	0.0				,	0.0				,	0.0				,	CovMatrixFlightDirection[ 1 ]	,	CovMatrixFlightDirection[ 2 ]	,	CovMatrixFlightDirection[ 4 ]	,
+		0.0				,	0.0				,	0.0				,	0.0				,	CovMatrixFlightDirection[ 3 ]	,	CovMatrixFlightDirection[ 4 ]	,	CovMatrixFlightDirection[ 5 ]	,
+	};
+	TMatrixD covMatrix_DetFD(rows,rows, input_cov_matrix_by_rows, "C");
+	covMatrixFlightDirDet.Mult( TMatrixD( jacobian , TMatrixD::kTransposeMult , covMatrix_DetFD) , jacobian );
+	CovMatrixDetNor.push_back( covMatrixFlightDirDet( 0 , 0 ) );
+	CovMatrixDetNor.push_back( covMatrixFlightDirDet( 1 , 0 ) );
+	CovMatrixDetNor.push_back( covMatrixFlightDirDet( 1 , 1 ) );
+	CovMatrixDetNor.push_back( covMatrixFlightDirDet( 2 , 0 ) );
+	CovMatrixDetNor.push_back( covMatrixFlightDirDet( 2 , 1 ) );
+	CovMatrixDetNor.push_back( covMatrixFlightDirDet( 2 , 2 ) );
+	CovMatrixDetNor.push_back( covMatrixFlightDirDet( 3 , 0 ) );
+	CovMatrixDetNor.push_back( covMatrixFlightDirDet( 3 , 1 ) );
+	CovMatrixDetNor.push_back( covMatrixFlightDirDet( 3 , 2 ) );
+	CovMatrixDetNor.push_back( covMatrixFlightDirDet( 3 , 3 ) );
+	streamlog_out(DEBUG9) << "	CovMatDetFlightNor :	" << CovMatrixDetNor[ 0 ] << std::endl;
+	streamlog_out(DEBUG9) << "				" << CovMatrixDetNor[ 1 ] << "	,	" << CovMatrixDetNor[ 2 ] << std::endl;
+	streamlog_out(DEBUG9) << "				" << CovMatrixDetNor[ 3 ] << "	,	" << CovMatrixDetNor[ 4 ] << "	,	" << CovMatrixDetNor[ 5 ] << std::endl;
+	streamlog_out(DEBUG9) << "				" << CovMatrixDetNor[ 6 ] << "	,	" << CovMatrixDetNor[ 7 ] << "	,	" << CovMatrixDetNor[ 8 ] << "	,	" << CovMatrixDetNor[ 9 ] << std::endl;
+	streamlog_out(DEBUG9) << "" << std::endl;
+}
+
+void SLDCorrection::getNeutrinoCovMat(		TLorentzVector recoNeutrinoFourMomentum , TLorentzVector visibleFourMomentum , TVector3 flightDirection ,
+						double parentHadronMass , std::vector< float > CovMatrixPVA , std::vector< float > CovMatrixDetector ,
+						std::vector< float > CovMatrixDetPar , std::vector< float > CovMatrixDetNor , std::vector< float > &NeutrinoCovMatrix )
+{
+	NeutrinoCovMatrix.clear();
+	double E_nu = recoNeutrinoFourMomentum.E();
+	double P_nu_par = ( recoNeutrinoFourMomentum.Vect() ).Dot( flightDirection );
+	double E_vis = visibleFourMomentum.E();
+	double P_vis_par = ( visibleFourMomentum.Vect() ).Dot( flightDirection );
+	double P_vis_nor = sqrt( ( visibleFourMomentum.Vect() ).Mag2() - pow( P_vis_par , 2 ) );
+	double M_vis = visibleFourMomentum.M();
+	streamlog_out(DEBUG9) << "	E_nu =		" << E_nu << std::endl;
+	streamlog_out(DEBUG9) << "	P_nu_par =	" << P_nu_par << std::endl;
+	streamlog_out(DEBUG9) << "	E_vis =		" << E_vis << std::endl;
+	streamlog_out(DEBUG9) << "	P_vis_par =	" << P_vis_par << std::endl;
+	streamlog_out(DEBUG9) << "	P_vis_nor =	" << P_vis_nor << std::endl;
+	streamlog_out(DEBUG9) << "	M_B =		" << parentHadronMass << std::endl;
+	double Coefficient = E_nu / ( E_nu * P_vis_par - E_vis * P_nu_par );
+	double coefficient_Evis = Coefficient * ( E_nu + E_vis );
+	double coefficient_PvisPar = Coefficient * ( P_nu_par + P_vis_par );
+	double coefficient_PvisNor = Coefficient * P_vis_nor * ( 1.0 + E_vis / E_nu );
+	double coefficient_MB = Coefficient * parentHadronMass;
+	float power = 1.0;
+
+	NeutrinoCovMatrix.push_back( pow( fabs( coefficient_PvisPar ) , power / 2.0 ) * CovMatrixDetPar[ 0 ] + pow( fabs( coefficient_PvisNor ) , power / 2.0 ) * CovMatrixDetNor[ 0 ] );
+	NeutrinoCovMatrix.push_back( pow( fabs( coefficient_PvisPar ) , power / 2.0 ) * CovMatrixDetPar[ 1 ] + pow( fabs( coefficient_PvisNor ) , power / 2.0 ) * CovMatrixDetNor[ 1 ] );
+	NeutrinoCovMatrix.push_back( pow( fabs( coefficient_PvisPar ) , power / 2.0 ) * CovMatrixDetPar[ 2 ] + pow( fabs( coefficient_PvisNor ) , power / 2.0 ) * CovMatrixDetNor[ 2 ] );
+	NeutrinoCovMatrix.push_back( pow( fabs( coefficient_PvisPar ) , power / 2.0 ) * CovMatrixDetPar[ 3 ] + pow( fabs( coefficient_PvisNor ) , power / 2.0 ) * CovMatrixDetNor[ 3 ] );
+	NeutrinoCovMatrix.push_back( pow( fabs( coefficient_PvisPar ) , power / 2.0 ) * CovMatrixDetPar[ 4 ] + pow( fabs( coefficient_PvisNor ) , power / 2.0 ) * CovMatrixDetNor[ 4 ] );
+	NeutrinoCovMatrix.push_back( pow( fabs( coefficient_PvisPar ) , power / 2.0 ) * CovMatrixDetPar[ 5 ] + pow( fabs( coefficient_PvisNor ) , power / 2.0 ) * CovMatrixDetNor[ 5 ] );
+	NeutrinoCovMatrix.push_back( pow( fabs( coefficient_PvisPar ) , power / 2.0 ) * CovMatrixDetPar[ 6 ] + pow( fabs( coefficient_PvisNor ) , power / 2.0 ) * CovMatrixDetNor[ 6 ] + pow( fabs( coefficient_Evis ) , power / 2.0 ) * ( CovMatrixDetector[ 6 ] + CovMatrixPVA[ 6 ] ) );
+	NeutrinoCovMatrix.push_back( pow( fabs( coefficient_PvisPar ) , power / 2.0 ) * CovMatrixDetPar[ 7 ] + pow( fabs( coefficient_PvisNor ) , power / 2.0 ) * CovMatrixDetNor[ 7 ] + pow( fabs( coefficient_Evis ) , power / 2.0 ) * ( CovMatrixDetector[ 7 ] + CovMatrixPVA[ 7 ] ) );
+	NeutrinoCovMatrix.push_back( pow( fabs( coefficient_PvisPar ) , power / 2.0 ) * CovMatrixDetPar[ 8 ] + pow( fabs( coefficient_PvisNor ) , power / 2.0 ) * CovMatrixDetNor[ 8 ] + pow( fabs( coefficient_Evis ) , power / 2.0 ) * ( CovMatrixDetector[ 8 ] + CovMatrixPVA[ 8 ] ) );
+	NeutrinoCovMatrix.push_back( pow( fabs( coefficient_Evis ) , power / 1.0 ) * ( CovMatrixDetector[ 9 ] + CovMatrixPVA[ 9 ] ) );
+
+/*
+	NeutrinoCovMatrix.push_back( pow( E_nu / ( E_vis * P_nu_par - E_nu * P_vis_par ) , 2 ) * ( pow( M_vis , 2 ) * CovMatrixPVA[ 0 ] + pow( P_vis_nor * ( 2 + E_vis / E_nu ) , 2 ) * CovMatrixDetNor[ 0 ] + pow( P_nu_par , 2 ) * CovMatrixDetPar[ 0 ] ) );
+	NeutrinoCovMatrix.push_back( pow( E_nu / ( E_vis * P_nu_par - E_nu * P_vis_par ) , 2 ) * ( pow( M_vis , 2 ) * CovMatrixPVA[ 1 ] + pow( P_vis_nor * ( 2 + E_vis / E_nu ) , 2 ) * CovMatrixDetNor[ 1 ] + pow( P_nu_par , 2 ) * CovMatrixDetPar[ 1 ] ) );
+	NeutrinoCovMatrix.push_back( pow( E_nu / ( E_vis * P_nu_par - E_nu * P_vis_par ) , 2 ) * ( pow( M_vis , 2 ) * CovMatrixPVA[ 2 ] + pow( P_vis_nor * ( 2 + E_vis / E_nu ) , 2 ) * CovMatrixDetNor[ 2 ] + pow( P_nu_par , 2 ) * CovMatrixDetPar[ 2 ] ) );
+	NeutrinoCovMatrix.push_back( pow( E_nu / ( E_vis * P_nu_par - E_nu * P_vis_par ) , 2 ) * ( pow( M_vis , 2 ) * CovMatrixPVA[ 3 ] + pow( P_vis_nor * ( 2 + E_vis / E_nu ) , 2 ) * CovMatrixDetNor[ 3 ] + pow( P_nu_par , 2 ) * CovMatrixDetPar[ 3 ] ) );
+	NeutrinoCovMatrix.push_back( pow( E_nu / ( E_vis * P_nu_par - E_nu * P_vis_par ) , 2 ) * ( pow( M_vis , 2 ) * CovMatrixPVA[ 4 ] + pow( P_vis_nor * ( 2 + E_vis / E_nu ) , 2 ) * CovMatrixDetNor[ 4 ] + pow( P_nu_par , 2 ) * CovMatrixDetPar[ 4 ] ) );
+	NeutrinoCovMatrix.push_back( pow( E_nu / ( E_vis * P_nu_par - E_nu * P_vis_par ) , 2 ) * ( pow( M_vis , 2 ) * CovMatrixPVA[ 5 ] + pow( P_vis_nor * ( 2 + E_vis / E_nu ) , 2 ) * CovMatrixDetNor[ 5 ] + pow( P_nu_par , 2 ) * CovMatrixDetPar[ 5 ] ) );
+	NeutrinoCovMatrix.push_back( pow( E_nu / ( E_vis * P_nu_par - E_nu * P_vis_par ) , 2 ) * ( pow( M_vis , 2 ) * CovMatrixPVA[ 6 ] + E_nu * CovMatrixDetector[ 6 ] ) );
+	NeutrinoCovMatrix.push_back( pow( E_nu / ( E_vis * P_nu_par - E_nu * P_vis_par ) , 2 ) * ( pow( M_vis , 2 ) * CovMatrixPVA[ 7 ] + E_nu * CovMatrixDetector[ 7 ] ) );
+	NeutrinoCovMatrix.push_back( pow( E_nu / ( E_vis * P_nu_par - E_nu * P_vis_par ) , 2 ) * ( pow( M_vis , 2 ) * CovMatrixPVA[ 8 ] + E_nu * CovMatrixDetector[ 8 ] ) );
+	NeutrinoCovMatrix.push_back( pow( E_nu / ( E_vis * P_nu_par - E_nu * P_vis_par ) , 2 ) * ( pow( M_vis , 2 ) * CovMatrixPVA[ 9 ] + pow( E_nu , 2 ) * CovMatrixDetector[ 9 ] ) );
+*/
+}
+
 void SLDCorrection::showTrueParameters( MCParticle *SLDLepton )
 {
 	TLorentzVector true4mom( 0.0 , 0.0 , 0.0 , 0.0 );
@@ -2148,18 +3028,33 @@ TLorentzVector SLDCorrection::getNeutrinoFourMomentum( TVector3 flightDirection 
 	streamlog_out(DEBUG4) << "		Visible Energy (prime):								" << visible_E_prime << std::endl;
 
 	TVector3 visible_p_par_prime	= solutionSign * sqrt( pow( ( pow( ParentHadronMass , 2 ) - pow( visible_mass , 2 ) ) / ( 2 * ParentHadronMass ) , 2 ) - visible_p_nor.Mag2() ) * flightDirection;
-	m_P_vis_par_prime.push_back( visible_p_par_prime.Mag() );
 	streamlog_out(DEBUG4) << "		Visible Momentum (par-prime):		( " << visible_p_par_prime.Px() << "	, " << visible_p_par_prime.Py() << "	, " << visible_p_par_prime.Pz() << "	)" << std::endl;
 	if ( pow( ( pow( ParentHadronMass , 2 ) - pow( visible_mass , 2 ) ) / ( 2 * ParentHadronMass ) , 2 ) < visible_p_nor.Mag2() )
 	{
 		visible_p_par_prime	= solutionSign * std::numeric_limits<double>::min() * flightDirection;
 	}
+	m_P_vis_par_prime.push_back( visible_p_par_prime.Mag() );
 	streamlog_out(DEBUG4) << "		Visible Momentum (par-prime):		( " << visible_p_par_prime.Px() << "	, " << visible_p_par_prime.Py() << "	, " << visible_p_par_prime.Pz() << "	)" << std::endl;
 
 	double parent_hadron_E		= ( ( visibleFourMomentum.E() * ( pow( ParentHadronMass , 2 ) + pow( visible_mass , 2 ) ) / ( 2 * ParentHadronMass ) ) - visible_p_par.Dot( visible_p_par_prime ) ) * ParentHadronMass / ( pow( visible_mass , 2 ) + visible_p_nor.Mag2() );
 	streamlog_out(DEBUG4) << "		Parent Hadron Energy =									" << parent_hadron_E << std::endl;
 	TVector3 parent_hadron_p	= sqrt( pow( parent_hadron_E , 2 ) - pow( ParentHadronMass , 2 ) ) * flightDirection;
 	streamlog_out(DEBUG4) << "		Parent Hadron Momentum:			( " << parent_hadron_p.Px() << "	, " << parent_hadron_p.Py() << "	, " << parent_hadron_p.Pz() << "	, " << parent_hadron_E << " )" << std::endl;
+
+	double sigma_E_vis = 0.0;
+	double sigma_E_vis_prime = 0.0;
+	double sigma_p_vis_par = 0.0;
+	double sigma_p_vis_par_prime = 0.0;
+	double sigma_p_vis_nor = 0.0;
+
+	double sigma_parent_hadron_E2	=	pow( ParentHadronMass , 2 ) * (
+						pow( visible_E_prime / ( pow( visible_mass , 2 ) + pow( visible_p_nor.Mag() , 2 ) ) , 2 ) * pow( sigma_E_vis , 2 ) +
+						pow( visible_E / ( pow( visible_mass , 2 ) + pow( visible_p_nor.Mag() , 2 ) ) , 2 ) * pow( sigma_E_vis_prime , 2 ) +
+						pow( visible_p_par_prime.Mag() / ( pow( visible_mass , 2 ) + pow( visible_p_nor.Mag() , 2 ) ) , 2 ) * pow( sigma_p_vis_par , 2 ) +
+						pow( visible_p_par.Mag() / ( pow( visible_mass , 2 ) + pow( visible_p_nor.Mag() , 2 ) ) , 2 ) * pow( sigma_p_vis_par_prime , 2 ) +
+						pow( 2 * visible_p_nor.Mag() * ( visible_E_prime * visible_E - visible_p_par_prime.Mag() * visible_p_par.Mag() ) / pow( ( pow( visible_mass , 2 ) + pow( visible_p_nor.Mag() , 2 ) ) , 2 ) , 2 ) * pow( sigma_p_vis_nor , 2 )
+					);
+					streamlog_out(DEBUG4) << "		Parent Hadron Sigma_E =									" << sigma_parent_hadron_E2 << std::endl;
 
 	double Neutrino_E		= parent_hadron_E - visible_E;
 	streamlog_out(DEBUG4) << "		Neutrino Energy:									" << Neutrino_E << std::endl;
@@ -2596,18 +3491,18 @@ void SLDCorrection::plotHistograms( TLorentzVector trueFourMomentumNeutrino , TL
 	double NuPyResidual = FourMomentumNuClose.Py() - trueFourMomentumNeutrino.Py(); m_NuPyResidual.push_back( NuPyResidual );
 	double NuPzResidual = FourMomentumNuClose.Pz() - trueFourMomentumNeutrino.Pz(); m_NuPzResidual.push_back( NuPzResidual );
 	double NuEResidual = FourMomentumNuClose.E() - trueFourMomentumNeutrino.E(); m_NuEResidual.push_back( NuEResidual );
-//	double NuPxNormalizedResidual = NuPxResidual / sqrt( NeutrinoCovMat[ 0 ] ); m_NuPxNormalizedResidual.push_back( NuPxNormalizedResidual );
-//	double NuPyNormalizedResidual = NuPyResidual / sqrt( NeutrinoCovMat[ 2 ] ); m_NuPyNormalizedResidual.push_back( NuPyNormalizedResidual );
-//	double NuPzNormalizedResidual = NuPzResidual / sqrt( NeutrinoCovMat[ 5 ] ); m_NuPzNormalizedResidual.push_back( NuPzNormalizedResidual );
-//	double NuENormalizedResidual = NuEResidual / sqrt( NeutrinoCovMat[ 9 ] ); m_NuENormalizedResidual.push_back( NuENormalizedResidual );
+	double NuPxNormalizedResidual = NuPxResidual / sqrt( NeutrinoCovMat[ 0 ] ); m_NuPxNormalizedResidual.push_back( NuPxNormalizedResidual );
+	double NuPyNormalizedResidual = NuPyResidual / sqrt( NeutrinoCovMat[ 2 ] ); m_NuPyNormalizedResidual.push_back( NuPyNormalizedResidual );
+	double NuPzNormalizedResidual = NuPzResidual / sqrt( NeutrinoCovMat[ 5 ] ); m_NuPzNormalizedResidual.push_back( NuPzNormalizedResidual );
+	double NuENormalizedResidual = NuEResidual / sqrt( NeutrinoCovMat[ 9 ] ); m_NuENormalizedResidual.push_back( NuENormalizedResidual );
 	h_NuPxResidual->Fill( NuPxResidual ); ++n_NuPxResidual;
 	h_NuPyResidual->Fill( NuPyResidual ); ++n_NuPyResidual;
 	h_NuPzResidual->Fill( NuPzResidual ); ++n_NuPzResidual;
 	h_NuEResidual->Fill( NuEResidual ); ++n_NuEResidual;
-//	h_NuPxNormalizedResidual->Fill( NuPxNormalizedResidual ); ++n_NuPxNormalizedResidual;
-//	h_NuPyNormalizedResidual->Fill( NuPyNormalizedResidual ); ++n_NuPyNormalizedResidual;
-//	h_NuPzNormalizedResidual->Fill( NuPzNormalizedResidual ); ++n_NuPzNormalizedResidual;
-//	h_NuENormalizedResidual->Fill( NuENormalizedResidual ); ++n_NuENormalizedResidual;
+	h_NuPxNormalizedResidual->Fill( NuPxNormalizedResidual ); ++n_NuPxNormalizedResidual;
+	h_NuPyNormalizedResidual->Fill( NuPyNormalizedResidual ); ++n_NuPyNormalizedResidual;
+	h_NuPzNormalizedResidual->Fill( NuPzNormalizedResidual ); ++n_NuPzNormalizedResidual;
+	h_NuENormalizedResidual->Fill( NuENormalizedResidual ); ++n_NuENormalizedResidual;
 	h_recoNuPx_mcNuPx->Fill( trueFourMomentumNeutrino.Px() , FourMomentumNuClose.Px() );
 	h_recoNuPy_mcNuPy->Fill( trueFourMomentumNeutrino.Py() , FourMomentumNuClose.Py() );
 	h_recoNuPz_mcNuPz->Fill( trueFourMomentumNeutrino.Pz() , FourMomentumNuClose.Pz() );
@@ -2625,8 +3520,8 @@ void SLDCorrection::InitializeHistogram( TH1F *histogram , int scale , int color
 	float fit_range = 4.0;
 	float fit_min = -2.0;
 	float fit_max = 2.0;
-	doProperGaussianFit( histogram , fit_min , fit_max , fit_range );
-	histogram->GetFunction("gaus")->SetLineColor( color );
+//	doProperGaussianFit( histogram , fit_min , fit_max , fit_range );
+//	histogram->GetFunction("gaus")->SetLineColor( color );
 	float y_max = 1.2 * histogram->GetMaximum();
 	histogram->GetYaxis()->SetRangeUser(0.0, y_max);
 	histogram->Write();
@@ -2686,11 +3581,19 @@ void SLDCorrection::end()
 		InitializeHistogram( h_NuPyResidual , n_NuPyResidual , 4 , 1 , 1.0 , 1 );
 		InitializeHistogram( h_NuPzResidual , n_NuPzResidual , 4 , 1 , 1.0 , 1 );
 		InitializeHistogram( h_NuEResidual , n_NuEResidual , 4 , 1 , 1.0 , 1 );
+		InitializeHistogram( h_NuPxNormalizedResidual , n_NuPxNormalizedResidual , 4 , 1 , 1.0 , 1 );
+		InitializeHistogram( h_NuPyNormalizedResidual , n_NuPyNormalizedResidual , 4 , 1 , 1.0 , 1 );
+		InitializeHistogram( h_NuPzNormalizedResidual , n_NuPzNormalizedResidual , 4 , 1 , 1.0 , 1 );
+		InitializeHistogram( h_NuENormalizedResidual , n_NuENormalizedResidual , 4 , 1 , 1.0 , 1 );
 		h_SLDecayOrder->Write();
 		h_NuPxResidual->Write();
 		h_NuPyResidual->Write();
 		h_NuPzResidual->Write();
 		h_NuEResidual->Write();
+		h_NuPxNormalizedResidual->Write();
+		h_NuPyNormalizedResidual->Write();
+		h_NuPzNormalizedResidual->Write();
+		h_NuENormalizedResidual->Write();
 		h_recoNuPx_mcNuPx->Write();
 		h_recoNuPy_mcNuPy->Write();
 		h_recoNuPz_mcNuPz->Write();

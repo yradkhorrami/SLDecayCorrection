@@ -22,7 +22,8 @@ void assignParticlesToSemiLeptonicDecay( pfoVector &assignedParticles , pfoVecto
 			totalFourMomentum += particleFourMomentum;
 			assignedParticles.push_back( particle );
 			streamlog_out(DEBUG1) << "		added one particle to the semi-leptonic decay" << std::endl;
-		}
+			streamlog_out(DEBUG1) << *particle << std::endl;
+}
 		else
 		{
 			return;
@@ -51,12 +52,13 @@ void assignVerticesToSemiLeptonicDecay( pfoVector &assignedParticles , vtxVector
 		}
 		if ( ( totalFourMomentum + vertexFourMomentum ).M() <= invariantMass )
 		{
+			streamlog_out(DEBUG1) << "		added one vertex to the semi-leptonic decay" << std::endl;
 			totalFourMomentum += vertexFourMomentum;
 			for ( unsigned int i_par = 0 ; i_par < ( sortedVertices[ i_vtx ]->getAssociatedParticle() )->getParticles().size() ; ++i_par )
 			{
 				assignedParticles.push_back( ( sortedVertices[ i_vtx ]->getAssociatedParticle() )->getParticles()[ i_par ] );
+				streamlog_out(DEBUG1) << *( sortedVertices[ i_vtx ]->getAssociatedParticle() )->getParticles()[ i_par ] << std::endl;
 			}
-			streamlog_out(DEBUG1) << "		added one vertex to the semi-leptonic decay" << std::endl;
 		}
 		else
 		{
