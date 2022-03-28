@@ -205,7 +205,7 @@ EVENT::Vertex *getParticleVertex( EVENT::ReconstructedParticle *particle , std::
 	EVENT::Vertex *particleVertex = NULL;
 	streamlog_out(DEBUG0) << "" << std::endl;
 	streamlog_out(DEBUG0) << "----------------------------------------------------------------------" << std::endl;
-	streamlog_out(DEBUG0) << "------ Looking for particle (" << particle << ") in vertices -----------------" << std::endl;
+	streamlog_out(DEBUG0) << "----------- Looking for particle (" << particle << ") in " << vertexVector.size() << " vertices----------" << std::endl;
 	streamlog_out(DEBUG0) << "----------------------------------------------------------------------" << std::endl;
 	streamlog_out(DEBUG0) << *particle << std::endl;
 	for ( unsigned int i_vtx = 0 ; i_vtx < vertexVector.size() ; ++i_vtx )

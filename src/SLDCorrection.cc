@@ -1054,6 +1054,11 @@ void SLDCorrection::processEvent( EVENT::LCEvent *pLCEvent )
 		pfoVector jetsOfSemiLeptonicDecays{};
 		mcpVector mcNeutrinos{};
 
+		vtxVector tempSemiLeptonicVertices{};
+		pfoVector tempSemiLeptonicVertexRecoParticles{};
+		pfoVector tempNeutrinos{};
+		pfoVector tempJetsOfSemiLeptonicDecays{};
+
 		int nBSLD = 0;
 		int nCSLD = 0;
 		int nTSLD = 0;
@@ -1070,7 +1075,7 @@ void SLDCorrection::processEvent( EVENT::LCEvent *pLCEvent )
 			bool isBHadronSLDecay = false;
 			bool isCHadronSLDecay = false;
 			bool isTauLeptonSLDecay = false;
-			if ( ( abs( testLepton->getPDG() ) == 11 || abs( testLepton->getPDG() ) == 13 || abs( testLepton->getPDG() ) == 15 ) && ( testLepton->getGeneratorStatus() ) == 1 )
+			if ( ( abs( testLepton->getPDG() ) == 11 || abs( testLepton->getPDG() ) == 13 || abs( testLepton->getPDG() ) == 15 ) && ( testLepton->getGeneratorStatus() ) == 1 && !( testLepton->isOverlay() ) )
 			{
 				for ( long unsigned int i_parent = 0 ; i_parent < ( testLepton->getParents() ).size() ; ++i_parent )
 				{
@@ -1171,8 +1176,8 @@ void SLDCorrection::processEvent( EVENT::LCEvent *pLCEvent )
 			mcNurecoNuLink = MCNuRecoNuRelNav.createLCCollection();
 			recoNumcNuLink = RecoNuMCNuRelNav.createLCCollection();
 		}
-		if ( semiLeptonicVertices.size() != 0 )
-		{
+//		if ( semiLeptonicVertices.size() != 0 )
+//		{
 			JetSLDLink = JetSLDRelNav.createLCCollection();
 			SLDJetLink = SLDJetRelNav.createLCCollection();
 			pLCEvent->addCollection( semiLeptonicVertex , m_SLDVertex );
@@ -1185,7 +1190,7 @@ void SLDCorrection::processEvent( EVENT::LCEvent *pLCEvent )
 				pLCEvent->addCollection( mcNurecoNuLink , m_mcNurecoNuLinkName );
 				pLCEvent->addCollection( recoNumcNuLink , m_recoNumcNuLinkName );
 			}
-		}
+//		}
 
 		streamlog_out(MESSAGE) << "	Found " << semiLeptonicVertices.size() << " semi-leptonic decays with " << semiLeptonicVertexRecoParticles.size() << " associated reconstructed particles in " << jetsOfSemiLeptonicDecays.size() << " jets" << std::endl;
 //		semiLeptonicVertices.clear();
@@ -1208,7 +1213,7 @@ bool SLDCorrection::hasPrimarySLDecay( MCParticle *parentHadron )
 		for ( long unsigned int i_daughter = 0 ; i_daughter < ( parentHadron->getDaughters() ).size() ; ++i_daughter )
 		{
 			MCParticle *daughter = parentHadron->getDaughters()[ i_daughter ];
-			if ( daughter->getGeneratorStatus() == 1 )
+			if ( daughter->getGeneratorStatus() == 1 && !( daughter->isOverlay() ) )
 			{
 				if ( abs( daughter->getPDG() ) == 11 || abs( daughter->getPDG() ) == 13 || abs( daughter->getPDG() ) == 15 )
 				{
@@ -1448,6 +1453,7 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 	std::vector< float > NeutrinoCovMat( 10 , 0.0 );
 	std::vector< float > NeutrinoCovMatPos( 10 , 0.0 );
 	std::vector< float > NeutrinoCovMatNeg( 10 , 0.0 );
+	std::vector< float > NeutrinoCovMatZero( 10 , 0.0 );
 	std::vector< float > CovMatrixPVA( 10, 0.0 );
 	std::vector< float > CovMatrixFlightDirection( 6, 0.0 );
 	std::vector< float > CovMatrixDetPar( 10 , 0.0 );
@@ -2323,7 +2329,7 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 	recoNeutrinoZero->setType( -1 * SLDLepton->getPDG() + SLDLepton->getCharge() );
 	recoNeutrinoZero->setMomentum( MomentumZero );
 	recoNeutrinoZero->setEnergy( 0.0 );
-	recoNeutrinoZero->setCovMatrix( NeutrinoCovMat );
+	recoNeutrinoZero->setCovMatrix( NeutrinoCovMatZero );
 	recoNeutrinoZero->setMass( 0.0 );
 	recoNeutrinoZero->setCharge( 0.0 );
 	recoNeutrinoZero->setReferencePoint( linkedRecoLepton->getReferencePoint() );
@@ -2634,11 +2640,11 @@ void SLDCorrection::getCovMatDetFlightDirection(	std::vector<EVENT::Reconstructe
 	{
 		if ( decayProducts[ i_par ]->getTracks().size() == 0 )
 		{
-			takeCovMat = ( m_cheatCharged4momentum ? 0.0 : 1.0 );
+			takeCovMat = ( m_cheatNeutral4momentum ? 0.0 : 1.0 );
 		}
 		else
 		{
-			takeCovMat = ( m_cheatNeutral4momentum ? 0.0 : 1.0 );
+			takeCovMat = ( m_cheatCharged4momentum ? 0.0 : 1.0 );
 		}
 		visibleFourMomentum += TLorentzVector( decayProducts[ i_par ]->getMomentum() , decayProducts[ i_par ]->getEnergy() );
 		for ( int i_Element = 0 ; i_Element < 10 ; ++i_Element )
@@ -3109,8 +3115,8 @@ TLorentzVector SLDCorrection::getNeutrinoFourMomentumModified( TVector3 flightDi
 	streamlog_out(DEBUG8) << "		|Visible Momentum (par)|:	" << P_vis_par << std::endl;
 	streamlog_out(DEBUG4) << "		Visible Momentum (par):			( " << visible_p_par.Px() << "	, " << visible_p_par.Py() << "	, " << visible_p_par.Pz() << "	)" << std::endl;
 
-	double P_vis_nor		= sqrt( visible_p.Mag2() - pow( P_vis_par , 2 ) );
 	TVector3 visible_p_nor		= visible_p - visible_p_par;
+	double P_vis_nor		= visible_p_nor.Mag();
 	m_P_vis_nor.push_back( P_vis_nor );
 	m_P_vis_nor_prime.push_back( P_vis_nor );
 	streamlog_out(DEBUG8) << "		|Visible Momentum (nor)|:	" << P_vis_nor << std::endl;
@@ -3134,7 +3140,7 @@ TLorentzVector SLDCorrection::getNeutrinoFourMomentumModified( TVector3 flightDi
 
 	double parent_hadron_E		= ( ( visibleFourMomentum.E() * ( pow( ParentHadronMass , 2 ) + pow( visible_mass , 2 ) ) / ( 2 * ParentHadronMass ) ) - visible_p_par.Dot( visible_p_par_prime ) ) * ParentHadronMass / ( pow( visible_mass , 2 ) + visible_p_nor.Mag2() );
 	streamlog_out(DEBUG4) << "		Parent Hadron Energy =									" << parent_hadron_E << std::endl;
-	TVector3 parent_hadron_p	= sqrt( pow( parent_hadron_E , 2 ) - pow( ParentHadronMass , 2 ) ) * flightDirection;
+	TVector3 parent_hadron_p	= ( ParentHadronMass >= parent_hadron_E ? 0.0 : sqrt( pow( parent_hadron_E , 2 ) - pow( ParentHadronMass , 2 ) ) ) * flightDirection;
 	streamlog_out(DEBUG4) << "		Parent Hadron Momentum:			( " << parent_hadron_p.Px() << "	, " << parent_hadron_p.Py() << "	, " << parent_hadron_p.Pz() << "	, " << parent_hadron_E << " )" << std::endl;
 
 	TVector3 Neutrino_p_nor		= -1 * visible_p_nor;

@@ -45,6 +45,7 @@ int getRecoFlightDirection( 	EVENT::ReconstructedParticle *linkedRecoLepton , TV
 	if ( recoLeptonIsInVertex )
 	{
 		SLDStatus = 4;
+		streamlog_out(DEBUG1) << "	(" << SLDStatus << ") Lepton from semi-leptonic decay found in a BuildUp Vertex, BuildUp Vertex is used as vertex of semi-leptonic decay!" << std::endl;
 		SLDVertices.push_back( recoLeptonVertex );
 		SLDVerticesRP.push_back( recoLeptonVertex->getAssociatedParticle() );
 		recoFlightDirection = TVector3( recoLeptonVertex->getPosition()[ 0 ] - startVertex->getPosition()[ 0 ] , recoLeptonVertex->getPosition()[ 1 ] - startVertex->getPosition()[ 1 ] , recoLeptonVertex->getPosition()[ 2 ] - startVertex->getPosition()[ 2 ] );
@@ -60,7 +61,6 @@ int getRecoFlightDirection( 	EVENT::ReconstructedParticle *linkedRecoLepton , TV
 		sldVertexPosition.push_back( recoLeptonVertex->getPosition()[ 2 ] );
 		daughterHadronFlightDistance = daughterHadronFlightDirection.Mag();
 		daughterHadronFlightDirection.SetMag( 1.0 );
-		streamlog_out(DEBUG1) << "	(" << SLDStatus << ") Lepton from semi-leptonic decay found in a BuildUp Vertex, BuildUp Vertex is used as vertex of semi-leptonic decay!" << std::endl;
 /*
 		for ( unsigned int i_vtx = 0 ; i_vtx < verticesInJet.size() ; ++i_vtx )
 		{
@@ -75,6 +75,7 @@ int getRecoFlightDirection( 	EVENT::ReconstructedParticle *linkedRecoLepton , TV
 	}
 	else if ( verticesInJet.size() != 0 )
 	{
+		streamlog_out(DEBUG1) << "	Lepton from semi-leptonic decay not found in a BuildUp Vertex, Investigating NuildUp vertices in jet" << std::endl;
 		EVENT::Vertex* thirdVertex = NULL;
 		float minDistanceToPrimaryVertex = 1000000.0;
 		for ( unsigned int i_vtx = 0 ; i_vtx < verticesInJet.size() ; ++i_vtx )
@@ -90,6 +91,8 @@ int getRecoFlightDirection( 	EVENT::ReconstructedParticle *linkedRecoLepton , TV
 		if ( thirdVertex != NULL )
 		{
 			SLDStatus = 5;
+			streamlog_out(DEBUG1) << "	(" << SLDStatus << ") There is One BuildUp Vertex in jet" << std::endl;
+			streamlog_out(DEBUG1) << "		Intersection point of Lepton and other BuildUp Vertices in jet is used as vertex of semi-leptonic decay!" << std::endl;
 			TVector3 PCAatTrack;
 			TVector3 PCAatLine;
 			Track* leptonTrack = linkedRecoLepton->getTracks()[ 0 ];
@@ -126,54 +129,72 @@ int getRecoFlightDirection( 	EVENT::ReconstructedParticle *linkedRecoLepton , TV
 	}
 	else
 	{
+		streamlog_out(DEBUG1) << "	There is NO BuildUp Vertex in jet" << std::endl;
+		streamlog_out(DEBUG1) << "	Other scenarios are investigated, but Nu-correction will not be performed" << std::endl;
 		TVector3 PCAatLepton;
 		TVector3 PCAatOtherParticle;
+		std::vector<double> chargedParticlePosition( 3 , 0.0 );
+		TVector3 chargedParticleMomentum( 0.0 , 0.0 , 0.0 );
 		ReconstructedParticle* leadingChargedParticle = getLeadingChargedParticle( assignedJet );
-		TVector3 chargedParticleMomentum( leadingChargedParticle->getMomentum() );
-		std::vector<double> chargedParticlePosition{};
-		chargedParticlePosition.push_back( leadingChargedParticle->getReferencePoint()[ 0 ] );
-		chargedParticlePosition.push_back( leadingChargedParticle->getReferencePoint()[ 1 ] );
-		chargedParticlePosition.push_back( leadingChargedParticle->getReferencePoint()[ 2 ] );
-		ReconstructedParticle* leadingNeutralParticle = getLeadingNeutralParticle( assignedJet );
-		TVector3 neutralParticleMomentum( leadingNeutralParticle->getMomentum() );
-		std::vector<double> neutralParticlePosition{};
-		neutralParticlePosition.push_back( leadingNeutralParticle->getReferencePoint()[ 0 ] );
-		neutralParticlePosition.push_back( leadingNeutralParticle->getReferencePoint()[ 1 ] );
-		neutralParticlePosition.push_back( leadingNeutralParticle->getReferencePoint()[ 2 ] );
-		if ( vertexingScenario == 1 )
+		if ( leadingChargedParticle != NULL )
 		{
-			recoFlightDirection = TVector3( assignedJet->getMomentum() );
-			hadronFlightLength = -1.0;
-			SLDStatus = 7;
+			chargedParticleMomentum = TVector3( leadingChargedParticle->getMomentum() );
+			chargedParticlePosition[ 0 ] = leadingChargedParticle->getReferencePoint()[ 0 ];
+			chargedParticlePosition[ 1 ] = leadingChargedParticle->getReferencePoint()[ 1 ];
+			chargedParticlePosition[ 2 ] = leadingChargedParticle->getReferencePoint()[ 2 ];
 		}
-		else if ( vertexingScenario == 2 )
+		std::vector<double> neutralParticlePosition( 3 , 0.0 );
+		TVector3 neutralParticleMomentum( 0.0 , 0.0 , 0.0 );
+		ReconstructedParticle* leadingNeutralParticle = getLeadingNeutralParticle( assignedJet );
+		if ( leadingNeutralParticle != NULL )
 		{
-			SLDStatus = 7;
-			if ( leadingChargedParticle->getTracks().size() == 1 )
+			neutralParticleMomentum = TVector3( leadingNeutralParticle->getMomentum() );
+			neutralParticlePosition[ 0 ] = leadingNeutralParticle->getReferencePoint()[ 0 ];
+			neutralParticlePosition[ 1 ] = leadingNeutralParticle->getReferencePoint()[ 1 ];
+			neutralParticlePosition[ 1 ] = leadingNeutralParticle->getReferencePoint()[ 2 ];
+		}
+		if ( vertexingScenario == 2 )
+		{
+			if ( leadingChargedParticle != NULL )
 			{
-				helicesDistance = intersectTrackTrack( linkedRecoLepton->getTracks()[ 0 ] , leadingChargedParticle->getTracks()[ 0 ] , PCAatLepton , PCAatOtherParticle );
+				SLDStatus = 7;
+				if ( leadingChargedParticle->getTracks().size() == 1 )
+				{
+					helicesDistance = intersectTrackTrack( linkedRecoLepton->getTracks()[ 0 ] , leadingChargedParticle->getTracks()[ 0 ] , PCAatLepton , PCAatOtherParticle );
+				}
+				else
+				{
+					helicesDistance = intersectTrackLine( linkedRecoLepton->getTracks()[ 0 ] , primaryVertex , chargedParticleMomentum , chargedParticlePosition , PCAatLepton , PCAatOtherParticle );
+				}
+				recoFlightDirection = PCAatLepton - startVertexPosition;
+				hadronFlightLength = recoFlightDirection.Mag();
+				sldVertexPosition.push_back( PCAatLepton.X() );
+				sldVertexPosition.push_back( PCAatLepton.Y() );
+				sldVertexPosition.push_back( PCAatLepton.Z() );
+//				recoFlightDirection = TVector3( PCAatLepton[ 0 ] - startVertex->getPosition()[ 0 ] , PCAatLepton[ 1 ] - startVertex->getPosition()[ 1 ] , PCAatLepton[ 2 ] - startVertex->getPosition()[ 2 ] );
 			}
 			else
 			{
-				helicesDistance = intersectTrackLine( linkedRecoLepton->getTracks()[ 0 ] , primaryVertex , chargedParticleMomentum , chargedParticlePosition , PCAatLepton , PCAatOtherParticle );
+				vertexingScenario = 1;
 			}
-			recoFlightDirection = PCAatLepton - startVertexPosition;
-			hadronFlightLength = recoFlightDirection.Mag();
-			sldVertexPosition.push_back( PCAatLepton.X() );
-			sldVertexPosition.push_back( PCAatLepton.Y() );
-			sldVertexPosition.push_back( PCAatLepton.Z() );
-//			recoFlightDirection = TVector3( PCAatLepton[ 0 ] - startVertex->getPosition()[ 0 ] , PCAatLepton[ 1 ] - startVertex->getPosition()[ 1 ] , PCAatLepton[ 2 ] - startVertex->getPosition()[ 2 ] );
 		}
 		else if ( vertexingScenario == 3 )
 		{
-			SLDStatus = 7;
-			helicesDistance = intersectTrackLine( linkedRecoLepton->getTracks()[ 0 ] , primaryVertex , neutralParticleMomentum , neutralParticlePosition , PCAatLepton , PCAatOtherParticle );
-			recoFlightDirection = PCAatLepton - startVertexPosition;
-			hadronFlightLength = recoFlightDirection.Mag();
-			sldVertexPosition.push_back( PCAatLepton.X() );
-			sldVertexPosition.push_back( PCAatLepton.Y() );
-			sldVertexPosition.push_back( PCAatLepton.Z() );
-//			recoFlightDirection = TVector3( PCAatLepton[ 0 ] - startVertex->getPosition()[ 0 ] , PCAatLepton[ 1 ] - startVertex->getPosition()[ 1 ] , PCAatLepton[ 2 ] - startVertex->getPosition()[ 2 ] );
+			if ( leadingNeutralParticle != NULL )
+			{
+				SLDStatus = 7;
+				helicesDistance = intersectTrackLine( linkedRecoLepton->getTracks()[ 0 ] , primaryVertex , neutralParticleMomentum , neutralParticlePosition , PCAatLepton , PCAatOtherParticle );
+				recoFlightDirection = PCAatLepton - startVertexPosition;
+				hadronFlightLength = recoFlightDirection.Mag();
+				sldVertexPosition.push_back( PCAatLepton.X() );
+				sldVertexPosition.push_back( PCAatLepton.Y() );
+				sldVertexPosition.push_back( PCAatLepton.Z() );
+//					recoFlightDirection = TVector3( PCAatLepton[ 0 ] - startVertex->getPosition()[ 0 ] , PCAatLepton[ 1 ] - startVertex->getPosition()[ 1 ] , PCAatLepton[ 2 ] - startVertex->getPosition()[ 2 ] );
+			}
+			else
+			{
+				vertexingScenario = 1;
+			}
 		}
 		else if ( vertexingScenario == 4  )
 		{
@@ -211,6 +232,12 @@ int getRecoFlightDirection( 	EVENT::ReconstructedParticle *linkedRecoLepton , TV
 			sldVertexPosition.push_back( PCAatLepton.Y() );
 			sldVertexPosition.push_back( PCAatLepton.Z() );
 //			recoFlightDirection = TVector3( PCAatLepton[ 0 ] - startVertex->getPosition()[ 0 ] , PCAatLepton[ 1 ] - startVertex->getPosition()[ 1 ] , PCAatLepton[ 2 ] - startVertex->getPosition()[ 2 ] );
+		}
+		if ( vertexingScenario == 1 )
+		{
+			recoFlightDirection = TVector3( assignedJet->getMomentum() );
+			hadronFlightLength = -1.0;
+			SLDStatus = 7;
 		}
 		daughterHadronFlightDirection = recoFlightDirection;
 		daughterHadronFlightDistance = daughterHadronFlightDirection.Mag();
