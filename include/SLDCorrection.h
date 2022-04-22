@@ -104,6 +104,8 @@ private:
 	std::string				m_SLDJetLinkName{};
 	std::string				m_mcNurecoNuLinkName{};
 	std::string				m_recoNumcNuLinkName{};
+	std::string				m_SLDNuLinkName{};
+	std::string				m_NuSLDLinkName{};
 	std::string				m_rootFile{};
 
 	bool					m_includeBSLD = true;

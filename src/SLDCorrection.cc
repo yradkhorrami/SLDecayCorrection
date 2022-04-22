@@ -183,6 +183,20 @@ SLDCorrection::SLDCorrection() :
 					std::string("recoNumcNuLinkName")
 				);
 
+	registerOutputCollection(	LCIO::LCRELATION,
+					"SLDNuLinkName",
+					"Name of the NeutrinoSemiLeptonicDecayLinkName output collection",
+					m_SLDNuLinkName,
+					std::string("SLDNuLinkName")
+				);
+
+	registerOutputCollection(	LCIO::LCRELATION,
+					"NuSLDLinkName",
+					"Name of the SemiLeptonicDecayNeutrinoLinkName output collection",
+					m_NuSLDLinkName,
+					std::string("NuSLDLinkName")
+				);
+
 	registerProcessorParameter(	"includeBSLD",
 					"do correction for semi-leptonic decays of B-Hadrons",
 					m_includeBSLD,
@@ -1040,9 +1054,13 @@ void SLDCorrection::processEvent( EVENT::LCEvent *pLCEvent )
 //	SLDJetLink = new EVENT::LCCollection( LCIO::LCRELATION );
 	EVENT::LCCollection* mcNurecoNuLink(NULL);
 	EVENT::LCCollection* recoNumcNuLink(NULL);
-
+	EVENT::LCCollection* NuSLDLink(NULL);
+	EVENT::LCCollection* SLDNuLink(NULL);
+	
 	LCRelationNavigator JetSLDRelNav(LCIO::RECONSTRUCTEDPARTICLE , LCIO::VERTEX  );
 	LCRelationNavigator SLDJetRelNav(LCIO::VERTEX , LCIO::RECONSTRUCTEDPARTICLE  );
+	LCRelationNavigator NeutrinoSLDRelNav(LCIO::RECONSTRUCTEDPARTICLE , LCIO::VERTEX  );
+	LCRelationNavigator SLDNeutrinoRelNav(LCIO::VERTEX , LCIO::RECONSTRUCTEDPARTICLE  );
 	LCRelationNavigator MCNuRecoNuRelNav(LCIO::MCPARTICLE , LCIO::RECONSTRUCTEDPARTICLE  );
 	LCRelationNavigator RecoNuMCNuRelNav(LCIO::RECONSTRUCTEDPARTICLE , LCIO::MCPARTICLE  );
 
@@ -1162,6 +1180,8 @@ void SLDCorrection::processEvent( EVENT::LCEvent *pLCEvent )
 			for ( unsigned int i_nu = 0 ; i_nu < 3 ; ++i_nu )
 			{
 				Neutrinos->addElement( neutrinos[ i_sld * 3 + i_nu ] );
+				NeutrinoSLDRelNav.addRelation( neutrinos[ i_sld * 3 + i_nu ] , semiLeptonicVertices[ i_sld ] , 1.0 );
+				SLDNeutrinoRelNav.addRelation( semiLeptonicVertices[ i_sld ] , neutrinos[ i_sld * 3 + i_nu ] , 1.0 );
 			}
 			JetSLDRelNav.addRelation( jetsOfSemiLeptonicDecays[ i_sld ] , semiLeptonicVertices[ i_sld ] , 1.0 );
 			SLDJetRelNav.addRelation( semiLeptonicVertices[ i_sld ] , jetsOfSemiLeptonicDecays[ i_sld ] , 1.0 );
@@ -1180,11 +1200,15 @@ void SLDCorrection::processEvent( EVENT::LCEvent *pLCEvent )
 //		{
 			JetSLDLink = JetSLDRelNav.createLCCollection();
 			SLDJetLink = SLDJetRelNav.createLCCollection();
+			NuSLDLink = NeutrinoSLDRelNav.createLCCollection();
+			SLDNuLink = SLDNeutrinoRelNav.createLCCollection();
 			pLCEvent->addCollection( semiLeptonicVertex , m_SLDVertex );
 			pLCEvent->addCollection( semiLeptonicVertexRP , m_SLDVertexRP );
 			pLCEvent->addCollection( Neutrinos , m_reconstructedNeutrino );
 			pLCEvent->addCollection( JetSLDLink , m_JetSLDLinkName );
 			pLCEvent->addCollection( SLDJetLink , m_SLDJetLinkName );
+			pLCEvent->addCollection( NuSLDLink , m_NuSLDLinkName );
+			pLCEvent->addCollection( SLDNuLink , m_SLDNuLinkName );
 			if ( mcNeutrinos.size() == neutrinos.size() / 3 )
 			{
 				pLCEvent->addCollection( mcNurecoNuLink , m_mcNurecoNuLinkName );
