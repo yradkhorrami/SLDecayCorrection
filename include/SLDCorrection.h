@@ -145,7 +145,15 @@ private:
 	double					eV2GeV;
 	double					eB;
 	bool					foundFlightDirection;
-	int					m_nTauSLDecay;
+	IntVector				m_SLDFlavour{}; //4: SLDecayOfCHadron, 5: SLDecayOfBHadron, 15: SLDecayOfTauLepton
+	IntVector				m_SLDType{}; //0: SLDecay with DownStream/UpStream semi-leptonic decay(s), 1: SLDecay without DownStream/UpStream semi-leptonic decay(s)
+	int					m_nSLDecayOfBHadron;
+	int					m_nSLDecayOfCHadron;
+	int					m_nSLDecayOfTauLepton;
+	int					m_nSLDecayTotal;
+	int					m_nSLDecayToElectron;
+	int					m_nSLDecayToMuon;
+	int					m_nSLDecayToTau;
 	int					m_nTauNeutrino;
 	int					m_nNeutrino;
 	int					m_nChargedPFOwoTrack;
@@ -436,6 +444,9 @@ private:
 	TH2F					*h_parentE_daughtersE{};
 	TH1I					*h_recoPFOLinkedToElectron_Type{};
 	TH1I					*h_recoPFOLinkedToMuon_Type{};
+	TH1I					*h_SLDecayFlavour{};
+	TH1I					*h_SLDecayModeB{};
+	TH1I					*h_SLDecayModeC{};
 	TH1I					*h_SLDecayOrder{};
 	TH2I					*h_foundVertex{};
 	TH1F					*h_secondaryVertex{};

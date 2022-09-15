@@ -54,7 +54,13 @@ SLDCorrection::SLDCorrection() :
 	eV2GeV(0.),
 	eB(0.),
 	foundFlightDirection(true),
-	m_nTauSLDecay(0),
+	m_nSLDecayOfBHadron(0),
+	m_nSLDecayOfCHadron(0),
+	m_nSLDecayOfTauLepton(0),
+	m_nSLDecayTotal(0),
+	m_nSLDecayToElectron(0),
+	m_nSLDecayToMuon(0),
+	m_nSLDecayToTau(0),
 	m_nTauNeutrino(0),
 	m_nNeutrino(0),
 	m_nChargedPFOwoTrack(0),
@@ -381,7 +387,15 @@ void SLDCorrection::init()
 		m_pTTree1 = new TTree("SLDCorrection", "SLDCorrection");
 		m_pTTree1->SetDirectory(m_pTFile);
 		m_pTTree1->Branch("event", &m_nEvt, "event/I");
-		m_pTTree1->Branch("nTauSLDecay",&m_nTauSLDecay,"nTauSLDecay/I");
+		m_pTTree1->Branch("SLDFlavour", &m_SLDFlavour);
+		m_pTTree1->Branch("SLDType", &m_SLDType);
+		m_pTTree1->Branch("nSLDecayOfBHadron",&m_nSLDecayOfBHadron,"nSLDecayOfBHadron/I");
+		m_pTTree1->Branch("nSLDecayOfCHadron",&m_nSLDecayOfCHadron,"nSLDecayOfCHadron/I");
+		m_pTTree1->Branch("nSLDecayOfTauLepton",&m_nSLDecayOfTauLepton,"nSLDecayOfTauLepton/I");
+		m_pTTree1->Branch("nSLDecayTotal",&m_nSLDecayTotal,"nSLDecayTotal/I");
+		m_pTTree1->Branch("nSLDecayToElectron",&m_nSLDecayToElectron,"nSLDecayToElectron/I");
+		m_pTTree1->Branch("nSLDecayToMuon",&m_nSLDecayToMuon,"nSLDecayToMuon/I");
+		m_pTTree1->Branch("nSLDecayToTau",&m_nSLDecayToTau,"nSLDecayToTau/I");
 		m_pTTree1->Branch("nTauNeutrino",&m_nTauNeutrino,"nTauNeutrino/I");
 		m_pTTree1->Branch("nNeutrino",&m_nNeutrino,"nNeutrino/I");
 		m_pTTree1->Branch("nSLD_chargedMCPwoTrack",&m_nSLD_chargedMCPwoTrack);
@@ -715,10 +729,21 @@ void SLDCorrection::init()
 		h_recoPFOLinkedToMuon_Type->GetXaxis()->SetBinLabel(6,"#Lambda");
 		h_recoPFOLinkedToMuon_Type->GetXaxis()->SetBinLabel(7,"Other");
 		h_recoPFOLinkedToMuon_Type->GetXaxis()->SetBinLabel(8,"Not Found");
-		h_SLDecayOrder = new TH1I( "SLDecayOrder" , "; SLDecay Type" , 3 , 0 , 3 );
-		h_SLDecayOrder->GetXaxis()->SetBinLabel(1,"upStream");
-		h_SLDecayOrder->GetXaxis()->SetBinLabel(2,"primary");
-		h_SLDecayOrder->GetXaxis()->SetBinLabel(3,"downStream");
+		h_SLDecayFlavour = new TH1I( "SLDecayFlavour" , "; SLDecay Type" , 3 , 0 , 3 );
+		h_SLDecayFlavour->GetXaxis()->SetBinLabel(1,"SLD of B-Hadron");
+		h_SLDecayFlavour->GetXaxis()->SetBinLabel(2,"SLD of C-Hadron");
+		h_SLDecayFlavour->GetXaxis()->SetBinLabel(3,"LD of Tau-Lepton");
+		h_SLDecayModeB = new TH1I( "SLDMode B-Hadron" , "; SLDecay Mode" , 3 , 0 , 3 );
+		h_SLDecayModeB->GetXaxis()->SetBinLabel(1,"X#rightarrow e#nu_{e}Y");
+		h_SLDecayModeB->GetXaxis()->SetBinLabel(2,"X#rightarrow #mu#nu_{#mu}Y");
+		h_SLDecayModeB->GetXaxis()->SetBinLabel(3,"X#rightarrow #tau#nu_{#tau}Y");
+		h_SLDecayModeC = new TH1I( "SLDMode C-Hadron" , "; SLDecay Mode" , 3 , 0 , 3 );
+		h_SLDecayModeC->GetXaxis()->SetBinLabel(1,"X#rightarrow e#nu_{e}Y");
+		h_SLDecayModeC->GetXaxis()->SetBinLabel(2,"X#rightarrow #mu#nu_{#mu}Y");
+		h_SLDecayModeC->GetXaxis()->SetBinLabel(3,"X#rightarrow #tau#nu_{#tau}Y");
+		h_SLDecayOrder = new TH1I( "SLDecayOrder" , "; SLDecay Type" , 2 , 0 , 2 );
+		h_SLDecayOrder->GetXaxis()->SetBinLabel(1,"with UpStream/DownStream SLD");
+		h_SLDecayOrder->GetXaxis()->SetBinLabel(2,"without UpStream/DownStream SLD");
 		h_foundVertex = new TH2I( "Viertices" , "; primary vertex ; secondary vertex" , 2 , 0 , 2 , 2 , 0 , 2 );
 		h_foundVertex->GetXaxis()->SetBinLabel(1,"vertex not found");
 		h_foundVertex->GetXaxis()->SetBinLabel(2,"vertex found");
@@ -781,7 +806,15 @@ void SLDCorrection::Clear()
 	m_lostChargedMCP_CosTheta.clear();
 	m_lostChargedMCP_Energy.clear();
 	m_lostChargedMCP_Pt.clear();
-	m_nTauSLDecay = 0;
+	m_SLDFlavour.clear();
+	m_SLDType.clear();
+	m_nSLDecayOfBHadron = 0;
+	m_nSLDecayOfCHadron = 0;
+	m_nSLDecayOfTauLepton = 0;
+	m_nSLDecayTotal = 0;
+	m_nSLDecayToElectron = 0;
+	m_nSLDecayToMuon = 0;
+	m_nSLDecayToTau = 0;
 	m_nTauNeutrino = 0;
 	m_nNeutrino = 0;
 	m_nChargedPFOwoTrack = 0;
@@ -1056,7 +1089,7 @@ void SLDCorrection::processEvent( EVENT::LCEvent *pLCEvent )
 	EVENT::LCCollection* recoNumcNuLink(NULL);
 	EVENT::LCCollection* NuSLDLink(NULL);
 	EVENT::LCCollection* SLDNuLink(NULL);
-	
+
 	LCRelationNavigator JetSLDRelNav(LCIO::RECONSTRUCTEDPARTICLE , LCIO::VERTEX  );
 	LCRelationNavigator SLDJetRelNav(LCIO::VERTEX , LCIO::RECONSTRUCTEDPARTICLE  );
 	LCRelationNavigator NeutrinoSLDRelNav(LCIO::RECONSTRUCTEDPARTICLE , LCIO::VERTEX  );
@@ -1077,10 +1110,6 @@ void SLDCorrection::processEvent( EVENT::LCEvent *pLCEvent )
 		pfoVector tempNeutrinos{};
 		pfoVector tempJetsOfSemiLeptonicDecays{};
 
-		int nBSLD = 0;
-		int nCSLD = 0;
-		int nTSLD = 0;
-
 		MCParticleCollection = pLCEvent->getCollection( m_mcParticleCollection );
 		int nMCP = MCParticleCollection->getNumberOfElements();
 		for ( int i_mcp = 0 ; i_mcp < nMCP ; ++i_mcp )
@@ -1093,7 +1122,7 @@ void SLDCorrection::processEvent( EVENT::LCEvent *pLCEvent )
 			bool isBHadronSLDecay = false;
 			bool isCHadronSLDecay = false;
 			bool isTauLeptonSLDecay = false;
-			if ( ( abs( testLepton->getPDG() ) == 11 || abs( testLepton->getPDG() ) == 13 || abs( testLepton->getPDG() ) == 15 ) && ( testLepton->getGeneratorStatus() ) == 1 && !( testLepton->isOverlay() ) )
+			if ( ( abs( testLepton->getPDG() ) == 11 || abs( testLepton->getPDG() ) == 13 || abs( testLepton->getPDG() ) == 15 ) )
 			{
 				for ( long unsigned int i_parent = 0 ; i_parent < ( testLepton->getParents() ).size() ; ++i_parent )
 				{
@@ -1109,9 +1138,62 @@ void SLDCorrection::processEvent( EVENT::LCEvent *pLCEvent )
 					isBHadronSLDecay = checkBHadronSLDecay( testLepton );
 					isCHadronSLDecay = checkCHadronSLDecay( testLepton );
 					isTauLeptonSLDecay = checkTauLeptonSLDecay( testLepton );
-					nBSLD += ( isBHadronSLDecay ? 1 : 0 );
-					nCSLD += ( isCHadronSLDecay ? 1 : 0 );
-					nTSLD += ( isTauLeptonSLDecay ? 1 : 0 );
+					if ( isBHadronSLDecay )
+					{
+						++m_nSLDecayOfBHadron;
+						m_SLDFlavour.push_back( 5 );
+						if ( m_fillRootTree ) h_SLDecayFlavour->Fill( 0.5 );
+					}
+					else if ( isCHadronSLDecay )
+					{
+						++m_nSLDecayOfCHadron;
+						m_SLDFlavour.push_back( 4 );
+						if ( m_fillRootTree ) h_SLDecayFlavour->Fill( 1.5 );
+					}
+					else if ( isTauLeptonSLDecay )
+					{
+						++m_nSLDecayOfTauLepton;
+						m_SLDFlavour.push_back( 15 );
+						if ( m_fillRootTree ) h_SLDecayFlavour->Fill( 2.5 );
+					}
+					else
+					{
+						m_SLDFlavour.push_back( 0 );
+					}
+					if ( downStreamSLDecay || upStreamSLDecay )
+					{
+						m_SLDType.push_back( 0 );
+					}
+					else
+					{
+						m_SLDType.push_back( 1 );
+					}
+					if ( abs( testLepton->getPDG() ) == 11 )
+					{
+						++m_nSLDecayToElectron;
+						if ( isBHadronSLDecay ) h_SLDecayModeB->Fill( 0.5 );
+						if ( isCHadronSLDecay ) h_SLDecayModeC->Fill( 0.5 );
+					}
+					else if ( abs( testLepton->getPDG() ) == 13 )
+					{
+						++m_nSLDecayToMuon;
+						if ( isBHadronSLDecay ) h_SLDecayModeB->Fill( 1.5 );
+						if ( isCHadronSLDecay ) h_SLDecayModeC->Fill( 1.5 );
+					}
+					else if ( abs( testLepton->getPDG() ) == 15 )
+					{
+						++m_nSLDecayToTau;
+						if ( isBHadronSLDecay ) h_SLDecayModeB->Fill( 2.5 );
+						if ( isCHadronSLDecay ) h_SLDecayModeC->Fill( 2.5 );
+					}
+					m_SLDecayXi.push_back( testLepton->getParents()[ 0 ]->getVertex()[ 0 ] );
+					m_SLDecayYi.push_back( testLepton->getParents()[ 0 ]->getVertex()[ 1 ] );
+					m_SLDecayZi.push_back( testLepton->getParents()[ 0 ]->getVertex()[ 2 ] );
+					m_SLDecayRi.push_back( sqrt( pow( testLepton->getParents()[ 0 ]->getVertex()[ 0 ] , 2 ) + pow( testLepton->getParents()[ 0 ]->getVertex()[ 1 ] , 2 ) + pow( testLepton->getParents()[ 0 ]->getVertex()[ 2 ] , 2 ) ) );
+					m_SLDecayXf.push_back( testLepton->getParents()[ 0 ]->getEndpoint()[ 0 ] );
+					m_SLDecayYf.push_back( testLepton->getParents()[ 0 ]->getEndpoint()[ 1 ] );
+					m_SLDecayZf.push_back( testLepton->getParents()[ 0 ]->getEndpoint()[ 2 ] );
+					m_SLDecayRf.push_back( sqrt( pow( testLepton->getParents()[ 0 ]->getEndpoint()[ 0 ] , 2 ) + pow( testLepton->getParents()[ 0 ]->getEndpoint()[ 1 ] , 2 ) + pow( testLepton->getParents()[ 0 ]->getEndpoint()[ 2 ] , 2 ) ) );
 					if ( isBHadronSLDecay && !m_includeBSLD ) continue;
 					if ( isCHadronSLDecay && !m_includeCSLD ) continue;
 					if ( isTauLeptonSLDecay && !m_includeTSLD ) continue;
@@ -1122,20 +1204,17 @@ void SLDCorrection::processEvent( EVENT::LCEvent *pLCEvent )
 					if ( downStreamSLDecay )
 					{
 						streamlog_out(DEBUG3) << "	There is/are downstream semi-leptonic(s) decay in primary semi-leptonic decay products" << std::endl;
-						if ( m_fillRootTree ) h_SLDecayOrder->Fill( 2.5 );
 					}
 					if ( upStreamSLDecay )
 					{
 						streamlog_out(DEBUG3) << "	There is/are upstream semi-leptonic(s) decay in primary semi-leptonic decay products" << std::endl;
-						if ( m_fillRootTree ) h_SLDecayOrder->Fill( 0.5 );
 					}
 					if ( !downStreamSLDecay && !upStreamSLDecay )
 					{
+						if ( m_fillRootTree ) h_SLDecayOrder->Fill( 1.5 );
 						streamlog_out(DEBUG3) << "	<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<   >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
 						streamlog_out(DEBUG3) << "	<<<<<<<<<<<<<<<< There are no upstream and downstream semi-leptonic decay >>>>>>>>>>>>>>>>>" << std::endl;
 						streamlog_out(DEBUG3) << "	<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<   >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
-
-						if ( m_fillRootTree ) h_SLDecayOrder->Fill( 1.5 );
 						doSLDCorrection( pLCEvent , testLepton , semiLeptonicVertices , semiLeptonicVertexRecoParticles , jetsOfSemiLeptonicDecays , neutrinos );
 						m_parentHadronMass.push_back( ( testLepton->getParents()[ 0 ] )->getMass() );
 						m_parentHadronPDG.push_back( ( testLepton->getParents()[ 0 ] )->getPDG() );
@@ -1160,19 +1239,25 @@ void SLDCorrection::processEvent( EVENT::LCEvent *pLCEvent )
 							if ( daughterPDG == std::abs( testLepton->getPDG() ) + 1 ) mcNeutrinos.push_back( mcDaughter );
 						}
 					}
+					else
+					{
+						if ( m_fillRootTree ) h_SLDecayOrder->Fill( 0.5 );
+					}
 				}
 			}
 		}
 		m_nTauNeutrino = nTauNeutrino;
+		m_nSLDecayTotal = m_nSLDecayOfBHadron + m_nSLDecayOfCHadron;
+
 		if ( m_fillRootTree )
 		{
 			m_pTTree1->Fill();
 			m_pTTree2->Fill();
 		}
-		semiLeptonicVertex->parameters().setValue( "nBHadronSLD_found" , ( int )nBSLD );
-		semiLeptonicVertex->parameters().setValue( "nCHadronSLD_found" , ( int )nCSLD );
-		semiLeptonicVertex->parameters().setValue( "nTauLeptonSLD_found" , ( int )nTSLD );
-		semiLeptonicVertex->parameters().setValue( "nTotalSLD_found" , ( int )nBSLD + ( int )nCSLD );
+		semiLeptonicVertex->parameters().setValue( "nBHadronSLD_found" , ( int )m_nSLDecayOfBHadron );
+		semiLeptonicVertex->parameters().setValue( "nCHadronSLD_found" , ( int )m_nSLDecayOfCHadron );
+		semiLeptonicVertex->parameters().setValue( "nTauLeptonSLD_found" , ( int )m_nSLDecayOfTauLepton );
+		semiLeptonicVertex->parameters().setValue( "nTotalSLD_found" , ( int )m_nSLDecayTotal );
 		for ( unsigned int i_sld = 0 ; i_sld < semiLeptonicVertices.size() ; ++i_sld )
 		{
 			semiLeptonicVertex->addElement( semiLeptonicVertices[ i_sld ] );
@@ -1196,24 +1281,24 @@ void SLDCorrection::processEvent( EVENT::LCEvent *pLCEvent )
 			mcNurecoNuLink = MCNuRecoNuRelNav.createLCCollection();
 			recoNumcNuLink = RecoNuMCNuRelNav.createLCCollection();
 		}
+		JetSLDLink = JetSLDRelNav.createLCCollection();
+		SLDJetLink = SLDJetRelNav.createLCCollection();
+		NuSLDLink = NeutrinoSLDRelNav.createLCCollection();
+		SLDNuLink = SLDNeutrinoRelNav.createLCCollection();
+		pLCEvent->addCollection( semiLeptonicVertex , m_SLDVertex );
+		pLCEvent->addCollection( semiLeptonicVertexRP , m_SLDVertexRP );
+		pLCEvent->addCollection( Neutrinos , m_reconstructedNeutrino );
+		pLCEvent->addCollection( JetSLDLink , m_JetSLDLinkName );
+		pLCEvent->addCollection( SLDJetLink , m_SLDJetLinkName );
+		pLCEvent->addCollection( NuSLDLink , m_NuSLDLinkName );
+		pLCEvent->addCollection( SLDNuLink , m_SLDNuLinkName );
+		if ( mcNeutrinos.size() == neutrinos.size() / 3 )
+		{
+			pLCEvent->addCollection( mcNurecoNuLink , m_mcNurecoNuLinkName );
+			pLCEvent->addCollection( recoNumcNuLink , m_recoNumcNuLinkName );
+		}
 //		if ( semiLeptonicVertices.size() != 0 )
 //		{
-			JetSLDLink = JetSLDRelNav.createLCCollection();
-			SLDJetLink = SLDJetRelNav.createLCCollection();
-			NuSLDLink = NeutrinoSLDRelNav.createLCCollection();
-			SLDNuLink = SLDNeutrinoRelNav.createLCCollection();
-			pLCEvent->addCollection( semiLeptonicVertex , m_SLDVertex );
-			pLCEvent->addCollection( semiLeptonicVertexRP , m_SLDVertexRP );
-			pLCEvent->addCollection( Neutrinos , m_reconstructedNeutrino );
-			pLCEvent->addCollection( JetSLDLink , m_JetSLDLinkName );
-			pLCEvent->addCollection( SLDJetLink , m_SLDJetLinkName );
-			pLCEvent->addCollection( NuSLDLink , m_NuSLDLinkName );
-			pLCEvent->addCollection( SLDNuLink , m_SLDNuLinkName );
-			if ( mcNeutrinos.size() == neutrinos.size() / 3 )
-			{
-				pLCEvent->addCollection( mcNurecoNuLink , m_mcNurecoNuLinkName );
-				pLCEvent->addCollection( recoNumcNuLink , m_recoNumcNuLinkName );
-			}
 //		}
 
 		streamlog_out(MESSAGE) << "	Found " << semiLeptonicVertices.size() << " semi-leptonic decays with " << semiLeptonicVertexRecoParticles.size() << " associated reconstructed particles in " << jetsOfSemiLeptonicDecays.size() << " jets" << std::endl;
@@ -1237,30 +1322,28 @@ bool SLDCorrection::hasPrimarySLDecay( MCParticle *parentHadron )
 		for ( long unsigned int i_daughter = 0 ; i_daughter < ( parentHadron->getDaughters() ).size() ; ++i_daughter )
 		{
 			MCParticle *daughter = parentHadron->getDaughters()[ i_daughter ];
-			if ( daughter->getGeneratorStatus() == 1 && !( daughter->isOverlay() ) )
+			if ( daughter->isOverlay() ) continue;
+			if ( daughter->getGeneratorStatus() == 1 )
 			{
 				if ( abs( daughter->getPDG() ) == 11 || abs( daughter->getPDG() ) == 13 || abs( daughter->getPDG() ) == 15 )
 				{
+					int leptonCharge = ( int ) daughter->getCharge();
+					int expectedNeutrinoPDG = -1 * ( daughter->getPDG() - leptonCharge );
 					for ( long unsigned int i_NuCandidate = 0 ; i_NuCandidate < ( parentHadron->getDaughters() ).size() ; ++i_NuCandidate )
 					{
 						MCParticle *secondDaughter = parentHadron->getDaughters()[ i_NuCandidate ];
-						if ( ( abs( secondDaughter->getPDG() ) == abs( daughter->getPDG() ) + 1 ) && secondDaughter->getGeneratorStatus() == 1 )
-						{
-							hasSLDecay = true;
-						}
+						if ( secondDaughter->getPDG() == expectedNeutrinoPDG && secondDaughter->getGeneratorStatus() == 1 ) hasSLDecay = true;
 					}
 				}
 			}
 			else if( abs( daughter->getPDG() ) == 15 )
 			{
+				int leptonCharge = ( int ) daughter->getCharge();
+				int expectedNeutrinoPDG = -1 * ( daughter->getPDG() - leptonCharge );
 				for ( long unsigned int i_NuCandidate = 0 ; i_NuCandidate < ( parentHadron->getDaughters() ).size() ; ++i_NuCandidate )
 				{
 					MCParticle *secondDaughter = parentHadron->getDaughters()[ i_NuCandidate ];
-					if ( ( abs( secondDaughter->getPDG() ) == abs( daughter->getPDG() ) + 1 ) && secondDaughter->getGeneratorStatus() == 1 )
-					{
-						hasSLDecay = true;
-						m_nTauSLDecay += 1;
-					}
+					if ( secondDaughter->getPDG() == expectedNeutrinoPDG && secondDaughter->getGeneratorStatus() == 1 ) hasSLDecay = true;
 				}
 			}
 		}
@@ -1446,12 +1529,9 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 
 	MCParticle* trueNeutrino = getTrueNeutrino( SLDLepton );
 	MCParticle *parentHadron = SLDLepton->getParents()[ 0 ];
-	MCParticle *daughterHadron = NULL;
 	TLorentzVector trueVisible4Mom( 0.0 , 0.0 , 0.0 , 0.0 );
 	for ( unsigned int i_d = 0 ; i_d < ( SLDLepton->getParents()[ 0 ] )->getDaughters().size() ; ++i_d )
 	{
-		int daughterPDG = std::abs( ( SLDLepton->getParents()[ 0 ] )->getDaughters()[ i_d ]->getPDG() );
-		if ( daughterPDG < 11 || daughterPDG > 16 ) daughterHadron = ( SLDLepton->getParents()[ 0 ] )->getDaughters()[ i_d ];
 		if ( ( SLDLepton->getParents()[ 0 ] )->getDaughters()[ i_d ] != trueNeutrino ) trueVisible4Mom += TLorentzVector( ( SLDLepton->getParents()[ 0 ] )->getDaughters()[ i_d ]->getMomentum() , ( SLDLepton->getParents()[ 0 ] )->getDaughters()[ i_d ]->getEnergy() );
 	}
 
@@ -1805,7 +1885,6 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 	evaluatePFOsAngle( aloneChargedPFOsInJetFromSLD , aloneChargedPFOsInJetNotFromSLD , chargedPFOsInJetFromSLD , chargedPFOsInJetNotFromSLD , neutralPFOsInJetFromSLD , neutralPFOsInJetNotFromSLD , leptonDirection , jetAxis , recoFlightDirection , SLDStatus );
 
 //	associatedParticles.push_back( linkedRecoLepton );
-//	double InvMassCut = daughterHadron->getMass();
 //	double InvMassCut = 2.1;
 	double InvMassCutCharged = 0.0;
 	double InvMassCutNeutral = 0.0;
@@ -2949,7 +3028,7 @@ void SLDCorrection::getNeutrinoCovMat(		TLorentzVector recoNeutrinoFourMomentum 
 	double E_vis = visibleFourMomentum.E();
 	double P_vis_par = ( visibleFourMomentum.Vect() ).Dot( flightDirection );
 	double P_vis_nor = sqrt( ( visibleFourMomentum.Vect() ).Mag2() - pow( P_vis_par , 2 ) );
-	double M_vis = visibleFourMomentum.M();
+//	double M_vis = visibleFourMomentum.M();
 	streamlog_out(DEBUG9) << "	E_nu =		" << E_nu << std::endl;
 	streamlog_out(DEBUG9) << "	P_nu_par =	" << P_nu_par << std::endl;
 	streamlog_out(DEBUG9) << "	E_vis =		" << E_vis << std::endl;
@@ -2960,7 +3039,7 @@ void SLDCorrection::getNeutrinoCovMat(		TLorentzVector recoNeutrinoFourMomentum 
 	double coefficient_Evis = Coefficient * ( E_nu + E_vis );
 	double coefficient_PvisPar = Coefficient * ( P_nu_par + P_vis_par );
 	double coefficient_PvisNor = Coefficient * P_vis_nor * ( 1.0 + E_vis / E_nu );
-	double coefficient_MB = Coefficient * parentHadronMass;
+//	double coefficient_MB = Coefficient * parentHadronMass;
 	float power = 1.0;
 
 	NeutrinoCovMatrix.push_back( pow( fabs( coefficient_PvisPar ) , power / 2.0 ) * CovMatrixDetPar[ 0 ] + pow( fabs( coefficient_PvisNor ) , power / 2.0 ) * CovMatrixDetNor[ 0 ] );
@@ -3547,9 +3626,9 @@ void SLDCorrection::InitializeHistogram( TH1F *histogram , int scale , int color
 	histogram->SetMarkerSize( markerSize );
 	histogram->SetMarkerStyle( markerStyle );
 	histogram->SetMarkerColor( color );
-	float fit_range = 4.0;
-	float fit_min = -2.0;
-	float fit_max = 2.0;
+//	float fit_range = 4.0;
+//	float fit_min = -2.0;
+//	float fit_max = 2.0;
 //	doProperGaussianFit( histogram , fit_min , fit_max , fit_range );
 //	histogram->GetFunction("gaus")->SetLineColor( color );
 	float y_max = 1.2 * histogram->GetMaximum();
@@ -3615,6 +3694,9 @@ void SLDCorrection::end()
 		InitializeHistogram( h_NuPyNormalizedResidual , n_NuPyNormalizedResidual , 4 , 1 , 1.0 , 1 );
 		InitializeHistogram( h_NuPzNormalizedResidual , n_NuPzNormalizedResidual , 4 , 1 , 1.0 , 1 );
 		InitializeHistogram( h_NuENormalizedResidual , n_NuENormalizedResidual , 4 , 1 , 1.0 , 1 );
+		h_SLDecayFlavour->Write();
+		h_SLDecayModeB->Write();
+		h_SLDecayModeC->Write();
 		h_SLDecayOrder->Write();
 		h_NuPxResidual->Write();
 		h_NuPyResidual->Write();
