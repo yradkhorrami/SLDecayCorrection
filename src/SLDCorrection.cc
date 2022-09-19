@@ -389,6 +389,12 @@ void SLDCorrection::init()
 		m_pTTree1->Branch("event", &m_nEvt, "event/I");
 		m_pTTree1->Branch("SLDFlavour", &m_SLDFlavour);
 		m_pTTree1->Branch("SLDType", &m_SLDType);
+		m_pTTree1->Branch("SLDLeptonID", &m_SLDLeptonID);
+		m_pTTree1->Branch("leptonE_to_parentE", &m_leptonE_to_parentE);
+		m_pTTree1->Branch("otherChargedE_to_parentE", &m_otherChargedE_to_parentE);
+		m_pTTree1->Branch("allChargedE_to_parentE", &m_allChargedE_to_parentE);
+		m_pTTree1->Branch("neutralE_to_parentE", &m_neutralE_to_parentE);
+		m_pTTree1->Branch("neutrino_to_parentE", &m_neutrino_to_parentE);
 		m_pTTree1->Branch("nSLDecayOfBHadron",&m_nSLDecayOfBHadron,"nSLDecayOfBHadron/I");
 		m_pTTree1->Branch("nSLDecayOfCHadron",&m_nSLDecayOfCHadron,"nSLDecayOfCHadron/I");
 		m_pTTree1->Branch("nSLDecayOfTauLepton",&m_nSLDecayOfTauLepton,"nSLDecayOfTauLepton/I");
@@ -658,14 +664,21 @@ void SLDCorrection::init()
 
 
 
-		h_SLDStatus = new TH1F( "SLDStatus" , ";" , 7 , 0.5 , 7.5 ); n_SLDStatus = 0;
-		h_SLDStatus->GetXaxis()->SetBinLabel(1,"lep not found");
+		h_SLDStatus = new TH1I( "SLDStatus" , ";" , 7 , 0 , 7 ); n_SLDStatus = 0;
+		h_SLDStatus->GetXaxis()->SetBinLabel(1,"No l^{REC}");
 		h_SLDStatus->GetXaxis()->SetBinLabel(2,"lep not in jet");
 		h_SLDStatus->GetXaxis()->SetBinLabel(3,"lep in Prim. Vtx");
 		h_SLDStatus->GetXaxis()->SetBinLabel(4,"lep in Sec. Vtx");
 		h_SLDStatus->GetXaxis()->SetBinLabel(5,"lep + 3^{rd} Vtx");
 		h_SLDStatus->GetXaxis()->SetBinLabel(6,"lep + alone track");
 		h_SLDStatus->GetXaxis()->SetBinLabel(7,"other");
+//		h_SLDStatus->GetXaxis()->SetBinLabel(1,"lep not found");
+//		h_SLDStatus->GetXaxis()->SetBinLabel(2,"lep not in jet");
+//		h_SLDStatus->GetXaxis()->SetBinLabel(3,"lep in Prim. Vtx");
+//		h_SLDStatus->GetXaxis()->SetBinLabel(4,"lep in Sec. Vtx");
+//		h_SLDStatus->GetXaxis()->SetBinLabel(5,"lep + 3^{rd} Vtx");
+//		h_SLDStatus->GetXaxis()->SetBinLabel(6,"lep + alone track");
+//		h_SLDStatus->GetXaxis()->SetBinLabel(7,"other");
 
 		h_BHadronType = new TH1F( "BHadronType" , ";" , 8 , -0.5 , 7.5 );
 		h_BHadronType->GetXaxis()->SetBinLabel(1,"B^{0}");//PDG = 511
@@ -808,6 +821,12 @@ void SLDCorrection::Clear()
 	m_lostChargedMCP_Pt.clear();
 	m_SLDFlavour.clear();
 	m_SLDType.clear();
+	m_SLDLeptonID.clear();
+	m_leptonE_to_parentE.clear();
+	m_otherChargedE_to_parentE.clear();
+	m_allChargedE_to_parentE.clear();
+	m_neutralE_to_parentE.clear();
+	m_neutrino_to_parentE.clear();
 	m_nSLDecayOfBHadron = 0;
 	m_nSLDecayOfCHadron = 0;
 	m_nSLDecayOfTauLepton = 0;
@@ -1168,6 +1187,7 @@ void SLDCorrection::processEvent( EVENT::LCEvent *pLCEvent )
 					{
 						m_SLDType.push_back( 1 );
 					}
+					m_SLDLeptonID.push_back( testLepton->getPDG() );
 					if ( abs( testLepton->getPDG() ) == 11 )
 					{
 						++m_nSLDecayToElectron;
@@ -1681,7 +1701,7 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 		streamlog_out(WARNING) << "	||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" << std::endl;
 		streamlog_out(WARNING) << "	||||||||||||||||| Reconstructed Lepton is not found ||||||||||||||||||" << std::endl;
 		streamlog_out(WARNING) << "	||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" << std::endl;
-		if ( m_fillRootTree ) h_SLDStatus->Fill( 1 );
+		if ( m_fillRootTree ) h_SLDStatus->Fill( 0.5 );
 		return;
 	}
 	recoLeptonFourMomentum = TLorentzVector( linkedRecoLepton->getMomentum() , linkedRecoLepton->getEnergy() );
@@ -1695,7 +1715,7 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 		streamlog_out(WARNING) << "	||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" << std::endl;
 		streamlog_out(WARNING) << "	||||||||||| Reconstructed Lepton doesn't belong to any jet |||||||||||" << std::endl;
 		streamlog_out(WARNING) << "	||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" << std::endl;
-		if ( m_fillRootTree ) h_SLDStatus->Fill( 2 );
+		if ( m_fillRootTree ) h_SLDStatus->Fill( 1.5 );
 		return;
 	}
 
@@ -1705,7 +1725,7 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 		streamlog_out(WARNING) << "	||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" << std::endl;
 		streamlog_out(WARNING) << "	||||||||||||| Reconstructed Lepton is in primary vertex ||||||||||||||" << std::endl;
 		streamlog_out(WARNING) << "	||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" << std::endl;
-		if ( m_fillRootTree ) h_SLDStatus->Fill( 3 );
+		if ( m_fillRootTree ) h_SLDStatus->Fill( 2.5 );
 		return;
 	}
 	investigateJetEnergyContent( assignedJet );
@@ -1777,7 +1797,7 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 	m_FlightDirectionErrorDeltaPhi.push_back( recoFlightDirection.Phi() - trueFlightDirection.Phi() );
 
 	m_SLDStatus.push_back( SLDStatus );
-	if ( m_fillRootTree ) h_SLDStatus->Fill( SLDStatus );
+	if ( m_fillRootTree ) h_SLDStatus->Fill( SLDStatus - 0.5 );
 
 	if ( m_cheatFlightDirection )
 	{
@@ -3561,6 +3581,11 @@ void SLDCorrection::fillTrueRecoFourMomentum(	TLorentzVector trueNeutralFourMome
 	m_cheatedPVARecoChargedPz.push_back( cheatedPVARecoChargedFourMomentum.Pz() );
 	m_cheatedPVARecoChargedE.push_back( cheatedPVARecoChargedFourMomentum.E() );
 	m_cheatedPVARecoChargedM.push_back( cheatedPVARecoChargedFourMomentum.M() );
+	m_leptonE_to_parentE.push_back( trueLeptonFourMomentum.E() / trueHadronFourMomentum.E() );
+	m_otherChargedE_to_parentE.push_back( trueChargedFourMomentum.E() / trueHadronFourMomentum.E() );
+	m_allChargedE_to_parentE.push_back( ( trueLeptonFourMomentum + trueChargedFourMomentum ).E() / trueHadronFourMomentum.E() );
+	m_neutralE_to_parentE.push_back( trueNeutralFourMomentum.E() / trueHadronFourMomentum.E() );
+	m_neutrino_to_parentE.push_back( trueNeutrinoFourMomentum.E() / trueHadronFourMomentum.E() );
 }
 
 void SLDCorrection::investigateJetEnergyContent( EVENT::ReconstructedParticle *assignedJet )
@@ -3681,7 +3706,7 @@ void SLDCorrection::end()
 		m_pTFile->cd();
 		m_pTTree1->Write();
 		m_pTTree2->Write();
-		h_SLDStatus->Scale( 100.0 / n_SLDStatus );
+//		h_SLDStatus->Scale( 100.0 / n_SLDStatus );
 		h_SLDStatus->GetYaxis()->SetTitle("#SLDecay [%]");
 		h_SLDStatus->Write();
 		h_BHadronType->Write();
