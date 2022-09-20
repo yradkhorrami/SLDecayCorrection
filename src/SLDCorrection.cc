@@ -402,6 +402,7 @@ void SLDCorrection::init()
 		m_pTTree1->Branch("nSLDecayToElectron",&m_nSLDecayToElectron,"nSLDecayToElectron/I");
 		m_pTTree1->Branch("nSLDecayToMuon",&m_nSLDecayToMuon,"nSLDecayToMuon/I");
 		m_pTTree1->Branch("nSLDecayToTau",&m_nSLDecayToTau,"nSLDecayToTau/I");
+		m_pTTree1->Branch("SLDStatus", &m_SLDStatus );
 		m_pTTree1->Branch("nTauNeutrino",&m_nTauNeutrino,"nTauNeutrino/I");
 		m_pTTree1->Branch("nNeutrino",&m_nNeutrino,"nNeutrino/I");
 		m_pTTree1->Branch("nSLD_chargedMCPwoTrack",&m_nSLD_chargedMCPwoTrack);
@@ -487,7 +488,6 @@ void SLDCorrection::init()
 		m_pTTree1->Branch("jetEnergyFractionNeutralHadron", &m_jetEnergyFractionNeutralHadron );
 		m_pTTree1->Branch("jetEnergyFractionPhoton", &m_jetEnergyFractionPhoton );
 		m_pTTree1->Branch("jetEnergyFractionNeutrals", &m_jetEnergyFractionNeutrals );
-		m_pTTree1->Branch("SLDStatus", &m_SLDStatus );
 		m_pTTree1->Branch("nTrueNeutralDecayProducts",&m_nTrueNeutralDecayProducts);
 		m_pTTree1->Branch("nTrueAloneChargedDecayProducts",&m_nTrueAloneChargedDecayProducts);
 		m_pTTree1->Branch("nTrueVertices",&m_nTrueVertices);
@@ -546,6 +546,14 @@ void SLDCorrection::init()
 
 		m_pTTree2 = new TTree("FourMomentums", "FourMomentums");
 		m_pTTree2->Branch("SLDStatus", &m_SLDStatus );
+		m_pTTree2->Branch("SLDFlavour", &m_SLDFlavour);
+		m_pTTree2->Branch("SLDType", &m_SLDType);
+		m_pTTree2->Branch("SLDLeptonID", &m_SLDLeptonID);
+		m_pTTree2->Branch("leptonE_to_parentE", &m_leptonE_to_parentE);
+		m_pTTree2->Branch("otherChargedE_to_parentE", &m_otherChargedE_to_parentE);
+		m_pTTree2->Branch("allChargedE_to_parentE", &m_allChargedE_to_parentE);
+		m_pTTree2->Branch("neutralE_to_parentE", &m_neutralE_to_parentE);
+		m_pTTree2->Branch("neutrino_to_parentE", &m_neutrino_to_parentE);
 		m_pTTree2->Branch("visibleChargedInvMassCut", &m_visibleChargedInvMassCut );
 		m_pTTree2->Branch("visibleNeutralInvMassCut", &m_visibleNeutralInvMassCut );
 		m_pTTree2->Branch("trueNeutralPx", &m_trueNeutralPx );
