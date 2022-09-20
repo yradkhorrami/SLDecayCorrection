@@ -1199,20 +1199,20 @@ void SLDCorrection::processEvent( EVENT::LCEvent *pLCEvent )
 					if ( abs( testLepton->getPDG() ) == 11 )
 					{
 						++m_nSLDecayToElectron;
-						if ( isBHadronSLDecay ) h_SLDecayModeB->Fill( 0.5 );
-						if ( isCHadronSLDecay ) h_SLDecayModeC->Fill( 0.5 );
+						if ( isBHadronSLDecay && m_fillRootTree ) h_SLDecayModeB->Fill( 0.5 );
+						if ( isCHadronSLDecay && m_fillRootTree ) h_SLDecayModeC->Fill( 0.5 );
 					}
 					else if ( abs( testLepton->getPDG() ) == 13 )
 					{
 						++m_nSLDecayToMuon;
-						if ( isBHadronSLDecay ) h_SLDecayModeB->Fill( 1.5 );
-						if ( isCHadronSLDecay ) h_SLDecayModeC->Fill( 1.5 );
+						if ( isBHadronSLDecay && m_fillRootTree ) h_SLDecayModeB->Fill( 1.5 );
+						if ( isCHadronSLDecay && m_fillRootTree ) h_SLDecayModeC->Fill( 1.5 );
 					}
 					else if ( abs( testLepton->getPDG() ) == 15 )
 					{
 						++m_nSLDecayToTau;
-						if ( isBHadronSLDecay ) h_SLDecayModeB->Fill( 2.5 );
-						if ( isCHadronSLDecay ) h_SLDecayModeC->Fill( 2.5 );
+						if ( isBHadronSLDecay && m_fillRootTree ) h_SLDecayModeB->Fill( 2.5 );
+						if ( isCHadronSLDecay && m_fillRootTree ) h_SLDecayModeC->Fill( 2.5 );
 					}
 					m_SLDecayXi.push_back( testLepton->getParents()[ 0 ]->getVertex()[ 0 ] );
 					m_SLDecayYi.push_back( testLepton->getParents()[ 0 ]->getVertex()[ 1 ] );
