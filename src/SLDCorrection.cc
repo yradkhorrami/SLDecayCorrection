@@ -673,12 +673,12 @@ void SLDCorrection::init()
 
 
 		h_SLDStatus = new TH1I( "SLDStatus" , ";" , 7 , 0 , 7 ); n_SLDStatus = 0;
-		h_SLDStatus->GetXaxis()->SetBinLabel(1,"No l^{REC}");
-		h_SLDStatus->GetXaxis()->SetBinLabel(2,"lep not in jet");
-		h_SLDStatus->GetXaxis()->SetBinLabel(3,"lep in Prim. Vtx");
-		h_SLDStatus->GetXaxis()->SetBinLabel(4,"lep in Sec. Vtx");
-		h_SLDStatus->GetXaxis()->SetBinLabel(5,"lep + 3^{rd} Vtx");
-		h_SLDStatus->GetXaxis()->SetBinLabel(6,"lep + alone track");
+		h_SLDStatus->GetXaxis()->SetBinLabel(1,"No #font[32]{l}^{REC}");
+		h_SLDStatus->GetXaxis()->SetBinLabel(2,"#font[32]{l}#notin^{}jet");
+		h_SLDStatus->GetXaxis()->SetBinLabel(3,"#font[32]{l}#in^{}Vtx^{Prim.}");
+		h_SLDStatus->GetXaxis()->SetBinLabel(4,"#font[32]{l}#in^{}2^{nd}Vtx");
+		h_SLDStatus->GetXaxis()->SetBinLabel(5,"#font[32]{l}+3^{rd}Vtx");
+		h_SLDStatus->GetXaxis()->SetBinLabel(6,"#font[32]{l}+trk^{alone}");
 		h_SLDStatus->GetXaxis()->SetBinLabel(7,"other");
 //		h_SLDStatus->GetXaxis()->SetBinLabel(1,"lep not found");
 //		h_SLDStatus->GetXaxis()->SetBinLabel(2,"lep not in jet");
@@ -1160,6 +1160,7 @@ void SLDCorrection::processEvent( EVENT::LCEvent *pLCEvent )
 				}
 				if ( primarySLDecay )
 				{
+					bool solveSLD = true;
 					std::vector< TLorentzVector > recoNeutrinoFourMomentum;
 					std::vector< std::vector< float > > recoNeutrinoCovMat;
 					isBHadronSLDecay = checkBHadronSLDecay( testLepton );
@@ -1190,12 +1191,12 @@ void SLDCorrection::processEvent( EVENT::LCEvent *pLCEvent )
 					if ( downStreamSLDecay || upStreamSLDecay )
 					{
 						m_SLDType.push_back( 0 );
+						solveSLD = false;
 					}
 					else
 					{
 						m_SLDType.push_back( 1 );
 					}
-					m_SLDLeptonID.push_back( testLepton->getPDG() );
 					if ( abs( testLepton->getPDG() ) == 11 )
 					{
 						++m_nSLDecayToElectron;
@@ -1222,10 +1223,11 @@ void SLDCorrection::processEvent( EVENT::LCEvent *pLCEvent )
 					m_SLDecayYf.push_back( testLepton->getParents()[ 0 ]->getEndpoint()[ 1 ] );
 					m_SLDecayZf.push_back( testLepton->getParents()[ 0 ]->getEndpoint()[ 2 ] );
 					m_SLDecayRf.push_back( sqrt( pow( testLepton->getParents()[ 0 ]->getEndpoint()[ 0 ] , 2 ) + pow( testLepton->getParents()[ 0 ]->getEndpoint()[ 1 ] , 2 ) + pow( testLepton->getParents()[ 0 ]->getEndpoint()[ 2 ] , 2 ) ) );
-					if ( isBHadronSLDecay && !m_includeBSLD ) continue;
-					if ( isCHadronSLDecay && !m_includeCSLD ) continue;
-					if ( isTauLeptonSLDecay && !m_includeTSLD ) continue;
-//					if ( abs( testLepton->getPDG() ) != 11 ) continue;
+					if ( isBHadronSLDecay && !m_includeBSLD ) solveSLD = false;
+					if ( isCHadronSLDecay && !m_includeCSLD ) solveSLD = false;
+					if ( isTauLeptonSLDecay && !m_includeTSLD ) solveSLD = false;
+					if ( abs( testLepton->getPDG() ) == 15 ) solveSLD = false;
+//					if ( abs( testLepton->getPDG() ) != 11 ) solveSLD = false;
 					streamlog_out(DEBUG3) << "" << std::endl;
 					streamlog_out(DEBUG3) << "	<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<   >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
 					streamlog_out(DEBUG3) << "	<<<<<<<<<<<<<<<<<<<<<<<<<<< Found a primary semi-leptonic decay >>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
@@ -1237,8 +1239,13 @@ void SLDCorrection::processEvent( EVENT::LCEvent *pLCEvent )
 					{
 						streamlog_out(DEBUG3) << "	There is/are upstream semi-leptonic(s) decay in primary semi-leptonic decay products" << std::endl;
 					}
-					if ( !downStreamSLDecay && !upStreamSLDecay )
+					if ( downStreamSLDecay || upStreamSLDecay )
 					{
+						if ( m_fillRootTree ) h_SLDecayOrder->Fill( 0.5 );
+					}
+					if ( solveSLD )
+					{
+						m_SLDLeptonID.push_back( testLepton->getPDG() );
 						if ( m_fillRootTree ) h_SLDecayOrder->Fill( 1.5 );
 						streamlog_out(DEBUG3) << "	<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<   >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
 						streamlog_out(DEBUG3) << "	<<<<<<<<<<<<<<<< There are no upstream and downstream semi-leptonic decay >>>>>>>>>>>>>>>>>" << std::endl;
@@ -1266,10 +1273,6 @@ void SLDCorrection::processEvent( EVENT::LCEvent *pLCEvent )
 							}
 							if ( daughterPDG == std::abs( testLepton->getPDG() ) + 1 ) mcNeutrinos.push_back( mcDaughter );
 						}
-					}
-					else
-					{
-						if ( m_fillRootTree ) h_SLDecayOrder->Fill( 0.5 );
 					}
 				}
 			}
@@ -1413,7 +1416,7 @@ bool SLDCorrection::checkBHadronSLDecay( MCParticle *SLDLepton )
 {
 	bool isBHadronSLDecay = false;
 	MCParticle *parentHadron = SLDLepton->getParents()[ 0 ];
-	if ( floor( abs( parentHadron->getPDG() ) / 100 ) == 5 || floor( abs( parentHadron->getPDG() ) / 1000 ) == 5 ) isBHadronSLDecay = true;
+	if ( floor( fabs( parentHadron->getPDG() ) / 100 ) == 5 || floor( fabs( parentHadron->getPDG() ) / 1000 ) == 5 ) isBHadronSLDecay = true;
 	return isBHadronSLDecay;
 }
 
@@ -1421,7 +1424,7 @@ bool SLDCorrection::checkCHadronSLDecay( MCParticle *SLDLepton )
 {
 	bool isCHadronSLDecay = false;
 	MCParticle *parentHadron = SLDLepton->getParents()[ 0 ];
-	if ( floor( abs( parentHadron->getPDG() ) / 100 ) == 4 || floor( abs( parentHadron->getPDG() ) / 1000 ) == 4 ) isCHadronSLDecay = true;
+	if ( floor( fabs( parentHadron->getPDG() ) / 100 ) == 4 || floor( fabs( parentHadron->getPDG() ) / 1000 ) == 4 ) isCHadronSLDecay = true;
 	return isCHadronSLDecay;
 }
 
@@ -3715,7 +3718,7 @@ void SLDCorrection::end()
 		m_pTTree1->Write();
 		m_pTTree2->Write();
 //		h_SLDStatus->Scale( 100.0 / n_SLDStatus );
-		h_SLDStatus->GetYaxis()->SetTitle("#SLDecay [%]");
+		h_SLDStatus->GetYaxis()->SetTitle("number of SLDecays");
 		h_SLDStatus->Write();
 		h_BHadronType->Write();
 		h_CHadronType->Write();
