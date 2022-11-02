@@ -79,6 +79,7 @@ public:
 	int getVertexInJetsDistribution( Vertex* testVertex , std::vector<EVENT::ReconstructedParticle*> jetVector );
 	void evaluatePFOsAngle( std::vector<EVENT::ReconstructedParticle*> aloneChargedPFOsInJetFromSLD , std::vector<EVENT::ReconstructedParticle*> aloneChargedPFOsInJetNotFromSLD , std::vector<EVENT::ReconstructedParticle*> chargedPFOsInJetFromSLD , std::vector<EVENT::ReconstructedParticle*> chargedPFOsInJetNotFromSLD , std::vector<EVENT::ReconstructedParticle*> neutralPFOsInJetFromSLD , std::vector<EVENT::ReconstructedParticle*> neutralPFOsInJetNotFromSLD , TVector3 leptonDirection , TVector3 jetAxis , TVector3 recoFlightDirection , int SLDStatus );
 	void investigateJetEnergyContent( EVENT::ReconstructedParticle *assignedJet );
+	void checkSLDInput( MCParticle *SLDHadron );
 
 	virtual void check( EVENT::LCEvent *pLCEvent );
 	virtual void end();
@@ -131,9 +132,17 @@ private:
 	float					m_CSLDNeutralSLD4InvMassCut = 0.0;
 	float					m_CSLDNeutralSLD5InvMassCut = 0.0;
 	int					m_nIterFlightDirCorrection = 0;
-	int					m_recoFourMomentumOfVisibles = 0;
+	float					m_BSLD4SigmaTheta = 0;
+	float					m_BSLD4SigmaPhi = 0;
+	float					m_BSLD5SigmaTheta = 0;
+	float					m_BSLD5SigmaPhi = 0;
+	float					m_BSLD4SigmaECPVA = 0;
+	float					m_BSLD4SigmaENPVA = 0;
+	float					m_BSLD5SigmaECPVA = 0;
+	float					m_BSLD5SigmaENPVA = 0;
 	bool					m_displayEvent = true;
 	bool					m_fillRootTree = true;
+	bool					m_traceEvent = false;
 
 	int					m_nRun;
 	int					m_nEvt;
