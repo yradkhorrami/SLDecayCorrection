@@ -2173,6 +2173,25 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 //	recoNeutrinoFourMomentumPos = getNeutrinoFourMomentumStandardMethod( flightDirection , visibleFourMomentum , parentHadronMass , +1.0 );
 //	recoNeutrinoFourMomentumNeg = getNeutrinoFourMomentumStandardMethod( flightDirection , visibleFourMomentum , parentHadronMass , -1.0 );
 
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////									    ////
+////		Estimate Errors due to Particle to Vertex Association	    ////
+////									    ////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+
+	getNeutrinoCovMatET( decayProducts , associatedParticles , linkedRecoLepton , flightDirection , recoNeutrinoFourMomentumPos , NeutrinoCovMatPos , SLDStatus );
+	getNeutrinoCovMatET( decayProducts , associatedParticles , linkedRecoLepton , flightDirection , recoNeutrinoFourMomentumNeg , NeutrinoCovMatNeg , SLDStatus );
+//	getCovMatPVA( decayProducts , associatedParticles , SLDStatus , CovMatrixPVA );
+//	getCovMatFlightDirection( flightDirection , sigmaTheta , sigmaPhi , CovMatrixFlightDirection );
+//	getCovMatDetFlightDirection( decayProducts , flightDirection , CovMatrixFlightDirection , CovMatrixDetector , linkedRecoLepton , CovMatrixDetPar , CovMatrixDetNor );
+//	getNeutrinoCovMat( recoNeutrinoFourMomentumPos , visibleFourMomentum , flightDirection , parentHadronMass , CovMatrixPVA , CovMatrixDetector , CovMatrixDetPar , CovMatrixDetNor , NeutrinoCovMatPos );
+//	getNeutrinoCovMat( recoNeutrinoFourMomentumNeg , visibleFourMomentum , flightDirection , parentHadronMass , CovMatrixPVA , CovMatrixDetector , CovMatrixDetPar , CovMatrixDetNor , NeutrinoCovMatNeg );
+
+
 	if ( fabs( recoNeutrinoFourMomentumPos.E() - trueNeutrinoFourMomentum.E() ) < fabs( recoNeutrinoFourMomentumNeg.E() - trueNeutrinoFourMomentum.E() ) )
 	{
 		recoNeutrinoFourMomentumClose = recoNeutrinoFourMomentumPos;
@@ -2205,39 +2224,7 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 		}
 	 }
 
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////									    ////
-////		Estimate Errors due to Particle to Vertex Association	    ////
-////									    ////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
 
-	getCovMatPVA( decayProducts , associatedParticles , SLDStatus , CovMatrixPVA );
-	float sigmaTheta = 0.0;
-	float sigmaPhi = 0.0;
-	if ( m_cheatFlightDirection )
-	{
-		sigmaTheta = 0.0;
-		sigmaPhi = 0.0;
-	}
-	else
-	{
-		if ( SLDStatus == 4 )
-		{
-			sigmaTheta = m_BSLD4SigmaTheta;//0.015;
-			sigmaPhi = m_BSLD4SigmaPhi;//0.018;
-		}
-		else if ( SLDStatus == 5 )
-		{
-			sigmaTheta = m_BSLD5SigmaTheta;//0.030;
-			sigmaPhi = m_BSLD5SigmaPhi;//0.030;
-		}
-	}
-	getCovMatFlightDirection( flightDirection , sigmaTheta , sigmaPhi , CovMatrixFlightDirection );
-	getCovMatDetFlightDirection( decayProducts , flightDirection , CovMatrixFlightDirection , CovMatrixDetector , linkedRecoLepton , CovMatrixDetPar , CovMatrixDetNor );
-	getNeutrinoCovMat( recoNeutrinoFourMomentumPos , visibleFourMomentum , flightDirection , parentHadronMass , CovMatrixPVA , CovMatrixDetector , CovMatrixDetPar , CovMatrixDetNor , NeutrinoCovMatPos );
-	getNeutrinoCovMat( recoNeutrinoFourMomentumNeg , visibleFourMomentum , flightDirection , parentHadronMass , CovMatrixPVA , CovMatrixDetector , CovMatrixDetPar , CovMatrixDetNor , NeutrinoCovMatNeg );
 	streamlog_out(DEBUG8) << "	CovMatNeutrino(+) :	" << NeutrinoCovMatPos[ 0 ] << std::endl;
 	streamlog_out(DEBUG8) << "				" << NeutrinoCovMatPos[ 1 ] << "	,	" << NeutrinoCovMatPos[ 2 ] << std::endl;
 	streamlog_out(DEBUG8) << "				" << NeutrinoCovMatPos[ 3 ] << "	,	" << NeutrinoCovMatPos[ 4 ] << "	,	" << NeutrinoCovMatPos[ 5 ] << std::endl;
@@ -2650,8 +2637,8 @@ void SLDCorrection::checkSLDInput( MCParticle *SLDHadron )
 }
 
 void SLDCorrection::getCovMatPVA(	std::vector<EVENT::ReconstructedParticle*> decayProducts ,
-						std::vector<EVENT::ReconstructedParticle*> associatedParticles ,
-						int SLDStatus , std::vector< float > &CovMatrixPVA )
+					std::vector<EVENT::ReconstructedParticle*> associatedParticles ,
+					int SLDStatus , std::vector< float > &CovMatrixPVA )
 {
 	float sigmaE_NeutralPVA = 0.0;
 	float sigmaE_ChargedPVA = 0.0;
@@ -2766,7 +2753,8 @@ void SLDCorrection::getCovMatPVA(	std::vector<EVENT::ReconstructedParticle*> dec
 	streamlog_out(DEBUG6) << "	chargedEnergyFromPVA = " << chargedEnergyFromPVA << std::endl;
 	for ( int i_Element = 0 ; i_Element < 10 ; ++i_Element )
 	{
-		CovMatrixPVA.push_back( pow( neutralEnergyFromPVA / neutralMomentumFromPVA , 2 ) * sigmaE_NeutralPVA * CovMatrixNeutralPVA[ i_Element ] + pow( chargedEnergyFromPVA / chargedMomentumFromPVA , 2 ) * sigmaE_ChargedPVA * CovMatrixChargedPVA[ i_Element ] );
+		CovMatrixPVA.push_back( pow( neutralEnergyFromPVA * sigmaE_NeutralPVA / neutralMomentumFromPVA , 2 ) * CovMatrixNeutralPVA[ i_Element ] + pow( chargedEnergyFromPVA * sigmaE_ChargedPVA / chargedMomentumFromPVA , 2 ) * CovMatrixChargedPVA[ i_Element ] );
+//		CovMatrixPVA.push_back( pow( neutralEnergyFromPVA / neutralMomentumFromPVA , 2 ) * sigmaE_NeutralPVA * CovMatrixNeutralPVA[ i_Element ] + pow( chargedEnergyFromPVA / chargedMomentumFromPVA , 2 ) * sigmaE_ChargedPVA * CovMatrixChargedPVA[ i_Element ] );
 	}
 	streamlog_out(DEBUG6) << "	CovMatPVA :	" << CovMatrixPVA[ 0 ] << std::endl;
 	streamlog_out(DEBUG6) << "			" << CovMatrixPVA[ 1 ] << "	,	" << CovMatrixPVA[ 2 ] << std::endl;
@@ -2805,7 +2793,7 @@ void SLDCorrection::getCovMatFlightDirection(	TVector3 flightDirection , float s
 	//
 	//
 	//
-	CovMatrixFlightDirection.clear();
+//	CovMatrixFlightDirection.clear();
 	const int rows			= 2; // n rows jacobian
 	const int columns		= 3; // n columns jacobian
 	const int kspace_dim		= 3;
@@ -2830,12 +2818,18 @@ void SLDCorrection::getCovMatFlightDirection(	TVector3 flightDirection , float s
 	streamlog_out(DEBUG6) << "	covMatrix_FD :	" << covMatrix_FD( 0 , 0 ) << "	,	" << covMatrix_FD( 0 , 1 ) << std::endl;
 	streamlog_out(DEBUG6) << "			" << covMatrix_FD( 1 , 0 ) << "	,	" << covMatrix_FD( 1 , 1 ) << std::endl;
 	covMatrixFlightDir.Mult( TMatrixD( jacobian , TMatrixD::kTransposeMult , covMatrix_FD ) , jacobian );
-	CovMatrixFlightDirection.push_back( covMatrixFlightDir( 0 , 0 ) );
-	CovMatrixFlightDirection.push_back( covMatrixFlightDir( 1 , 0 ) );
-	CovMatrixFlightDirection.push_back( covMatrixFlightDir( 1 , 1 ) );
-	CovMatrixFlightDirection.push_back( covMatrixFlightDir( 2 , 0 ) );
-	CovMatrixFlightDirection.push_back( covMatrixFlightDir( 2 , 1 ) );
-	CovMatrixFlightDirection.push_back( covMatrixFlightDir( 2 , 2 ) );
+	CovMatrixFlightDirection[ 0 ] = covMatrixFlightDir( 0 , 0 );
+	CovMatrixFlightDirection[ 1 ] = covMatrixFlightDir( 1 , 0 );
+	CovMatrixFlightDirection[ 2 ] = covMatrixFlightDir( 1 , 1 );
+	CovMatrixFlightDirection[ 3 ] = covMatrixFlightDir( 2 , 0 );
+	CovMatrixFlightDirection[ 4 ] = covMatrixFlightDir( 2 , 1 );
+	CovMatrixFlightDirection[ 5 ] = covMatrixFlightDir( 2 , 2 );
+//	CovMatrixFlightDirection.push_back( covMatrixFlightDir( 0 , 0 ) );
+//	CovMatrixFlightDirection.push_back( covMatrixFlightDir( 1 , 0 ) );
+//	CovMatrixFlightDirection.push_back( covMatrixFlightDir( 1 , 1 ) );
+//	CovMatrixFlightDirection.push_back( covMatrixFlightDir( 2 , 0 ) );
+//	CovMatrixFlightDirection.push_back( covMatrixFlightDir( 2 , 1 ) );
+//	CovMatrixFlightDirection.push_back( covMatrixFlightDir( 2 , 2 ) );
 	streamlog_out(DEBUG6) << "	Theta		= " << flightDirection.Theta() << std::endl;
 	streamlog_out(DEBUG6) << "	Phi		= " << flightDirection.Phi() << std::endl;
 	streamlog_out(DEBUG6) << "	sigmaTheta	= " << sigmaTheta << std::endl;
@@ -3082,7 +3076,7 @@ void SLDCorrection::getCovMatrixDetNor(		TVector3 flightDirection , TLorentzVect
 	//
 	//
 	//
-	CovMatrixDetNor.clear();
+//	CovMatrixDetNor.clear();
 	const int rows			= 7; // n rows jacobian
 	const int columns		= 4; // n columns jacobian
 	const int SpaceTime_dim		= 4;
@@ -3124,16 +3118,33 @@ void SLDCorrection::getCovMatrixDetNor(		TVector3 flightDirection , TLorentzVect
 	};
 	TMatrixD covMatrix_DetFD(rows,rows, input_cov_matrix_by_rows, "C");
 	covMatrixFlightDirDet.Mult( TMatrixD( jacobian , TMatrixD::kTransposeMult , covMatrix_DetFD) , jacobian );
-	CovMatrixDetNor.push_back( covMatrixFlightDirDet( 0 , 0 ) );
-	CovMatrixDetNor.push_back( covMatrixFlightDirDet( 1 , 0 ) );
-	CovMatrixDetNor.push_back( covMatrixFlightDirDet( 1 , 1 ) );
-	CovMatrixDetNor.push_back( covMatrixFlightDirDet( 2 , 0 ) );
-	CovMatrixDetNor.push_back( covMatrixFlightDirDet( 2 , 1 ) );
-	CovMatrixDetNor.push_back( covMatrixFlightDirDet( 2 , 2 ) );
-	CovMatrixDetNor.push_back( covMatrixFlightDirDet( 3 , 0 ) );
-	CovMatrixDetNor.push_back( covMatrixFlightDirDet( 3 , 1 ) );
-	CovMatrixDetNor.push_back( covMatrixFlightDirDet( 3 , 2 ) );
-	CovMatrixDetNor.push_back( covMatrixFlightDirDet( 3 , 3 ) );
+	CovMatrixDetNor[ 0 ] = covMatrixFlightDirDet( 0 , 0 );
+	CovMatrixDetNor[ 1 ] = covMatrixFlightDirDet( 1 , 0 );
+	CovMatrixDetNor[ 2 ] = covMatrixFlightDirDet( 1 , 1 );
+	CovMatrixDetNor[ 3 ] = covMatrixFlightDirDet( 2 , 0 );
+	CovMatrixDetNor[ 4 ] = covMatrixFlightDirDet( 2 , 1 );
+	CovMatrixDetNor[ 5 ] = covMatrixFlightDirDet( 2 , 2 );
+	CovMatrixDetNor[ 6 ] = covMatrixFlightDirDet( 3 , 0 );
+	CovMatrixDetNor[ 7 ] = covMatrixFlightDirDet( 3 , 1 );
+	CovMatrixDetNor[ 8 ] = covMatrixFlightDirDet( 3 , 2 );
+	CovMatrixDetNor[ 9 ] = covMatrixFlightDirDet( 3 , 3 );
+//	CovMatrixDetNor.push_back( covMatrixFlightDirDet( 0 , 0 ) );
+//	CovMatrixDetNor.push_back( covMatrixFlightDirDet( 1 , 0 ) );
+//	CovMatrixDetNor.push_back( covMatrixFlightDirDet( 1 , 1 ) );
+//	CovMatrixDetNor.push_back( covMatrixFlightDirDet( 2 , 0 ) );
+//	CovMatrixDetNor.push_back( covMatrixFlightDirDet( 2 , 1 ) );
+//	CovMatrixDetNor.push_back( covMatrixFlightDirDet( 2 , 2 ) );
+//	CovMatrixDetNor.push_back( covMatrixFlightDirDet( 3 , 0 ) );
+//	CovMatrixDetNor.push_back( covMatrixFlightDirDet( 3 , 1 ) );
+//	CovMatrixDetNor.push_back( covMatrixFlightDirDet( 3 , 2 ) );
+//	CovMatrixDetNor.push_back( covMatrixFlightDirDet( 3 , 3 ) );
+	if ( m_cheatFlightDirection )
+	{
+		for ( int i_Element = 0 ; i_Element < 10 ; ++i_Element )
+		{
+			CovMatrixDetNor[ i_Element ] = pow( P_nor / Momentum.Mag() , 2 ) * initialCovMatrixDetector[ i_Element ];
+		}
+	}
 	streamlog_out(DEBUG6) << "	CovMatDetFlightNor :	" << CovMatrixDetNor[ 0 ] << std::endl;
 	streamlog_out(DEBUG6) << "				" << CovMatrixDetNor[ 1 ] << "	,	" << CovMatrixDetNor[ 2 ] << std::endl;
 	streamlog_out(DEBUG6) << "				" << CovMatrixDetNor[ 3 ] << "	,	" << CovMatrixDetNor[ 4 ] << "	,	" << CovMatrixDetNor[ 5 ] << std::endl;
@@ -3189,6 +3200,254 @@ void SLDCorrection::getNeutrinoCovMat(		TLorentzVector recoNeutrinoFourMomentum 
 	NeutrinoCovMatrix.push_back( pow( E_nu / ( E_vis * P_nu_par - E_nu * P_vis_par ) , 2 ) * ( pow( M_vis , 2 ) * CovMatrixPVA[ 9 ] + pow( E_nu , 2 ) * CovMatrixDetector[ 9 ] ) );
 */
 }
+
+void SLDCorrection::getNeutrinoCovMatET(	std::vector<EVENT::ReconstructedParticle*> decayProducts , std::vector<EVENT::ReconstructedParticle*> associatedParticles ,
+						EVENT::ReconstructedParticle* linkedRecoLepton , TVector3 flightDirection , TLorentzVector recoNeutrinoFourMomentum ,
+						std::vector< float > &NeutrinoCovMatrix , int SLDStatus )
+{
+	NeutrinoCovMatrix.clear();
+	std::vector< float > CovMatrixChargedPVA( 10, 0.0 );
+	std::vector< float > CovMatrixNeutralPVA( 10, 0.0 );
+	getPVACovMat( decayProducts , associatedParticles , SLDStatus , CovMatrixChargedPVA , CovMatrixNeutralPVA );
+
+	std::vector< float > CovMatrixDetector( 10 , 0.0 );
+	std::vector< float > CovMatrixDetectorPVA( 10 , 0.0 );
+	std::vector< float > CovMatrixFlightDirection( 6, 0.0 );
+	float takeCovMat = ( m_cheatLepton4momentum ? 0.0 : 1.0 );
+	TLorentzVector visibleFourMomentum = TLorentzVector( linkedRecoLepton->getMomentum() , linkedRecoLepton->getEnergy() );
+	for ( int i_Element = 0 ; i_Element < 10 ; ++i_Element )
+	{
+		CovMatrixDetector[ i_Element ] = takeCovMat * linkedRecoLepton->getCovMatrix()[ i_Element ];
+	}
+
+	for ( unsigned int i_par = 0 ; i_par < decayProducts.size() ; ++i_par )
+	{
+		if ( decayProducts[ i_par ] == linkedRecoLepton ) continue;
+		takeCovMat = 0.0;
+		if ( decayProducts[ i_par ]->getTracks().size() == 0 )
+		{
+			takeCovMat = ( m_cheatNeutral4momentum ? 0.0 : 1.0 );
+		}
+		else
+		{
+			takeCovMat = ( m_cheatCharged4momentum ? 0.0 : 1.0 );
+		}
+		visibleFourMomentum += TLorentzVector( decayProducts[ i_par ]->getMomentum() , decayProducts[ i_par ]->getEnergy() );
+		for ( int i_Element = 0 ; i_Element < 10 ; ++i_Element )
+		{
+			CovMatrixDetector[ i_Element ] += takeCovMat * decayProducts[ i_par ]->getCovMatrix()[ i_Element ];
+		}
+	}
+	for ( int i_Element = 0 ; i_Element < 10 ; ++i_Element )
+	{
+		CovMatrixDetectorPVA[ i_Element ] = CovMatrixDetector[ i_Element ] + CovMatrixChargedPVA[ i_Element ] + CovMatrixNeutralPVA[ i_Element ];
+	}
+
+	float sigmaTheta = 0.0;
+	float sigmaPhi = 0.0;
+	if ( m_cheatFlightDirection )
+	{
+		sigmaTheta = 0.0;
+		sigmaPhi = 0.0;
+	}
+	else
+	{
+		if ( SLDStatus == 4 )
+		{
+			sigmaTheta = m_BSLD4SigmaTheta;//0.015;
+			sigmaPhi = m_BSLD4SigmaPhi;//0.018;
+		}
+		else if ( SLDStatus == 5 )
+		{
+			sigmaTheta = m_BSLD5SigmaTheta;//0.030;
+			sigmaPhi = m_BSLD5SigmaPhi;//0.030;
+		}
+	}
+	getCovMatFlightDirection( flightDirection , sigmaTheta , sigmaPhi , CovMatrixFlightDirection );
+	std::vector< float > CovMatrixDetPvaFdNor( 10 , 0.0 );
+	getCovMatrixDetNor( flightDirection , visibleFourMomentum , CovMatrixFlightDirection , CovMatrixDetectorPVA , CovMatrixDetPvaFdNor );
+	TVector3 recoNeutrinoMomentum = recoNeutrinoFourMomentum.Vect();
+	TVector3 recoNeutrinoMomentumPar = recoNeutrinoMomentum.Dot( flightDirection ) * flightDirection;
+	TVector3 recoNeutrinoMomentumNor = recoNeutrinoMomentum - recoNeutrinoMomentumPar;
+	streamlog_out(DEBUG6) << "	P_nu 	 =	" << recoNeutrinoMomentum.Mag() << std::endl;
+	streamlog_out(DEBUG6) << "	P_nu_nor =	" << recoNeutrinoMomentumNor.Mag() << std::endl;
+	int power = 1;
+	for ( int i_Element = 0 ; i_Element < 10 ; ++i_Element )
+	{
+		streamlog_out(DEBUG6) << "	CovMatrixDetPvaFdNor[ " << i_Element << " ] :	" << CovMatrixDetPvaFdNor[ i_Element ] << std::endl;
+		NeutrinoCovMatrix.push_back( pow( recoNeutrinoMomentum.Mag() / recoNeutrinoMomentumNor.Mag() , power ) * CovMatrixDetPvaFdNor[ i_Element ] );
+	}
+	for ( int i_Element = 0 ; i_Element < 10 ; ++i_Element )
+	{
+		streamlog_out(DEBUG6) << "	NeutrinoCovMatrix[ " << i_Element << " ] :	" << NeutrinoCovMatrix[ i_Element ] << std::endl;
+	}
+}
+
+void SLDCorrection::getPVACovMat(		std::vector<EVENT::ReconstructedParticle*> decayProducts , std::vector<EVENT::ReconstructedParticle*> associatedParticles ,
+						int SLDStatus , std::vector< float > &CovMatrixChargedPVA , std::vector< float > &CovMatrixNeutralPVA )
+{
+	float sigmaE_NeutralPVA = 0.0;
+	float sigmaE_ChargedPVA = 0.0;
+//	CovMatrixChargedPVA.clear();
+//	CovMatrixNeutralPVA.clear();
+	std::vector< float > CovMatrixChargedPVABase( 10, 0.0 );
+	std::vector< float > CovMatrixNeutralPVABase( 10, 0.0 );
+	TLorentzVector chargedTLV( 0.0 , 0.0 , 0.0 , 0.0 );
+	TLorentzVector chargedTLVFromVertexing( 0.0 , 0.0 , 0.0 , 0.0 );
+	TLorentzVector chargedTLVFromPVA( 0.0 , 0.0 , 0.0 , 0.0 );
+	TLorentzVector neutralTLV( 0.0 , 0.0 , 0.0 , 0.0 );
+	TLorentzVector neutralTLVFromVertexing( 0.0 , 0.0 , 0.0 , 0.0 );
+	TLorentzVector neutralTLVFromPVA( 0.0 , 0.0 , 0.0 , 0.0 );
+
+	float chargedEnergyFromPVA = 0.0;
+	float chargedMomentumFromPVA = 0.0;
+	float neutralEnergyFromPVA = 0.0;
+	float neutralMomentumFromPVA = 0.0;
+	TVector3 neutralPfromPVA = TVector3( 0.0 , 0.0 , 0.0 );
+	TVector3 neutralPfromVertexing = TVector3( 0.0 , 0.0 , 0.0 );
+	TVector3 chargedPfromPVA = TVector3( 0.0 , 0.0 , 0.0 );
+	TVector3 chargedPfromVertexing = TVector3( 0.0 , 0.0 , 0.0 );
+
+	for ( unsigned int i_par = 0 ; i_par < decayProducts.size() ; ++i_par )
+	{
+		bool perfectAssociation = false;
+		TLorentzVector particleTLV( decayProducts[ i_par ]->getMomentum() , decayProducts[ i_par ]->getEnergy() );
+		if ( decayProducts[ i_par ]->getTracks().size() == 0 )
+		{
+			neutralTLV += particleTLV;
+			for ( unsigned int i_p = 0 ; i_p < associatedParticles.size() ; ++i_p )
+			{
+				if ( decayProducts[ i_par ] == associatedParticles[ i_p ] ) perfectAssociation = true;
+			}
+			if ( perfectAssociation )
+			{
+				neutralTLVFromVertexing += particleTLV;
+			}
+			else
+			{
+				neutralTLVFromPVA += particleTLV;
+			}
+		}
+		else
+		{
+			chargedTLV += particleTLV;
+			for ( unsigned int i_p = 0 ; i_p < associatedParticles.size() ; ++i_p )
+			{
+				if ( decayProducts[ i_par ] == associatedParticles[ i_p ] ) perfectAssociation = true;
+			}
+			if ( perfectAssociation )
+			{
+				chargedTLVFromVertexing += particleTLV;
+			}
+			else
+			{
+				chargedTLVFromPVA += particleTLV;
+			}
+		}
+	}
+	neutralPfromPVA = neutralTLVFromPVA.Vect();
+	m_neutralEnergy.push_back( neutralTLV.E() );
+	m_neutralEnergyFromVertexing.push_back( neutralTLVFromVertexing.E() );
+	m_neutralEnergyFromPVA.push_back( neutralTLVFromPVA.E() );
+	m_neutralMomentum.push_back( ( neutralTLV.Vect() ).Mag() );
+	m_neutralMomentumFromVertexing.push_back( ( neutralTLVFromVertexing.Vect() ).Mag() );
+	m_neutralMomentumFromPVA.push_back( ( neutralTLVFromPVA.Vect() ).Mag() );
+	neutralEnergyFromPVA = neutralTLVFromPVA.E();
+	neutralMomentumFromPVA = ( neutralTLVFromPVA.Vect() ).Mag();
+
+	chargedPfromPVA = chargedTLVFromPVA.Vect();
+	m_chargedEnergy.push_back( chargedTLV.E() );
+	m_chargedEnergyFromVertexing.push_back( chargedTLVFromVertexing.E() );
+	m_chargedEnergyFromPVA.push_back( chargedTLVFromPVA.E() );
+	m_chargedMomentum.push_back( ( chargedTLV.Vect() ).Mag() );
+	m_chargedMomentumFromVertexing.push_back( ( chargedTLVFromVertexing.Vect() ).Mag() );
+	m_chargedMomentumFromPVA.push_back( ( chargedTLVFromPVA.Vect() ).Mag() );
+	chargedEnergyFromPVA = chargedTLVFromPVA.E();
+	chargedMomentumFromPVA = ( chargedTLVFromPVA.Vect() ).Mag();
+
+	float chargedTheta = chargedPfromPVA.Theta();
+	float chargedPhi = chargedPfromPVA.Phi();
+	float neutralTheta = neutralPfromPVA.Theta();
+	float neutralPhi = neutralPfromPVA.Phi();
+	if ( SLDStatus == 4 )
+	{
+		sigmaE_NeutralPVA = ( m_cheatPVAneutral ? 0.0 : m_BSLD4SigmaENPVA );//6.7 );
+		sigmaE_ChargedPVA = ( m_cheatPVAcharged ? 0.0 : m_BSLD4SigmaECPVA );//9.2 );
+	}
+	else if ( SLDStatus == 5 )
+	{
+		sigmaE_NeutralPVA = ( m_cheatPVAneutral ? 0.0 : m_BSLD5SigmaENPVA );//6.5 );
+		sigmaE_ChargedPVA = ( m_cheatPVAcharged ? 0.0 : m_BSLD5SigmaECPVA );//9.5 );
+	}
+	CovMatrixChargedPVABase[ 0 ] = pow( sin( chargedTheta ) , 2 ) * pow( cos( chargedPhi ) , 2 );
+	CovMatrixChargedPVABase[ 1 ] = pow( sin( chargedTheta ) , 2 ) * sin( chargedPhi ) * cos( chargedPhi );
+	CovMatrixChargedPVABase[ 2 ] = pow( sin( chargedTheta ) , 2 ) * pow( sin( chargedPhi ) , 2 );
+	CovMatrixChargedPVABase[ 3 ] = sin( chargedTheta ) * cos( chargedTheta ) * cos( chargedPhi );
+	CovMatrixChargedPVABase[ 4 ] = sin( chargedTheta ) * cos( chargedTheta ) * sin( chargedPhi );
+	CovMatrixChargedPVABase[ 5 ] = pow( cos( chargedTheta ) , 2 );
+	CovMatrixChargedPVABase[ 6 ] = ( chargedMomentumFromPVA / chargedEnergyFromPVA ) * sin( chargedTheta ) * cos( chargedPhi );
+	CovMatrixChargedPVABase[ 7 ] = ( chargedMomentumFromPVA / chargedEnergyFromPVA ) * sin( chargedTheta ) * sin( chargedPhi );
+	CovMatrixChargedPVABase[ 8 ] = ( chargedMomentumFromPVA / chargedEnergyFromPVA ) * cos( chargedTheta );
+	CovMatrixChargedPVABase[ 9 ] = pow( chargedMomentumFromPVA , 2 ) / pow( chargedEnergyFromPVA , 2 );
+	CovMatrixNeutralPVABase[ 0 ] = pow( sin( neutralTheta ) , 2 ) * pow( cos( neutralPhi ) , 2 );
+	CovMatrixNeutralPVABase[ 1 ] = pow( sin( neutralTheta ) , 2 ) * sin( neutralPhi ) * cos( neutralPhi );
+	CovMatrixNeutralPVABase[ 2 ] = pow( sin( neutralTheta ) , 2 ) * pow( sin( neutralPhi ) , 2 );
+	CovMatrixNeutralPVABase[ 3 ] = sin( neutralTheta ) * cos( neutralTheta ) * cos( neutralPhi );
+	CovMatrixNeutralPVABase[ 4 ] = sin( neutralTheta ) * cos( neutralTheta ) * sin( neutralPhi );
+	CovMatrixNeutralPVABase[ 5 ] = pow( cos( neutralTheta ) , 2 );
+	CovMatrixNeutralPVABase[ 6 ] = ( neutralMomentumFromPVA / neutralEnergyFromPVA ) * sin( neutralTheta ) * cos( neutralPhi );
+	CovMatrixNeutralPVABase[ 7 ] = ( neutralMomentumFromPVA / neutralEnergyFromPVA ) * sin( neutralTheta ) * sin( neutralPhi );
+	CovMatrixNeutralPVABase[ 8 ] = ( neutralMomentumFromPVA / neutralEnergyFromPVA ) * cos( neutralTheta );
+	CovMatrixNeutralPVABase[ 9 ] = pow( neutralMomentumFromPVA , 2 ) / pow( neutralEnergyFromPVA , 2 );
+	streamlog_out(DEBUG6) << "	sigmaE_NeutralPVA = " << sigmaE_NeutralPVA << std::endl;
+	streamlog_out(DEBUG6) << "	neutralTheta = " << neutralTheta << std::endl;
+	streamlog_out(DEBUG6) << "	neutralPhi = " << neutralPhi << std::endl;
+	streamlog_out(DEBUG6) << "	neutralMomentumFromPVA = " << neutralMomentumFromPVA << std::endl;
+	streamlog_out(DEBUG6) << "	neutralEnergyFromPVA = " << neutralEnergyFromPVA << std::endl;
+	streamlog_out(DEBUG6) << "	sigmaE_ChargedPVA = " << sigmaE_ChargedPVA << std::endl;
+	streamlog_out(DEBUG6) << "	chargedTheta = " << chargedTheta << std::endl;
+	streamlog_out(DEBUG6) << "	chargedPhi = " << chargedPhi << std::endl;
+	streamlog_out(DEBUG6) << "	chargedMomentumFromPVA = " << chargedMomentumFromPVA << std::endl;
+	streamlog_out(DEBUG6) << "	chargedEnergyFromPVA = " << chargedEnergyFromPVA << std::endl;
+	for ( int i_Element = 0 ; i_Element < 10 ; ++i_Element )
+	{
+		if ( chargedEnergyFromPVA > 0.0 )
+		{
+			streamlog_out(DEBUG6) << "	CovMatrixChargedPVABase[ " << i_Element << " ] :	" << CovMatrixChargedPVABase[ i_Element ] << std::endl;
+			CovMatrixChargedPVA[ i_Element ] = pow( chargedEnergyFromPVA * sigmaE_ChargedPVA / chargedMomentumFromPVA , 2 ) * CovMatrixChargedPVABase[ i_Element ];
+//			CovMatrixChargedPVA.push_back( pow( chargedEnergyFromPVA * sigmaE_ChargedPVA / chargedMomentumFromPVA , 2 ) * CovMatrixChargedPVABase[ i_Element ] );
+		}
+		else
+		{
+			CovMatrixChargedPVA[ i_Element ] = 0.0;
+//			CovMatrixChargedPVA.push_back( 0.0 );
+		}
+		if ( neutralEnergyFromPVA > 0.0 )
+		{
+			streamlog_out(DEBUG6) << "	CovMatrixNeutralPVABase[ " << i_Element << " ] :	" << CovMatrixNeutralPVABase[ i_Element ] << std::endl;
+			CovMatrixNeutralPVA[ i_Element ] = pow( neutralEnergyFromPVA * sigmaE_NeutralPVA / neutralMomentumFromPVA , 2 ) * CovMatrixNeutralPVABase[ i_Element ];
+//			CovMatrixNeutralPVA.push_back( pow( neutralEnergyFromPVA * sigmaE_NeutralPVA / neutralMomentumFromPVA , 2 ) * CovMatrixNeutralPVABase[ i_Element ] );
+		}
+		else
+		{
+			CovMatrixNeutralPVA[ i_Element ] = 0.0;
+//			CovMatrixNeutralPVA.push_back( 0.0 );
+		}
+//		CovMatrixPVA.push_back( pow( neutralEnergyFromPVA / neutralMomentumFromPVA , 2 ) * sigmaE_NeutralPVA * CovMatrixNeutralPVA[ i_Element ] + pow( chargedEnergyFromPVA / chargedMomentumFromPVA , 2 ) * sigmaE_ChargedPVA * CovMatrixChargedPVA[ i_Element ] );
+	}
+	streamlog_out(DEBUG6) << "	CovMatChargedPVA :	" << CovMatrixChargedPVA[ 0 ] << std::endl;
+	streamlog_out(DEBUG6) << "				" << CovMatrixChargedPVA[ 1 ] << "	,	" << CovMatrixChargedPVA[ 2 ] << std::endl;
+	streamlog_out(DEBUG6) << "				" << CovMatrixChargedPVA[ 3 ] << "	,	" << CovMatrixChargedPVA[ 4 ] << "	,	" << CovMatrixChargedPVA[ 5 ] << std::endl;
+	streamlog_out(DEBUG6) << "				" << CovMatrixChargedPVA[ 6 ] << "	,	" << CovMatrixChargedPVA[ 7 ] << "	,	" << CovMatrixChargedPVA[ 8 ] << "	,	" << CovMatrixChargedPVA[ 9 ] << std::endl;
+	streamlog_out(DEBUG6) << "" << std::endl;
+	streamlog_out(DEBUG6) << "	CovMatNeutralPVA :	" << CovMatrixNeutralPVA[ 0 ] << std::endl;
+	streamlog_out(DEBUG6) << "				" << CovMatrixNeutralPVA[ 1 ] << "	,	" << CovMatrixNeutralPVA[ 2 ] << std::endl;
+	streamlog_out(DEBUG6) << "				" << CovMatrixNeutralPVA[ 3 ] << "	,	" << CovMatrixNeutralPVA[ 4 ] << "	,	" << CovMatrixNeutralPVA[ 5 ] << std::endl;
+	streamlog_out(DEBUG6) << "				" << CovMatrixNeutralPVA[ 6 ] << "	,	" << CovMatrixNeutralPVA[ 7 ] << "	,	" << CovMatrixNeutralPVA[ 8 ] << "	,	" << CovMatrixNeutralPVA[ 9 ] << std::endl;
+	streamlog_out(DEBUG6) << "" << std::endl;
+
+}
+
 
 void SLDCorrection::showTrueParameters( MCParticle *SLDLepton )
 {

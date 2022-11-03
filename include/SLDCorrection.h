@@ -73,6 +73,10 @@ public:
 	virtual void getCovMatrixDetPar( TVector3 flightDirection , TLorentzVector visibleFourMomentum , std::vector< float > CovMatrixFlightDirection , std::vector< float > initialCovMatrixDetector , std::vector< float > &CovMatrixDetPar );
 	virtual void getCovMatrixDetNor( TVector3 flightDirection , TLorentzVector visibleFourMomentum , std::vector< float > CovMatrixFlightDirection , std::vector< float > initialCovMatrixDetector , std::vector< float > &CovMatrixDetNor );
 	virtual void getNeutrinoCovMat( TLorentzVector recoNeutrinoFourMomentum , TLorentzVector visibleFourMomentum , TVector3 flightDirection , double parentHadronMass , std::vector< float > CovMatrixPVA , std::vector< float > CovMatrixDetector , std::vector< float > CovMatrixDetPar , std::vector< float > CovMatrixDetNor , std::vector< float > &NeutrinoCovMatrix );
+
+	virtual void getNeutrinoCovMatET( std::vector<EVENT::ReconstructedParticle*> decayProducts , std::vector<EVENT::ReconstructedParticle*> associatedParticles , EVENT::ReconstructedParticle* linkedRecoLepton , TVector3 flightDirection , TLorentzVector recoNeutrinoFourMomentum , std::vector< float > &NeutrinoCovMatrix , int SLDStatus );
+	virtual void getPVACovMat( std::vector<EVENT::ReconstructedParticle*> decayProducts , std::vector<EVENT::ReconstructedParticle*> associatedParticles , int SLDStatus , std::vector< float > &CovMatrixChargedPVA , std::vector< float > &CovMatrixNeutralPVA );
+
 	virtual void plotHistograms( TLorentzVector trueFourMomentumNeutrino , TLorentzVector FourMomentumNuClose , std::vector<float> NeutrinoCovMat );
 	virtual void InitializeHistogram( TH1F *histogram , int scale , int color , int lineWidth , int markerSize , int markerStyle );
 	virtual void doProperGaussianFit( TH1F *histogram , float fitMin , float fitMax , float fitRange );
