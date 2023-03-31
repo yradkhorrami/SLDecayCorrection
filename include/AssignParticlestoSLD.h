@@ -22,7 +22,9 @@ typedef std::vector<EVENT::Vertex*>			vtxVector;
 
 void assignParticlesToSemiLeptonicDecay( pfoVector &assignedParticles , pfoVector &availableParticles , double invariantMass , TVector3 direction );
 
-void assignVerticesToSemiLeptonicDecay( pfoVector &assignedParticles , vtxVector &availableVertices , double invariantMass , TVector3 direction , EVENT::Vertex* startVertex );
+void assignParticlesToSemiLeptonicDecay( pfoVector &assignedParticles , pfoVector &availableParticles , double invariantMass , TVector3 direction , TLorentzVector &visibleFourMomentum );
+
+void assignVerticesToSemiLeptonicDecay( pfoVector &assignedParticles , vtxVector &availableVertices , double invariantMass , TVector3 direction , EVENT::Vertex* startVertex , TLorentzVector &visibleFourMomentum );
 
 void sortParticles( pfoVector &sortedParticles , pfoVector &unSortedParticles , TVector3 direction );
 

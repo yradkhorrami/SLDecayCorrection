@@ -23,7 +23,30 @@ void assignParticlesToSemiLeptonicDecay( pfoVector &assignedParticles , pfoVecto
 			assignedParticles.push_back( particle );
 			streamlog_out(DEBUG1) << "		added one particle to the semi-leptonic decay" << std::endl;
 			streamlog_out(DEBUG1) << *particle << std::endl;
+		}
+		else
+		{
+			return;
+		}
+	}
 }
+
+void assignParticlesToSemiLeptonicDecay( pfoVector &assignedParticles , pfoVector &availableParticles , double invariantMass , TVector3 direction , TLorentzVector &visibleFourMomentum )
+{
+	direction.SetMag( 1.0 );
+	pfoVector sortedParticles{};
+	sortParticles( sortedParticles , availableParticles , direction );
+	for ( unsigned int i_par = 0 ; i_par < sortedParticles.size() ; ++i_par )
+	{
+		ReconstructedParticle* particle = sortedParticles[ i_par ];
+		TLorentzVector particleFourMomentum = TLorentzVector( particle->getMomentum()[ 0 ] , particle->getMomentum()[ 1 ] , particle->getMomentum()[ 2 ] , particle->getEnergy() );
+		if ( ( visibleFourMomentum + particleFourMomentum ).M() <= invariantMass )
+		{
+			visibleFourMomentum += particleFourMomentum;
+			assignedParticles.push_back( particle );
+			streamlog_out(DEBUG1) << "		added one particle to the semi-leptonic decay" << std::endl;
+			streamlog_out(DEBUG1) << *particle << std::endl;
+		}
 		else
 		{
 			return;
@@ -34,7 +57,6 @@ void assignParticlesToSemiLeptonicDecay( pfoVector &assignedParticles , pfoVecto
 void assignVerticesToSemiLeptonicDecay( pfoVector &assignedParticles , vtxVector &availableVertices , double invariantMass , TVector3 direction , EVENT::Vertex* startVertex )
 {
 	direction.SetMag( 1.0 );
-	pfoVector sortedParticles{};
 	vtxVector sortedVertices{};
 	sortVertices( sortedVertices , availableVertices , direction , startVertex );
 	TLorentzVector totalFourMomentum( 0.0 , 0.0 , 0.0 , 0.0 );
@@ -67,10 +89,45 @@ void assignVerticesToSemiLeptonicDecay( pfoVector &assignedParticles , vtxVector
 	}
 }
 
+void assignVerticesToSemiLeptonicDecay( pfoVector &assignedParticles , vtxVector &availableVertices , double invariantMass , TVector3 direction , EVENT::Vertex* startVertex , TLorentzVector &visibleFourMomentum )
+{
+	direction.SetMag( 1.0 );
+	vtxVector sortedVertices{};
+	streamlog_out(DEBUG8) << "			Sorting vertices with respect to direction	:	(	" << direction.X() << "	, " << direction.Y() << "	, " << direction.Z() << "	)" << std::endl;
+	streamlog_out(DEBUG8) << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<	Association vertices to the vertex of the semi-leptonic decay	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
+	streamlog_out(DEBUG8) << "			Initial fourMomentum (Px,Py,Pz,M):	(	" << visibleFourMomentum.Px() << "	, " << visibleFourMomentum.Py() << "	, " << visibleFourMomentum.Pz() << "	, " << visibleFourMomentum.E() << "	, " << visibleFourMomentum.M() << "	)" << std::endl;
+	sortVertices( sortedVertices , availableVertices , direction , startVertex );
+	pfoVector availableParticles{};
+	for ( unsigned int i_vtx = 0 ; i_vtx < sortedVertices.size() ; ++i_vtx )
+	{
+		TLorentzVector vertexFourMomentum = TLorentzVector( 0.0 , 0.0 , 0.0 , 0.0 );
+		for ( unsigned int i_par = 0 ; i_par < ( sortedVertices[ i_vtx ]->getAssociatedParticle() )->getParticles().size() ; ++i_par )
+		{
+			vertexFourMomentum += TLorentzVector( ( sortedVertices[ i_vtx ]->getAssociatedParticle() )->getParticles()[ i_par ]->getMomentum() , ( sortedVertices[ i_vtx ]->getAssociatedParticle() )->getParticles()[ i_par ]->getEnergy() );
+		}
+		if ( ( visibleFourMomentum + vertexFourMomentum ).M() <= invariantMass )
+		{
+			visibleFourMomentum += vertexFourMomentum;
+			streamlog_out(DEBUG8) << "		added one vertex to the semi-leptonic decay" << std::endl;
+			streamlog_out(DEBUG8) << "			New fourMomentum (Px,Py,Pz,M):	(	" << visibleFourMomentum.Px() << "	, " << visibleFourMomentum.Py() << "	, " << visibleFourMomentum.Pz() << "	, " << visibleFourMomentum.E() << "	, " << visibleFourMomentum.M() << "	)" << std::endl;
+			for ( unsigned int i_par = 0 ; i_par < ( sortedVertices[ i_vtx ]->getAssociatedParticle() )->getParticles().size() ; ++i_par )
+			{
+				assignedParticles.push_back( ( sortedVertices[ i_vtx ]->getAssociatedParticle() )->getParticles()[ i_par ] );
+				streamlog_out(DEBUG1) << *( sortedVertices[ i_vtx ]->getAssociatedParticle() )->getParticles()[ i_par ] << std::endl;
+			}
+		}
+		else
+		{
+			return;
+		}
+	}
+}
+
 void sortParticles( pfoVector &sortedParticles , pfoVector &unSortedParticles , TVector3 direction )
 {
 	double closestAngleCos = -1.0;
 	ReconstructedParticle* closestParticle = NULL;
+	direction.SetMag( 1.0 );
 	streamlog_out(DEBUG0) << "	" << sortedParticles.size() << " of " << unSortedParticles.size() + sortedParticles.size() << " particles have been sorted wrt ( " << direction.X() << " , " << direction.Y() << " , " << direction.Z() <<" )" << std::endl;
 	for ( unsigned int i_par = 0 ; i_par < unSortedParticles.size() ; ++i_par )
 	{
@@ -122,6 +179,8 @@ void sortVertices( vtxVector &sortedVertices , vtxVector &unSortedVertices , TVe
 		if ( unSortedVertices[ i_vtx ] == closestVertex )
 		{
 			sortedVertices.push_back( unSortedVertices[ i_vtx ] );
+			TVector3 vertexPosition = TVector3( unSortedVertices[ i_vtx ]->getPosition()[ 0 ] - startVertex->getPosition()[ 0 ] , unSortedVertices[ i_vtx ]->getPosition()[ 1 ] - startVertex->getPosition()[ 1 ] , unSortedVertices[ i_vtx ]->getPosition()[ 2 ] - startVertex->getPosition()[ 2 ] );
+			streamlog_out(DEBUG8) << "			Sorted One vertex at (x,y,z):	(	" << vertexPosition.X() << "	, " << vertexPosition.Y() << "	, " << vertexPosition.Z() << "	) with Cos(Theta) = " << closestAngleCos << std::endl;
 		}
 		else
 		{
