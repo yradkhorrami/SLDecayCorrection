@@ -39,14 +39,13 @@
 		<constant name="OutputBaseName" value="SLDCorrection" />
 		<constant name="OutputBaseName_iter" value="0" />
 		<constant name="Verbosity" value="MESSAGE"/>
+		<constant name="MCparticleCollectionName" value="MCParticlesSkimmed"/>
 	</constants>
 
 	<execute>
 		<processor name="InitDD4hep" condition="" />
 		<processor name="MyIsolatedLeptonTaggingProcessor"/>
 		<processor name="MyFastJetProcessor"/>
-		<processor name="MyJetIsoLepDeclustering" condition="" />
-		<processor name="MyFastJetProcessorRerun"/>
 		<processor name="MyZHEvents"/>
 		<if condition="MyZHEvents.leptonicDecayMode">
 			<if condition="MyZHEvents.ZHDecayMode">
@@ -119,7 +118,7 @@
 		<!--Minimum momentum for muon-->
 		<parameter name="MinPForMuon" type="float">5 </parameter>
 		<!--Name of collection with the selected isolated lepton-->
-		<parameter name="OutputIsoLeptonsCollection" type="string" lcioOutType="ReconstructedParticle">ISOLeptons </parameter>
+		<parameter name="OutputIsoLeptonsCollection" type="string" lcioOutType="ReconstructedParticle">IsolatedLeptons </parameter>
 		<!--Name of the new PFOs collection without isolated lepton-->
 		<parameter name="OutputPFOsWithoutIsoLepCollection" type="string" lcioOutType="ReconstructedParticle">PandoraPFOsWithoutIsoLep </parameter>
 		<!--use yoke for muon ID-->
@@ -154,7 +153,7 @@
 
 	<processor name="MyZHEvents" type="ZHEvents">
 		<!--Name of the Input MCParticle Collection-->
-		<parameter name="MCParticleCollection" type="string" lcioInType="MCParticle">MCParticlesSkimmed</parameter>
+		<parameter name="MCParticleCollection" type="string" lcioInType="MCParticle">${MCparticleCollectionName}</parameter>
 		<!--Name of the Input isolated lepton collection-->
 		<parameter name="isoLepCollection" type="string" lcioInType="ReconstructedParticle">IsolatedLeptons </parameter>
 		<!--Name of the Input Jet Collection-->
@@ -215,13 +214,13 @@
 
 	<processor name="MySLDCorrection" type="SLDCorrection">
 		<!--Name of the Input MCParticle Collection-->
-		<parameter name="MCParticleCollection" type="string" lcioInType="MCParticle">MCParticlesSkimmed</parameter>
+		<parameter name="MCParticleCollection" type="string" lcioInType="MCParticle">${MCparticleCollectionName}</parameter>
 		<!--Name of the Input PFO Collection-->
 		<parameter name="PfoCollection" type="string" lcioInType="RECONSTRUCTEDPARTICLE">declusteredJetIsoleps</parameter>
 		<!--Name of the Input isolated lepton collection-->
 		<parameter name="isoLeptonsCollection" type="string" lcioInType="ReconstructedParticle">IsolatedLeptons </parameter>
 		<!--Name of the Input Jet Collection-->
-		<parameter name="JetCollection" type="string" lcioInType="RECONSTRUCTEDPARTICLE">Durham_2JetsNew</parameter>
+		<parameter name="JetCollection" type="string" lcioInType="RECONSTRUCTEDPARTICLE">Durham_2Jets</parameter>
 		<!--Name of Primary Vertex Collection-->
 		<parameter name="PrimaryVertex" type="string" lcioInType="VERTEX">PrimaryVertex</parameter>
 		<!--Name of Primary BuildUp Collection-->
@@ -279,23 +278,27 @@
 		<!--Cheat FourMomentum of Neutral visibles in semi-leptonic decays-->
 	        <parameter name="cheatNeutral4momentum" type="bool">false</parameter>
 		<!--Cut on Invariant mass of visible charged decay products for semi-leptonic decay of B-Hadron when leptin is in 2nd vertex-->
-	        <parameter name="BSLDChargedSLD4InvMassCut" type="float">1.65</parameter>
+	        <parameter name="BSLDChargedSLD4InvMassCut" type="float">1.80</parameter>
 		<!--Cut on Invariant mass of visible charged decay products for semi-leptonic decay of B-Hadron when leptin is with 3rd vertex-->
-	        <parameter name="BSLDChargedSLD5InvMassCut" type="float">1.70</parameter>
+	        <parameter name="BSLDChargedSLD5InvMassCut" type="float">1.50</parameter>
 		<!--Cut on Invariant mass of visible neutral decay products for semi-leptonic decay of B-Hadron when leptin is in 2nd vertex-->
-	        <parameter name="BSLDNeutralSLD4InvMassCut" type="float">1.88</parameter>
+	        <parameter name="BSLDNeutralSLD4InvMassCut" type="float">2.80</parameter>
 		<!--Cut on Invariant mass of visible neutral decay products for semi-leptonic decay of B-Hadron when leptin is with 3rd vertex-->
-	        <parameter name="BSLDNeutralSLD5InvMassCut" type="float">2.0</parameter>
+	        <parameter name="BSLDNeutralSLD5InvMassCut" type="float">2.50</parameter>
 		<!--Cut on Invariant mass of visible charged decay products for semi-leptonic decay of C-Hadron when leptin is in 2nd vertex-->
 	        <parameter name="CSLDChargedSLD4InvMassCut" type="float">0.00</parameter>
 		<!--Cut on Invariant mass of visible charged decay products for semi-leptonic decay of C-Hadron when leptin is with 3rd vertex-->
 	        <parameter name="CSLDChargedSLD5InvMassCut" type="float">0.00</parameter>
 		<!--Cut on Invariant mass of visible neutral decay products for semi-leptonic decay of C-Hadron when leptin is in 2nd vertex-->
-	        <parameter name="CSLDNeutralSLD4InvMassCut" type="float">0.0</parameter>
+	        <parameter name="CSLDNeutralSLD4InvMassCut" type="float">0.00</parameter>
 		<!--Cut on Invariant mass of visible neutral decay products for semi-leptonic decay of C-Hadron when leptin is with 3rd vertex-->
-	        <parameter name="CSLDNeutralSLD5InvMassCut" type="float">0.0</parameter>
+	        <parameter name="CSLDNeutralSLD5InvMassCut" type="float">0.00</parameter>
 		<!--0: get 4p from linked track/cluster to MCP, 1: get 4p from PFO with linked track/cluster, 2: get 4p from linked PFO-->
 	        <parameter name="recoFourMomentumOfVisibles" type="int">2</parameter>
+		<!--Angle uncertainty (radian) for semi-leptonic decay of B-Hadron -->
+		<parameter name="sigmaAlphaNu" type="float">0.100</parameter>
+		<!--Energy uncertainty (GeV) for semi-leptonic decay of B-Hadron -->
+		<parameter name="sigmaENu" type="float">4.00</parameter>
 		<!--Display recoLepton, downstraem vertex and RP and reconstructed secondary vertex in Event Display-->
 		<parameter name="displayEvent" type="bool">${displayEvent}</parameter>
 		<!--Whether create root file for new pfo collection or not true:create / false: do not create-->
@@ -313,7 +316,7 @@
 		<!--drops all collections of the given type from the event-->
 		<!--parameter name="DropCollectionTypes" type="StringVec">SimTrackerHit SimCalorimeterHit  </parameter-->
 		<!-- write complete objects in subset collections to the file (i.e. ignore subset flag)-->
-		<!--parameter name="FullSubsetCollections" type="StringVec">MCParticlesSkimmed  </parameter-->
+		<!--parameter name="FullSubsetCollections" type="StringVec">${MCparticleCollectionName}  </parameter-->
 		<!--force keep of the named collections - overrules DropCollectionTypes (and DropCollectionNames)-->
 		<!--parameter name="KeepCollectionNames" type="StringVec">MyPreciousSimTrackerHits  </parameter-->
 		<!-- name of output file -->

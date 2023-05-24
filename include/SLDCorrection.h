@@ -84,6 +84,7 @@ public:
 //	virtual void getNeutrinoCovMatET( std::vector<EVENT::ReconstructedParticle*> decayProducts , std::vector<EVENT::ReconstructedParticle*> associatedParticles , EVENT::ReconstructedParticle* linkedRecoLepton , TVector3 flightDirection , TLorentzVector recoNeutrinoFourMomentum , std::vector< float > &NeutrinoCovMatrix , int SLDStatus );
 //	virtual void getNeutrinoCovarianceMatrix( std::vector< float > &NeutrinoCovMatrix , int SLDStatus , std::vector<EVENT::ReconstructedParticle*> decayProducts , std::vector<EVENT::ReconstructedParticle*> associatedParticles , EVENT::ReconstructedParticle* linkedRecoLepton , TVector3 flightDirection , TLorentzVector recoNeutrinoFourMomentum , double parentHadronMass , float solutionSign );
 	virtual void getNeutrinoCovarianceMatrix( std::vector< float > &NeutrinoCovMatrixPos , std::vector< float > &NeutrinoCovMatrixNeg , int SLDStatus , EVENT::MCParticle *SLDLepton , EVENT::ReconstructedParticle *linkedRecoLepton , mcpVector trueChargedDecayProducts , mcpVector trueNeutralDecayProducts , std::vector<EVENT::ReconstructedParticle*> truePVAChargedDecayProducts , std::vector<EVENT::ReconstructedParticle*> truePVANeutralDecayProducts , std::vector<EVENT::ReconstructedParticle*> recoSLDVertexDecayProducts , std::vector<EVENT::ReconstructedParticle*> recoPVAVertexDecayProducts , std::vector<EVENT::ReconstructedParticle*> recoPVAChargedDecayProducts , std::vector<EVENT::ReconstructedParticle*> recoPVANeutralDecayProducts , TVector3 flightDirection , TLorentzVector recoNeutrinoFourMomentumPos , TLorentzVector recoNeutrinoFourMomentumNeg , double parentHadronMass , std::vector< float > &CovMatDetector , std::vector< float > &CovMatFlightDirection );
+	virtual void addNeutrinoCovarianceMatrix( TLorentzVector neutrinoFourMomentum , std::vector< float > &NuCovMat );
 	virtual void evaluateInputCovMat( TLorentzVector trueVisibleFourMomentum , TVector3 trueFlightDirection , TLorentzVector trueNeutrinoFourMomentum , TLorentzVector visibleFourMomentum , TVector3 flightDirection , TLorentzVector recoNeutrinoFourMomentum , std::vector< float > CovMatDetector , std::vector< float > CovMatFlightDirection , std::vector< float > CovMatNeutrino );
 	virtual void getNuCovMatP4( TLorentzVector visibleFourMomentum , TVector3 flightDirection , double parentHadronMass , std::vector< float > CovMatrixDetectorPVA , std::vector< float > CovMatrixFlightDirection , TLorentzVector recoNeutrinoFourMomentum , std::vector< float > &NeutrinoCovMatrix , float solutionSign );
 	virtual void getNuCovMatP4( TLorentzVector visibleFourMomentum , TVector3 flightDirection , double parentHadronMass , std::vector< float > CovMatrixDetector , TLorentzVector recoNeutrinoFourMomentum , std::vector< float > &NeutrinoCovMatrix , float solutionSign );
@@ -161,6 +162,8 @@ private:
 	float					m_BSLD5SigmaENPVA = 0;
 	float					m_BSLD5SigmaAlphaCPVA = 0.0;
 	float					m_BSLD5SigmaAlphaNPVA = 0.0;
+	float					m_sigmaAlphaNu = 0.1;
+	float					m_sigmaENu = 4.0;
 	bool					m_displayEvent = true;
 	bool					m_fillRootTree = true;
 	bool					m_traceEvent = false;
