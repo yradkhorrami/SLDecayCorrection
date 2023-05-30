@@ -61,7 +61,7 @@ public:
 	bool checkBHadronSLDecay( MCParticle *SLDLepton );
 	bool checkCHadronSLDecay( MCParticle *SLDLepton );
 	bool checkTauLeptonSLDecay( MCParticle *SLDLepton );
-	virtual void doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDLepton , vtxVector& semiLeptonicVertices , pfoVector& semiLeptonicVertexRecoParticles , pfoVector& jetsOfSemiLeptonicDecays , pfoVectorVector& neutrinos , IntVector &sldStatus , IntVector &pvaStatus , IntVector &solutionSigns );
+	virtual void doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDLepton , vtxVector& semiLeptonicVertices , pfoVector& semiLeptonicVertexRecoParticles , pfoVector& jetsOfSemiLeptonicDecays , pfoVectorVector& neutrinos , IntVector &sldStatus , IntVector &pvaStatus , IntVector &solutionSigns , mcpVector &trueNeutrinos );
 	void showTrueParameters( MCParticle *SLDLepton );
 	TLorentzVector getNeutrinoFourMomentum( TVector3 flightDirection , TLorentzVector visibleFourMomentum , double parentHadronMass , float solutionSign );
 	TLorentzVector getNeutrinoFourMomentumModified( TVector3 &flightDirection , TLorentzVector visibleFourMomentum , double parentHadronMass , float solutionSign );

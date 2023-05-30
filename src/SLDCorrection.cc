@@ -1575,7 +1575,7 @@ void SLDCorrection::processEvent( EVENT::LCEvent *pLCEvent )
 						streamlog_out(DEBUG3) << "	<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<   >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
 						streamlog_out(DEBUG3) << "	<<<<<<<<<<<<<<<< There are no upstream and downstream semi-leptonic decay >>>>>>>>>>>>>>>>>" << std::endl;
 						streamlog_out(DEBUG3) << "	<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<   >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
-						doSLDCorrection( pLCEvent , testLepton , semiLeptonicVertices , semiLeptonicVertexRecoParticles , jetsOfSemiLeptonicDecays , neutrinos , SLDStatus , PVAStatus , solutionSigns );
+						doSLDCorrection( pLCEvent , testLepton , semiLeptonicVertices , semiLeptonicVertexRecoParticles , jetsOfSemiLeptonicDecays , neutrinos , SLDStatus , PVAStatus , solutionSigns , mcNeutrinos );
 						m_parentHadronMass.push_back( ( testLepton->getParents()[ 0 ] )->getMass() );
 						m_parentHadronPDG.push_back( ( testLepton->getParents()[ 0 ] )->getPDG() );
 						for ( unsigned int i_Btype = 0 ; i_Btype < BHadPDGs.size() ; ++i_Btype )
@@ -1596,7 +1596,7 @@ void SLDCorrection::processEvent( EVENT::LCEvent *pLCEvent )
 									if ( abs( mcDaughter->getPDG() ) == CHadPDGs[ i_Ctype ] && m_fillRootTree ) h_CHadronType->Fill( i_Ctype );
 								}
 							}
-							if ( daughterPDG == std::abs( testLepton->getPDG() ) + 1 ) mcNeutrinos.push_back( mcDaughter );
+							//if ( daughterPDG == std::abs( testLepton->getPDG() ) + 1 ) mcNeutrinos.push_back( mcDaughter );
 						}
 					}
 				}
@@ -1632,12 +1632,12 @@ void SLDCorrection::processEvent( EVENT::LCEvent *pLCEvent )
 			JetSLDRelNav.addRelation( jetsOfSemiLeptonicDecays[ i_sld ] , semiLeptonicVertices[ i_sld ] , 1.0 );
 			SLDJetRelNav.addRelation( semiLeptonicVertices[ i_sld ] , jetsOfSemiLeptonicDecays[ i_sld ] , 1.0 );
 		}
-		if ( mcNeutrinos.size() == neutrinos.size() )
+		if ( mcNeutrinos.size() == semiLeptonicVertices.size() )
 		{
-			for ( unsigned int i_nu = 0 ; i_nu < mcNeutrinos.size() ; ++i_nu )
+			for ( unsigned int i_sld = 0 ; i_sld < mcNeutrinos.size() ; ++i_sld )
 			{
-				MCNuRecoNuRelNav.addRelation( mcNeutrinos[ i_nu ] , neutrinos[ i_nu ][ 0 ] , 1.0 );
-				RecoNuMCNuRelNav.addRelation( neutrinos[ i_nu ][ 0 ] , mcNeutrinos[ i_nu ] , 1.0 );
+				MCNuRecoNuRelNav.addRelation( mcNeutrinos[ i_sld ] , neutrinos[ i_sld ][ 0 ] , 1.0 );
+				RecoNuMCNuRelNav.addRelation( neutrinos[ i_sld ][ 0 ] , mcNeutrinos[ i_sld ] , 1.0 );
 			}
 			mcNurecoNuLink = MCNuRecoNuRelNav.createLCCollection();
 			recoNumcNuLink = RecoNuMCNuRelNav.createLCCollection();
@@ -1653,7 +1653,7 @@ void SLDCorrection::processEvent( EVENT::LCEvent *pLCEvent )
 		pLCEvent->addCollection( SLDJetLink , m_SLDJetLinkName );
 		pLCEvent->addCollection( NuSLDLink , m_NuSLDLinkName );
 		pLCEvent->addCollection( SLDNuLink , m_SLDNuLinkName );
-		if ( mcNeutrinos.size() == neutrinos.size() / 3 )
+		if ( mcNeutrinos.size() == semiLeptonicVertices.size() )
 		{
 			pLCEvent->addCollection( mcNurecoNuLink , m_mcNurecoNuLinkName );
 			pLCEvent->addCollection( recoNumcNuLink , m_recoNumcNuLinkName );
@@ -1799,7 +1799,7 @@ int SLDCorrection::getVertexInJetsDistribution( Vertex* testVertex , pfoVector j
 	return jets.size();
 }
 
-void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDLepton , vtxVector& semiLeptonicVertices , pfoVector& semiLeptonicVertexRecoParticles , pfoVector& jetsOfSemiLeptonicDecays , pfoVectorVector& neutrinos , IntVector &sldStatus , IntVector &pvaStatus , IntVector &solutionSigns )
+void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDLepton , vtxVector& semiLeptonicVertices , pfoVector& semiLeptonicVertexRecoParticles , pfoVector& jetsOfSemiLeptonicDecays , pfoVectorVector& neutrinos , IntVector &sldStatus , IntVector &pvaStatus , IntVector &solutionSigns , mcpVector &trueNeutrinos )
 {
 	++n_SLDStatus;
 	showTrueParameters( SLDLepton );
@@ -2419,22 +2419,6 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 
 	m_visibleChargedInvMassCut.push_back( InvMassCutCharged );
 	m_visibleNeutralInvMassCut.push_back( InvMassCutNeutral );
-	int PVAStatus = 0;
-	if ( recoPVANeutralDecayProducts.size() == 0 )
-	{
-		PVAStatus = 3;
-	}
-	else
-	{
-		if ( ( recoPVAVertexDecayProducts.size() + recoPVAChargedDecayProducts.size() ) == 0 )
-		{
-			PVAStatus = 2;
-		}
-		else
-		{
-			PVAStatus = 1;
-		}
-	}
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -2593,7 +2577,28 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 
 	//std::vector< float > CovMatrixDetector( 10 , 0.0 );
 	//std::vector< float > CovMatrixFlightDirection( 6, 0.0 );
-	getNeutrinoCovarianceMatrix( NeutrinoCovMatPos , NeutrinoCovMatNeg , SLDStatus , SLDLepton , linkedRecoLepton , trueChargedDecayProducts , trueNeutralDecayProducts , truePVAChargedDecayProducts , truePVANeutralDecayProducts , recoSLDVertexDecayProducts , recoPVAVertexDecayProducts , recoPVAChargedDecayProducts , recoPVANeutralDecayProducts , flightDirection , recoNeutrinoFourMomentumPos , recoNeutrinoFourMomentumNeg , parentHadronMass , CovMatrixDetector , CovMatrixFlightDirection );
+	//getNeutrinoCovarianceMatrix( NeutrinoCovMatPos , NeutrinoCovMatNeg , SLDStatus , SLDLepton , linkedRecoLepton , trueChargedDecayProducts , trueNeutralDecayProducts , truePVAChargedDecayProducts , truePVANeutralDecayProducts , recoSLDVertexDecayProducts , recoPVAVertexDecayProducts , recoPVAChargedDecayProducts , recoPVANeutralDecayProducts , flightDirection , recoNeutrinoFourMomentumPos , recoNeutrinoFourMomentumNeg , parentHadronMass , CovMatrixDetector , CovMatrixFlightDirection );
+	addNeutrinoCovarianceMatrix( recoNeutrinoFourMomentumPos , NeutrinoCovMatPos );
+	addNeutrinoCovarianceMatrix( recoNeutrinoFourMomentumNeg , NeutrinoCovMatNeg );
+	int PVAStatus = 0;
+	if ( recoPVANeutralDecayProducts.size() == 0 ) //( without neutral PVA)
+	{
+		PVAStatus = 3;
+	}
+	else //( with neutral PVA)
+	{
+		if ( recoPVAVertexDecayProducts.size() + recoPVAChargedDecayProducts.size() == 0 ) //( without charged PVA)
+		{
+			PVAStatus = 2;
+		}
+		else //( with charged PVA)
+		{
+			PVAStatus = 1;
+		}
+	}
+	if( m_cheatPVAneutral || m_cheatPVAcharged ) PVAStatus = 0;
+	m_PVAStatus.push_back( PVAStatus );
+
 	//getNeutrinoCovarianceMatrix( NeutrinoCovMatNeg , SLDStatus , linkedRecoLepton , truePVAChargedDecayProducts , truePVANeutralDecayProducts , recoSLDVertexDecayProducts , recoPVAVertexDecayProducts , recoPVAChargedDecayProducts , recoPVANeutralDecayProducts , flightDirection , recoNeutrinoFourMomentumNeg , parentHadronMass , -1.0 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -2838,25 +2843,12 @@ void SLDCorrection::doSLDCorrection( EVENT::LCEvent *pLCEvent , MCParticle *SLDL
 
 	semiLeptonicVertexRecoParticle->setStartVertex( startVertex );
 
+	trueNeutrinos.push_back( trueNeutrino );
 	semiLeptonicVertices.push_back( semiLeptonicVertex );
 	semiLeptonicVertexRecoParticles.push_back( semiLeptonicVertexRecoParticle );
-	if ( m_cheatSolutionSign )
-	{
-		if ( _trueSolutionSign == 1 )
-		{
-			neutrinosOfThisSLD.push_back( recoNeutrinoPos );
-		}
-		else if ( _trueSolutionSign == -1 )
-		{
-			neutrinosOfThisSLD.push_back( recoNeutrinoNeg );
-		}
-	}
-	else
-	{
-		neutrinosOfThisSLD.push_back( recoNeutrinoZero );
-		neutrinosOfThisSLD.push_back( recoNeutrinoPos );
-		neutrinosOfThisSLD.push_back( recoNeutrinoNeg );
-	}
+	neutrinosOfThisSLD.push_back( recoNeutrinoZero );
+	neutrinosOfThisSLD.push_back( recoNeutrinoPos );
+	neutrinosOfThisSLD.push_back( recoNeutrinoNeg );
 	neutrinos.push_back( neutrinosOfThisSLD );
 	sldStatus.push_back( SLDStatus );
 	pvaStatus.push_back( PVAStatus );
@@ -2999,24 +2991,6 @@ void SLDCorrection::getNeutrinoCovarianceMatrix(	std::vector< float > &NeutrinoC
 			for ( int i_Element = 0 ; i_Element < 10 ; ++i_Element ) CovMatrixDetector[ i_Element ] += recoPVAChargedDecayProducts[ i_par ]->getCovMatrix()[ i_Element ];
 		}
 	}
-	int PVAStatus = 0;
-	if ( recoPVANeutralDecayProducts.size() == 0 ) //( without neutral PVA)
-	{
-		PVAStatus = 3;
-	}
-	else //( with neutral PVA)
-	{
-		if ( recoPVAVertexDecayProducts.size() + recoPVAChargedDecayProducts.size() == 0 ) //( without charged PVA)
-		{
-			PVAStatus = 2;
-		}
-		else //( with charged PVA)
-		{
-			PVAStatus = 1;
-		}
-	}
-	if( m_cheatPVAneutral || m_cheatPVAcharged ) PVAStatus = 0;
-	m_PVAStatus.push_back( PVAStatus );
 
 	for ( int i_Element = 0 ; i_Element < 10 ; ++i_Element )
 	{

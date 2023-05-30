@@ -248,53 +248,53 @@
 		<!--Name of the NeutrinoSemiLeptonicDecayLinkName output collection-->
 		<parameter name="SLDNuLinkName" type="string" lcioOutType="LCRelation">SLDNuLink</parameter>
 		<!--do correction for semi-leptonic decays of B-Hadrons? YES: true , NO: false-->
-	        <parameter name="includeBSLD" type="bool">true</parameter>
+        <parameter name="includeBSLD" type="bool">true</parameter>
 		<!--do correction for semi-leptonic decays of C-Hadrons? YES: true , NO: false-->
-	        <parameter name="includeCSLD" type="bool">false</parameter>
+        <parameter name="includeCSLD" type="bool">false</parameter>
 		<!--do correction for semi-leptonic decays of Tau-Leptons? YES: true , NO: false-->
-	        <parameter name="includeTSLD" type="bool">false</parameter>
+        <parameter name="includeTSLD" type="bool">false</parameter>
 		<!--Cheat semi-leptonic decays lepton from MCTruth-->
-	        <parameter name="cheatSLDLeptons" type="bool">true</parameter>
+        <parameter name="cheatSLDLeptons" type="bool">true</parameter>
 		<!--Cheat FourMomentum of lepton in semi-leptonic decays-->
-	        <parameter name="cheatLepton4momentum" type="bool">false</parameter>
+        <parameter name="cheatLepton4momentum" type="bool">false</parameter>
 		<!--Cheat Flight direction of mother hadron-->
-	        <parameter name="cheatFlightDirection" type="bool">false</parameter>
+        <parameter name="cheatFlightDirection" type="bool">false</parameter>
 		<!--Scenario for finding flight direction of mother hadron: 1 = default , 2 = assign jet axis , 3 = assign flight direction of leading particle in the jet-->
-	        <parameter name="vertexingScenario" type="int">4</parameter>
+        <parameter name="vertexingScenario" type="int">4</parameter>
 		<!--Number of iterations for correcting flight direction of CHARGED parent hadron-->
-	        <parameter name="nIterFlightDirCorrection" type="int">1</parameter>
+        <parameter name="nIterFlightDirCorrection" type="int">1</parameter>
 		<!--Cheat Particle ID for Charged Decay Products-->
-	        <parameter name="cheatPVAcharged" type="bool">false</parameter>
+        <parameter name="cheatPVAcharged" type="bool">false</parameter>
 		<!--Cosine of Acceptance angle for charged PFOs to be assigned to the semi-leptonic decay when lepton is in 2nd vertex-->
-	        <parameter name="chargedCosAcceptanceAngleSLD4" type="float">0.5</parameter>
+        <parameter name="chargedCosAcceptanceAngleSLD4" type="float">0.5</parameter>
 		<!--Cosine of Acceptance angle for charged PFOs to be assigned to the semi-leptonic decay when lepton is with 3rd vertex-->
-	        <parameter name="chargedCosAcceptanceAngleSLD5" type="float">0.5</parameter>
+        <parameter name="chargedCosAcceptanceAngleSLD5" type="float">0.5</parameter>
 		<!--Cheat FourMomentum of charged visibles in semi-leptonic decays-->
-	        <parameter name="cheatCharged4momentum" type="bool">false</parameter>
+        <parameter name="cheatCharged4momentum" type="bool">false</parameter>
 		<!--Cheat Particle ID for Neutral Decay Products-->
-	        <parameter name="cheatPVAneutral" type="bool">false</parameter>
+        <parameter name="cheatPVAneutral" type="bool">false</parameter>
 		<!--Cosine of Acceptance angle for neutral PFOs to be assigned to the semi-leptonic decay -->
-	        <parameter name="neutralCosAcceptanceAngle" type="float">0.5</parameter>
+        <parameter name="neutralCosAcceptanceAngle" type="float">0.5</parameter>
 		<!--Cheat FourMomentum of Neutral visibles in semi-leptonic decays-->
-	        <parameter name="cheatNeutral4momentum" type="bool">false</parameter>
+        <parameter name="cheatNeutral4momentum" type="bool">false</parameter>
 		<!--Cut on Invariant mass of visible charged decay products for semi-leptonic decay of B-Hadron when leptin is in 2nd vertex-->
-	        <parameter name="BSLDChargedSLD4InvMassCut" type="float">1.80</parameter>
+        <parameter name="BSLDChargedSLD4InvMassCut" type="float">1.80</parameter>
 		<!--Cut on Invariant mass of visible charged decay products for semi-leptonic decay of B-Hadron when leptin is with 3rd vertex-->
-	        <parameter name="BSLDChargedSLD5InvMassCut" type="float">1.50</parameter>
+        <parameter name="BSLDChargedSLD5InvMassCut" type="float">1.50</parameter>
 		<!--Cut on Invariant mass of visible neutral decay products for semi-leptonic decay of B-Hadron when leptin is in 2nd vertex-->
-	        <parameter name="BSLDNeutralSLD4InvMassCut" type="float">2.80</parameter>
+        <parameter name="BSLDNeutralSLD4InvMassCut" type="float">2.80</parameter>
 		<!--Cut on Invariant mass of visible neutral decay products for semi-leptonic decay of B-Hadron when leptin is with 3rd vertex-->
-	        <parameter name="BSLDNeutralSLD5InvMassCut" type="float">2.50</parameter>
+        <parameter name="BSLDNeutralSLD5InvMassCut" type="float">2.50</parameter>
 		<!--Cut on Invariant mass of visible charged decay products for semi-leptonic decay of C-Hadron when leptin is in 2nd vertex-->
-	        <parameter name="CSLDChargedSLD4InvMassCut" type="float">0.00</parameter>
+        <parameter name="CSLDChargedSLD4InvMassCut" type="float">0.00</parameter>
 		<!--Cut on Invariant mass of visible charged decay products for semi-leptonic decay of C-Hadron when leptin is with 3rd vertex-->
-	        <parameter name="CSLDChargedSLD5InvMassCut" type="float">0.00</parameter>
+        <parameter name="CSLDChargedSLD5InvMassCut" type="float">0.00</parameter>
 		<!--Cut on Invariant mass of visible neutral decay products for semi-leptonic decay of C-Hadron when leptin is in 2nd vertex-->
-	        <parameter name="CSLDNeutralSLD4InvMassCut" type="float">0.00</parameter>
+        <parameter name="CSLDNeutralSLD4InvMassCut" type="float">0.00</parameter>
 		<!--Cut on Invariant mass of visible neutral decay products for semi-leptonic decay of C-Hadron when leptin is with 3rd vertex-->
-	        <parameter name="CSLDNeutralSLD5InvMassCut" type="float">0.00</parameter>
+        <parameter name="CSLDNeutralSLD5InvMassCut" type="float">0.00</parameter>
 		<!--0: get 4p from linked track/cluster to MCP, 1: get 4p from PFO with linked track/cluster, 2: get 4p from linked PFO-->
-	        <parameter name="recoFourMomentumOfVisibles" type="int">2</parameter>
+        <parameter name="recoFourMomentumOfVisibles" type="int">2</parameter>
 		<!--Angle uncertainty (radian) for semi-leptonic decay of B-Hadron -->
 		<parameter name="sigmaAlphaNu" type="float">0.100</parameter>
 		<!--Energy uncertainty (GeV) for semi-leptonic decay of B-Hadron -->
@@ -318,7 +318,7 @@
 		<!-- write complete objects in subset collections to the file (i.e. ignore subset flag)-->
 		<!--parameter name="FullSubsetCollections" type="StringVec">${MCparticleCollectionName}  </parameter-->
 		<!--force keep of the named collections - overrules DropCollectionTypes (and DropCollectionNames)-->
-		<!--parameter name="KeepCollectionNames" type="StringVec">MyPreciousSimTrackerHits  </parameter-->
+		<parameter name="KeepCollectionNames" type="StringVec">SemiLeptonicDecayVertex SemiLeptonicDecay_RP recoNeutrinos JetSLDLink SLDJetLink mcNurecoNuLink recoNumcNuLink NuSLDLink SLDNuLink</parameter>
 		<!-- name of output file -->
 		<parameter name="LCIOOutputFile" type="string">${OutputDirectory}/${OutputBaseName}.slcio</parameter>
 		<!--write mode for output file:  WRITE_APPEND or WRITE_NEW-->
