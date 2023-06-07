@@ -443,6 +443,31 @@ SLDCorrection::SLDCorrection() :
 					std::string("Output.root")
 				);
 
+	registerProcessorParameter(	"BSLDMode",
+					"Event selection based on semi-leptonic decays of B-hadrons",
+					m_BSLDMode,
+					int(0)
+				);
+
+	registerProcessorParameter(	"CSLDMode",
+					"Event selection based on semi-leptonic decays of C-hadrons",
+					m_CSLDMode,
+					int(0)
+				);
+
+	registerProcessorParameter(	"TSLDMode",
+					"Event selection based on semi-leptonic decays of tau-leptons",
+					m_TSLDMode,
+					int(0)
+				);
+
+	registerProcessorParameter(	"SLDMode",
+					"Event selection based on semi-leptonic decays of All hadrons and tau-leptons",
+					m_SLDMode,
+					int(0)
+				);
+
+
 }
 
 
@@ -1447,6 +1472,9 @@ void SLDCorrection::processEvent( EVENT::LCEvent *pLCEvent )
 
 	try
 	{
+		vtxVector BsemiLeptonicVertices{};
+		vtxVector CsemiLeptonicVertices{};
+		vtxVector TsemiLeptonicVertices{};
 		vtxVector semiLeptonicVertices{};
 		pfoVector semiLeptonicVertexRecoParticles{};
 		pfoVectorVector neutrinos{};
@@ -1575,7 +1603,7 @@ void SLDCorrection::processEvent( EVENT::LCEvent *pLCEvent )
 						streamlog_out(DEBUG3) << "	<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<   >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
 						streamlog_out(DEBUG3) << "	<<<<<<<<<<<<<<<< There are no upstream and downstream semi-leptonic decay >>>>>>>>>>>>>>>>>" << std::endl;
 						streamlog_out(DEBUG3) << "	<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<   >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
-						doSLDCorrection( pLCEvent , testLepton , semiLeptonicVertices , semiLeptonicVertexRecoParticles , jetsOfSemiLeptonicDecays , neutrinos , SLDStatus , PVAStatus , solutionSigns , mcNeutrinos );
+						doSLDCorrection( pLCEvent , testLepton , BsemiLeptonicVertices , semiLeptonicVertexRecoParticles , jetsOfSemiLeptonicDecays , neutrinos , SLDStatus , PVAStatus , solutionSigns , mcNeutrinos );
 						m_parentHadronMass.push_back( ( testLepton->getParents()[ 0 ] )->getMass() );
 						m_parentHadronPDG.push_back( ( testLepton->getParents()[ 0 ] )->getPDG() );
 						for ( unsigned int i_Btype = 0 ; i_Btype < BHadPDGs.size() ; ++i_Btype )
@@ -1611,10 +1639,41 @@ void SLDCorrection::processEvent( EVENT::LCEvent *pLCEvent )
 			m_pTTree2->Fill();
 			m_pTTree3->Fill();
 		}
+		bool b_BSLDMode = false;
+		if ( m_BSLDMode == 0 && m_nSLDecayOfBHadron == 0 ) b_BSLDMode = true;
+		if ( m_BSLDMode == 1 ) b_BSLDMode = true;
+		if ( m_BSLDMode == 2 && m_nSLDecayOfBHadron > 0 ) b_BSLDMode = true;
+		if ( m_BSLDMode == 3 && BsemiLeptonicVertices.size() == m_nSLDecayOfBHadron ) b_BSLDMode = true;
+		bool b_CSLDMode = false;
+		if ( m_CSLDMode == 0 && m_nSLDecayOfCHadron == 0 ) b_BSLDMode = true;
+		if ( m_CSLDMode == 1 ) b_CSLDMode = true;
+		if ( m_CSLDMode == 2 && m_nSLDecayOfCHadron > 0 ) b_CSLDMode = true;
+		if ( m_CSLDMode == 3 && CsemiLeptonicVertices.size() == m_nSLDecayOfCHadron ) b_CSLDMode = true;
+		bool b_TSLDMode = false;
+		if ( m_TSLDMode == 0 && m_nSLDecayOfTauLepton == 0 ) b_TSLDMode = true;
+		if ( m_TSLDMode == 1 ) b_TSLDMode = true;
+		if ( m_TSLDMode == 2 && m_nSLDecayOfTauLepton > 0 ) b_TSLDMode = true;
+		if ( m_TSLDMode == 3 && CsemiLeptonicVertices.size() == m_nSLDecayOfTauLepton ) b_TSLDMode = true;
+		bool b_SLDMode = false;
+		if ( m_SLDMode == 0 && m_nSLDecayTotal == 0 ) b_SLDMode = true;
+		if ( m_SLDMode == 1 ) b_SLDMode = true;
+		if ( m_SLDMode == 2 && m_nSLDecayTotal > 0 ) b_SLDMode = true;
+		if ( m_SLDMode == 3 && semiLeptonicVertices.size() == m_nSLDecayTotal ) b_SLDMode = true;
+		setReturnValue( "BSLDMode" , b_BSLDMode );
+		setReturnValue( "CSLDMode" , b_CSLDMode );
+		setReturnValue( "TSLDMode" , b_TSLDMode );
+		setReturnValue( "SLDMode" , b_SLDMode );
+
+		for ( unsigned int bSLD = 0 ; bSLD < BsemiLeptonicVertices.size() ; ++bSLD ) semiLeptonicVertices.push_back( BsemiLeptonicVertices[ bSLD ] );
+		for ( unsigned int cSLD = 0 ; cSLD < CsemiLeptonicVertices.size() ; ++cSLD ) semiLeptonicVertices.push_back( CsemiLeptonicVertices[ cSLD ] );
+		for ( unsigned int tSLD = 0 ; tSLD < TsemiLeptonicVertices.size() ; ++tSLD ) semiLeptonicVertices.push_back( TsemiLeptonicVertices[ tSLD ] );
 		semiLeptonicVertex->parameters().setValue( "nBHadronSLD_found" , ( int )m_nSLDecayOfBHadron );
 		semiLeptonicVertex->parameters().setValue( "nCHadronSLD_found" , ( int )m_nSLDecayOfCHadron );
 		semiLeptonicVertex->parameters().setValue( "nTauLeptonSLD_found" , ( int )m_nSLDecayOfTauLepton );
 		semiLeptonicVertex->parameters().setValue( "nTotalSLD_found" , ( int )m_nSLDecayTotal );
+		semiLeptonicVertex->parameters().setValue( "nBHadronSLD_solved" , ( int )( BsemiLeptonicVertices.size() ) );
+		semiLeptonicVertex->parameters().setValue( "nCHadronSLD_solved" , ( int )( CsemiLeptonicVertices.size() ) );
+		semiLeptonicVertex->parameters().setValue( "nTauLeptonSLD_solved" , ( int )( TsemiLeptonicVertices.size() ) );
 		semiLeptonicVertex->parameters().setValue( "nSolvedSLD" , ( int )( semiLeptonicVertices.size() ) );
 		semiLeptonicVertex->parameters().setValues( "SLDLepStatus" , ( IntVec )SLDStatus );
 		semiLeptonicVertex->parameters().setValues( "PVAStatus" , ( IntVec )PVAStatus );

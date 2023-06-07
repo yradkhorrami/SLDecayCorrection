@@ -302,9 +302,17 @@
 		<!--Display recoLepton, downstraem vertex and RP and reconstructed secondary vertex in Event Display-->
 		<parameter name="displayEvent" type="bool">${displayEvent}</parameter>
 		<!--Whether create root file for new pfo collection or not true:create / false: do not create-->
-	        <parameter name="fillRootTree" type="bool">${createRootTree}</parameter>
+        <parameter name="fillRootTree" type="bool">${createRootTree}</parameter>
 		<!--Name of the output root file-->
-	        <parameter name="RootFile" type="string">${OutputDirectory}/${OutputBaseName}_SLDCorrection_${OutputBaseName_iter}.root</parameter>
+        <parameter name="RootFile" type="string">${OutputDirectory}/${OutputBaseName}_SLDCorrection_${OutputBaseName_iter}.root</parameter>
+		<!--Event selection based on semi-leptonic decays of B-hadrons: (0): without BSLD (1): with >= 0 BSLD(all events) (2): with >= 1 BSLD (3): with correctable BSLD -->
+        <parameter name="BSLDMode" type="int">1</parameter>
+		<!--Event selection based on semi-leptonic decays of C-hadrons: (0): without CSLD (1): with >= 0 CSLD(all events) (2): with >= 1 CSLD (3): with correctable CSLD -->
+        <parameter name="CSLDMode" type="int">1</parameter>
+		<!--Event selection based on semi-leptonic decays of T-Leptons: (0): without TSLD (1): with >= 0 TSLD(all events) (2): with >= 1 TSLD (3): with correctable TSLD -->
+        <parameter name="TSLDMode" type="int">1</parameter>
+		<!--Event selection based on semi-leptonic decays: (0): without SLD (1): with >= 0 SLD(all events) (2): with >= 1 SLD (3): with correctable SLD -->
+        <parameter name="SLDMode" type="int">1</parameter>
 		<!--verbosity level of this processor ("DEBUG0-4,MESSAGE0-4,WARNING0-4,ERROR0-4,SILENT")-->
 		<parameter name="Verbosity" type="string">${Verbosity}</parameter>
 	</processor>

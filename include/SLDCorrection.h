@@ -167,6 +167,10 @@ private:
 	bool					m_displayEvent = true;
 	bool					m_fillRootTree = true;
 	bool					m_traceEvent = false;
+	int						m_BSLDMode = 0;
+	int						m_CSLDMode = 0;
+	int						m_TSLDMode = 0;
+	int						m_SLDMode = 0;
 
 	int					m_nRun;
 	int					m_nEvt;
@@ -186,16 +190,16 @@ private:
 	FloatVector				m_allChargedE_to_parentE{};
 	FloatVector				m_neutralE_to_parentE{};
 	FloatVector				m_neutrino_to_parentE{};
-	int					m_nSLDecayOfBHadron;
-	int					m_nSLDecayOfCHadron;
-	int					m_nSLDecayOfTauLepton;
-	int					m_nSLDecayTotal;
-	int					m_nSLDecayToElectron;
-	int					m_nSLDecayToMuon;
-	int					m_nSLDecayToTau;
-	int					m_nTauNeutrino;
-	int					m_nNeutrino;
-	int					m_nChargedPFOwoTrack;
+	unsigned int			m_nSLDecayOfBHadron;
+	unsigned int			m_nSLDecayOfCHadron;
+	unsigned int			m_nSLDecayOfTauLepton;
+	unsigned int			m_nSLDecayTotal;
+	int						m_nSLDecayToElectron;
+	int						m_nSLDecayToMuon;
+	int						m_nSLDecayToTau;
+	int						m_nTauNeutrino;
+	int						m_nNeutrino;
+	int						m_nChargedPFOwoTrack;
 	IntVector				BHadPDGs{};
 	IntVector				CHadPDGs{};
 	IntVector				m_nSLD_chargedMCPwoTrack{};
