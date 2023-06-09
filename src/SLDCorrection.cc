@@ -1735,16 +1735,16 @@ void SLDCorrection::processEvent( EVENT::LCEvent *pLCEvent )
 		//semiLeptonicVertices.clear();
 		//semiLeptonicVertexRecoParticles.clear();
 		//jetsOfSemiLeptonicDecays.clear();
-		setReturnValue( "BSLDMode" , b_BSLDMode );
-		setReturnValue( "CSLDMode" , b_CSLDMode );
-		setReturnValue( "TSLDMode" , b_TSLDMode );
-		setReturnValue( "SLDMode" , b_SLDMode );
 
 	}
 	catch(DataNotAvailableException &e)
 	{
 		streamlog_out(WARNING) << "	Input collection not found in event " << m_nEvt << std::endl;
 	}
+	setReturnValue( "BSLDMode" , b_BSLDMode );
+	setReturnValue( "CSLDMode" , b_CSLDMode );
+	setReturnValue( "TSLDMode" , b_TSLDMode );
+	setReturnValue( "SLDMode" , b_SLDMode );
 
 }
 
