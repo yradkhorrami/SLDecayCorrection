@@ -443,25 +443,25 @@ SLDCorrection::SLDCorrection() :
 					std::string("Output.root")
 				);
 
-	registerProcessorParameter(	"BSLDMode",
+	registerProcessorParameter(	"BsldMode",
 					"Event selection based on semi-leptonic decays of B-hadrons",
 					m_BSLDMode,
 					int(0)
 				);
 
-	registerProcessorParameter(	"CSLDMode",
+	registerProcessorParameter(	"CsldMode",
 					"Event selection based on semi-leptonic decays of C-hadrons",
 					m_CSLDMode,
 					int(0)
 				);
 
-	registerProcessorParameter(	"TSLDMode",
+	registerProcessorParameter(	"TsldMode",
 					"Event selection based on semi-leptonic decays of tau-leptons",
 					m_TSLDMode,
 					int(0)
 				);
 
-	registerProcessorParameter(	"SLDMode",
+	registerProcessorParameter(	"sldMode",
 					"Event selection based on semi-leptonic decays of All hadrons and tau-leptons",
 					m_SLDMode,
 					int(0)
@@ -1436,11 +1436,15 @@ void SLDCorrection::processEvent( EVENT::LCEvent *pLCEvent )
 {
 	m_nRun = pLCEvent->getRunNumber();
 	m_nEvt = pLCEvent->getEventNumber();
+	bool b_BSLDMode = false;
+	bool b_CSLDMode = false;
+	bool b_TSLDMode = false;
+	bool b_SLDMode = false;
 
 	LCCollection *MCParticleCollection{};
 	int nTauNeutrino = 0;
 	++m_nEvtSum;
-	this->Clear();
+	Clear();
 	streamlog_out(MESSAGE) << "" << std::endl;
 	streamlog_out(MESSAGE) << "	////////////////////////////////////////////////////////////////////////////" << std::endl;
 	streamlog_out(MESSAGE) << "	////////////////////	Processing event 	" << m_nEvt << "	////////////////////" << std::endl;
@@ -1639,34 +1643,35 @@ void SLDCorrection::processEvent( EVENT::LCEvent *pLCEvent )
 			m_pTTree2->Fill();
 			m_pTTree3->Fill();
 		}
-		bool b_BSLDMode = false;
-		if ( m_BSLDMode == 0 && m_nSLDecayOfBHadron == 0 ) b_BSLDMode = true;
-		if ( m_BSLDMode == 1 ) b_BSLDMode = true;
-		if ( m_BSLDMode == 2 && m_nSLDecayOfBHadron > 0 ) b_BSLDMode = true;
-		if ( m_BSLDMode == 3 && BsemiLeptonicVertices.size() == m_nSLDecayOfBHadron ) b_BSLDMode = true;
-		bool b_CSLDMode = false;
-		if ( m_CSLDMode == 0 && m_nSLDecayOfCHadron == 0 ) b_BSLDMode = true;
-		if ( m_CSLDMode == 1 ) b_CSLDMode = true;
-		if ( m_CSLDMode == 2 && m_nSLDecayOfCHadron > 0 ) b_CSLDMode = true;
-		if ( m_CSLDMode == 3 && CsemiLeptonicVertices.size() == m_nSLDecayOfCHadron ) b_CSLDMode = true;
-		bool b_TSLDMode = false;
-		if ( m_TSLDMode == 0 && m_nSLDecayOfTauLepton == 0 ) b_TSLDMode = true;
-		if ( m_TSLDMode == 1 ) b_TSLDMode = true;
-		if ( m_TSLDMode == 2 && m_nSLDecayOfTauLepton > 0 ) b_TSLDMode = true;
-		if ( m_TSLDMode == 3 && CsemiLeptonicVertices.size() == m_nSLDecayOfTauLepton ) b_TSLDMode = true;
-		bool b_SLDMode = false;
-		if ( m_SLDMode == 0 && m_nSLDecayTotal == 0 ) b_SLDMode = true;
-		if ( m_SLDMode == 1 ) b_SLDMode = true;
-		if ( m_SLDMode == 2 && m_nSLDecayTotal > 0 ) b_SLDMode = true;
-		if ( m_SLDMode == 3 && semiLeptonicVertices.size() == m_nSLDecayTotal ) b_SLDMode = true;
-		setReturnValue( "BSLDMode" , b_BSLDMode );
-		setReturnValue( "CSLDMode" , b_CSLDMode );
-		setReturnValue( "TSLDMode" , b_TSLDMode );
-		setReturnValue( "SLDMode" , b_SLDMode );
-
 		for ( unsigned int bSLD = 0 ; bSLD < BsemiLeptonicVertices.size() ; ++bSLD ) semiLeptonicVertices.push_back( BsemiLeptonicVertices[ bSLD ] );
 		for ( unsigned int cSLD = 0 ; cSLD < CsemiLeptonicVertices.size() ; ++cSLD ) semiLeptonicVertices.push_back( CsemiLeptonicVertices[ cSLD ] );
 		for ( unsigned int tSLD = 0 ; tSLD < TsemiLeptonicVertices.size() ; ++tSLD ) semiLeptonicVertices.push_back( TsemiLeptonicVertices[ tSLD ] );
+		if ( m_BSLDMode == 0 && m_nSLDecayOfBHadron == 0 ) b_BSLDMode = true;
+		if ( m_BSLDMode == 1 ) b_BSLDMode = true;
+		if ( m_BSLDMode == 2 && m_nSLDecayOfBHadron > 0 ) b_BSLDMode = true;
+		if ( m_BSLDMode == 3 && BsemiLeptonicVertices.size() == m_nSLDecayOfBHadron && BsemiLeptonicVertices.size() > 0 ) b_BSLDMode = true;
+		if ( m_CSLDMode == 0 && m_nSLDecayOfCHadron == 0 ) b_CSLDMode = true;
+		if ( m_CSLDMode == 1 ) b_CSLDMode = true;
+		if ( m_CSLDMode == 2 && m_nSLDecayOfCHadron > 0 ) b_CSLDMode = true;
+		if ( m_CSLDMode == 3 && CsemiLeptonicVertices.size() == m_nSLDecayOfCHadron && CsemiLeptonicVertices.size() > 0 ) b_CSLDMode = true;
+		if ( m_TSLDMode == 0 && m_nSLDecayOfTauLepton == 0 ) b_TSLDMode = true;
+		if ( m_TSLDMode == 1 ) b_TSLDMode = true;
+		if ( m_TSLDMode == 2 && m_nSLDecayOfTauLepton > 0 ) b_TSLDMode = true;
+		if ( m_TSLDMode == 3 && TsemiLeptonicVertices.size() == m_nSLDecayOfTauLepton && TsemiLeptonicVertices.size() > 0 ) b_TSLDMode = true;
+		if ( m_SLDMode == 0 && m_nSLDecayTotal == 0 ) b_SLDMode = true;
+		if ( m_SLDMode == 1 ) b_SLDMode = true;
+		if ( m_SLDMode == 2 && m_nSLDecayTotal > 0 ) b_SLDMode = true;
+		if ( m_SLDMode == 3 && semiLeptonicVertices.size() == m_nSLDecayTotal && semiLeptonicVertices.size() > 0 ) b_SLDMode = true;
+		streamlog_out(DEBUG9) << "	Number of BSLD: 	Found = " << m_nSLDecayOfBHadron << " , Corrected = " << BsemiLeptonicVertices.size() << std::endl;
+		streamlog_out(DEBUG9) << "	Number of CSLD: 	Found = " << m_nSLDecayOfCHadron << " , Corrected = " << CsemiLeptonicVertices.size() << std::endl;
+		streamlog_out(DEBUG9) << "	Number of TSLD: 	Found = " << m_nSLDecayOfTauLepton << " , Corrected = " << TsemiLeptonicVertices.size() << std::endl;
+		streamlog_out(DEBUG9) << "	Number of SLD: 		Found = " << m_nSLDecayTotal << " , Corrected = " << semiLeptonicVertices.size() << std::endl;
+		streamlog_out(DEBUG9) << "	Event selected by number of BSLD:		" << ( b_BSLDMode ? "TRUE" : "FALSE" ) << std::endl;
+		streamlog_out(DEBUG9) << "	Event selected by number of CSLD:		" << ( b_CSLDMode ? "TRUE" : "FALSE" ) << std::endl;
+		streamlog_out(DEBUG9) << "	Event selected by number of TSLD:		" << ( b_TSLDMode ? "TRUE" : "FALSE" ) << std::endl;
+		streamlog_out(DEBUG9) << "	Event selected by number of SLD:		" << ( b_SLDMode ? "TRUE" : "FALSE" ) << std::endl;
+
+
 		semiLeptonicVertex->parameters().setValue( "nBHadronSLD_found" , ( int )m_nSLDecayOfBHadron );
 		semiLeptonicVertex->parameters().setValue( "nCHadronSLD_found" , ( int )m_nSLDecayOfCHadron );
 		semiLeptonicVertex->parameters().setValue( "nTauLeptonSLD_found" , ( int )m_nSLDecayOfTauLepton );
@@ -1730,12 +1735,16 @@ void SLDCorrection::processEvent( EVENT::LCEvent *pLCEvent )
 		//semiLeptonicVertices.clear();
 		//semiLeptonicVertexRecoParticles.clear();
 		//jetsOfSemiLeptonicDecays.clear();
+		setReturnValue( "BSLDMode" , b_BSLDMode );
+		setReturnValue( "CSLDMode" , b_CSLDMode );
+		setReturnValue( "TSLDMode" , b_TSLDMode );
+		setReturnValue( "SLDMode" , b_SLDMode );
 
 	}
 	catch(DataNotAvailableException &e)
-        {
-        	streamlog_out(WARNING) << "	Input collection not found in event " << m_nEvt << std::endl;
-        }
+	{
+		streamlog_out(WARNING) << "	Input collection not found in event " << m_nEvt << std::endl;
+	}
 
 }
 
